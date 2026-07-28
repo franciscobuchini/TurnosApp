@@ -9,6 +9,7 @@
   --breakpoint-desktop: 1024px;
 
   /* Spacing */
+  --size-3xs: 2px; /* Gap productos */
   --size-2xs: 4px;
   --size-xs: 8px;
   --size-s: 12px; /* Gap y Margin Sidebar */
@@ -16,6 +17,8 @@
   --size-l: 24px;
   --size-xl: 32px;
   --size-2xl: 48px; /* Button height y Table Height Default */
-  --size-3xl: 56px; /* Header y Sidebar Tablet */
-  --size-4xl: 256px; /* Sidebar Desktop */
+  --size-3xl: 56px; /* Header, Sidebar Tablet */
+  --size-4xl: 64px; /* Image */
+  --size-5xl: 96px; /* Sidebar Tablet */
+  --size-6xl: 256px; /* Sidebar Desktop */
 }

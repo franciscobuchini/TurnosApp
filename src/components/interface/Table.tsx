@@ -29,7 +29,7 @@ interface TableProps<T> {
 const TableStyle = {
   box: '',
   table: '',
-  headerRow: '',
+  headerRow: 'h-(--size-2xl)',
   headerCell: 'px-(--size-s) border-b-1 border-black',
   bodyRow: '',
   bodyCell: 'px-(--size-s) border-t-1 border-b-1 border-black',

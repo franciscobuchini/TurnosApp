@@ -11,7 +11,7 @@ export default function Sidebar() {
   return (
     <aside
       className={twMerge(
-        'hidden h-full flex-col tablet:flex tablet:w-(--size-3xl) desktop:w-(--size-4xl)',
+        'hidden h-full flex-col tablet:flex tablet:w-(--size-3xl) desktop:w-(--size-6xl)',
         SidebarStyle.sidebar,
       )}
     >

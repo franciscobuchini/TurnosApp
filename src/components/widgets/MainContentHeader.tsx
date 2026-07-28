@@ -11,7 +11,7 @@ interface MainContentHeaderProps {
 
 export default function MainContentHeader({ title }: MainContentHeaderProps) {
   return (
-    <Box className="p-(--size-m)">
+    <Box className="h-(--size-4xl) flex items-center px-(--size-m)">
       <h1>{title}</h1>
     </Box>
   );
