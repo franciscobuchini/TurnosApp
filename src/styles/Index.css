@@ -1,0 +1,8 @@
+/* 
+  src/styles/Index.css
+  Tailwind + Variables.
+*/
+
+@import "./Reset.css" layer(base);
+@import "tailwindcss";
+@import "./Variables.css";

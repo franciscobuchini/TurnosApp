@@ -1,0 +1,21 @@
+/* 
+  src/styles/Variables.css
+  Variables pre-establecidas para toda la aplicación.
+*/
+@theme {
+  /* Breakpoints */
+  --breakpoint-mobile: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+
+  /* Spacing */
+  --size-2xs: 4px;
+  --size-xs: 8px;
+  --size-s: 12px; /* Gap y Margin Sidebar */
+  --size-m: 16px;
+  --size-l: 24px;
+  --size-xl: 32px;
+  --size-2xl: 48px; /* Button height y Table Height Default */
+  --size-3xl: 56px; /* Header y Sidebar Tablet */
+  --size-4xl: 256px; /* Sidebar Desktop */
+}

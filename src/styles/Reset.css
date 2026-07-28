@@ -1,0 +1,370 @@
+/* 
+  src/styles/Reset.css
+  Reset de estilos por defecto de navegadores y sistemas operativos.
+*/
+
+/* 1. Reset de caja para todos los elementos */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: 0;
+  font: inherit;
+  vertical-align: baseline;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 2. Root y html */
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+/* 3. Body */
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background: none;
+  color: inherit;
+}
+
+/* 4. Elementos de bloque y semánticos: quitar comportamientos default */
+article, details, figcaption, figure,
+footer, hgroup, main, menu, section {
+  display: block;
+}
+
+/* 5. Listas: quitar bullets/numeración y estilos de list-style */
+ul, ol {
+  list-style: none;
+}
+
+/* 6. Enlaces: quitar subrayado, color azul y estilos de visited/active */
+a {
+  text-decoration: none;
+  color: inherit;
+  background-color: transparent;
+  -webkit-text-decoration-skip: objects;
+}
+
+a:active,
+a:hover,
+a:visited,
+a:focus {
+  outline: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 7. Imágenes, video, canvas, svg: eliminar espacio fantasma y bordes */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-style: none;
+  -ms-interpolation-mode: bicubic;
+}
+
+/* 8. Tipografía: headings sin tamaños/pesos forzados por el UA */
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* 9. Texto: elementos con estilos por defecto raros */
+p, blockquote, pre, dl, dd {
+  margin: 0;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote::before, blockquote::after,
+q::before, q::after {
+  content: '';
+  content: none;
+}
+
+small {
+  font-size: 100%;
+}
+
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sub { bottom: -0.25em; }
+sup { top: -0.5em; }
+
+/* 10. Tablas: eliminar espaciados y bordes default de todos los navegadores */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+th {
+  text-align: inherit;
+  font-weight: inherit;
+}
+
+/* 11. Formularios: el punto más inconsistente entre OS/navegadores */
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: inherit;
+  color: inherit;
+  background-color: transparent;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+button,
+select {
+  text-transform: none;
+  cursor: pointer;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+  cursor: pointer;
+}
+
+button:disabled,
+[type="button"]:disabled,
+[type="reset"]:disabled,
+[type="submit"]:disabled {
+  cursor: not-allowed;
+}
+
+/* Quitar el borde punteado de Firefox al hacer focus en botones */
+button::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner {
+  border-style: none;
+  padding: 0;
+}
+
+/* Inputs de texto */
+textarea {
+  resize: vertical;
+  overflow: auto;
+}
+
+/* Quitar flechas de inputs number en Chrome/Safari/Edge */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Quitar flechas de inputs number en Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Quitar la "X" de limpiar en inputs search de Edge/IE */
+input[type="search"]::-ms-clear,
+input[type="search"]::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Quitar decoración de search en WebKit */
+input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Checkbox y radio: reset total para poder estilizarlos custom */
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0;
+  width: auto;
+}
+
+/* Quitar estilos de autofill en Chrome (fondo amarillo/azul) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Select: quitar flecha nativa en todos los navegadores */
+select {
+  background-image: none;
+}
+
+select::-ms-expand {
+  display: none;
+}
+
+/* Placeholder consistente entre navegadores */
+::placeholder {
+  color: inherit;
+  opacity: 0.5;
+}
+
+/* Fieldset/legend sin estilos nativos */
+fieldset {
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+  display: table;
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* Progress y meter sin estilo nativo (opcional, dejar transparente) */
+progress {
+  vertical-align: baseline;
+}
+
+/* 12. Quitar el outline azul de focus por defecto (¡recordá reemplazarlo por accesibilidad!) */
+:focus {
+  outline: none;
+}
+
+/* Alternativa accesible recomendada: solo mostrar el outline con teclado */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* 13. Elementos varios */
+hr {
+  border: none;
+  border-top: 1px solid currentColor;
+  height: 0;
+  overflow: visible;
+}
+
+address {
+  font-style: normal;
+}
+
+/* iframe sin borde */
+iframe {
+  border: 0;
+}
+
+/* audio y video sin display raro */
+audio,
+video {
+  display: inline-block;
+}
+
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+/* details/summary sin marcador nativo */
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* mark sin fondo amarillo default */
+mark {
+  background-color: transparent;
+  color: inherit;
+}
+
+/* dialog nativo sin estilos de OS */
+dialog {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  max-width: none;
+  max-height: none;
+}
+
+dialog::backdrop {
+  background: transparent;
+}
+
+/* 14. Elementos que Safari/iOS estilizan distinto */
+input,
+textarea,
+button,
+select {
+  -webkit-border-radius: 0;
+  border-radius: 0;
+}
+
+/* Reset de scrollbar (opcional, WebKit) */
+::-webkit-scrollbar {
+  width: initial;
+  height: initial;
+}
+
+/* 15. Respeta preferencia de reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
