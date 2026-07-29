@@ -9,22 +9,27 @@ interface ImageProps {
   src?: string;
   alt?: string;
   sizeClassName?: string;
-  borderClassName?: string;
+  colorClassName?: string;
+  shapeClassName?: string;
+  animationClassName?: string;
   className?: string;
 }
 
 /* ImageStyle: clases de estilo, estas si se pueden variar */
 const ImageStyle = {
-  image: 'bg-neutral-200',
+  base: 'flex items-center justify-center select-none',
   size: 'w-(--size-4xl) h-(--size-4xl)',
-  border: '',
+  color: 'bg-neutral-200',
+  shape: '',
+  animation: '',
 };
 
-export default function Image({ src, alt, sizeClassName, borderClassName, className }: ImageProps) {
+export default function Image({ src, alt, sizeClassName, colorClassName, shapeClassName, animationClassName, className }: ImageProps) {
   const mergedClassName = twMerge(
-    ImageStyle.image,
     sizeClassName || ImageStyle.size,
-    borderClassName || ImageStyle.border,
+    colorClassName || ImageStyle.color,
+    shapeClassName || ImageStyle.shape,
+    animationClassName || ImageStyle.animation,
     className,
   );
 
@@ -33,7 +38,7 @@ export default function Image({ src, alt, sizeClassName, borderClassName, classN
       <img
         src={src}
         alt={alt || ''}
-        className={twMerge('flex items-center justify-center select-none', mergedClassName)}
+        className={twMerge(ImageStyle.base, mergedClassName)}
       />
     );
   }

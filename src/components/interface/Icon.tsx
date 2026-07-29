@@ -9,14 +9,22 @@ import { twMerge } from 'tailwind-merge';
 export interface IconProps {
   name: keyof typeof icons;
   className?: string;
+  sizeClassName?: string;
+  colorClassName?: string;
+  shapeClassName?: string;
+  animationClassName?: string;
 }
 
 /* IconStyle: clases de estilo, estas si se pueden variar */
 const IconStyle = {
-  icon: 'w-(--size-m) h-(--size-m)',
+  base: '',
+  size: 'w-(--size-m) h-(--size-m)',
+  color: '',
+  shape: '',
+  animation: '',
 };
 
-export default function Icon({ name, className }: IconProps) {
+export default function Icon({ name, className, sizeClassName, colorClassName, shapeClassName, animationClassName }: IconProps) {
   const LucideIcon = icons[name];
 
   if (!LucideIcon) {
@@ -26,7 +34,7 @@ export default function Icon({ name, className }: IconProps) {
 
   return (
     <LucideIcon
-      className={twMerge(IconStyle.icon, className)}
+      className={twMerge(IconStyle.base, sizeClassName || IconStyle.size, colorClassName || IconStyle.color, shapeClassName || IconStyle.shape, animationClassName || IconStyle.animation, className)}
     />
   );
 }

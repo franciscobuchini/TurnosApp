@@ -4,9 +4,27 @@
 */
 
 import { useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 import Button from '../../components/interface/Button';
 import Box from '../../components/interface/Box';
 import Table, { type TableColumn } from '../../components/interface/Table';
+import ContentHeader from './ContentHeader';
+
+interface MonthlyViewProps {
+  className?: string;
+  sizeClassName?: string;
+  colorClassName?: string;
+  shapeClassName?: string;
+  animationClassName?: string;
+}
+
+const MonthlyViewStyle = {
+  base: 'flex flex-col border border-black gap-(--size-xl) p-(--size-xl)',
+  size: '',
+  color: '',
+  shape: '',
+  animation: '',
+};
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -78,7 +96,13 @@ const getDaysInMonth = (year: number, month: number): CalendarCell[] => {
   return cells;
 };
 
-export default function MonthlyView() {
+export default function MonthlyView({
+  className,
+  sizeClassName,
+  colorClassName,
+  shapeClassName,
+  animationClassName,
+}: MonthlyViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const year = currentDate.getFullYear();
@@ -148,21 +172,26 @@ export default function MonthlyView() {
   }));
 
   return (
-    <Box className="flex flex-col border border-black gap-(--size-xl) p-(--size-xl)">
+    <Box
+      className={twMerge(
+        MonthlyViewStyle.base,
+        sizeClassName || MonthlyViewStyle.size,
+        colorClassName || MonthlyViewStyle.color,
+        shapeClassName || MonthlyViewStyle.shape,
+        animationClassName || MonthlyViewStyle.animation,
+        className,
+      )}
+    >
       {/* Cabecera de navegación */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-bold">
-          {MONTH_NAMES[month]} {year}
-        </h2>
-        <div className="flex gap-(--size-m)">
-          <Button onClick={prevMonth}>
-            Anterior
-          </Button>
-          <Button onClick={nextMonth}>
-            Siguiente
-          </Button>
-        </div>
-      </div>
+      <ContentHeader
+        title={`${MONTH_NAMES[month]} ${year}`}
+        action={
+          <div className="flex gap-(--size-m)">
+            <Button onClick={prevMonth}>Anterior</Button>
+            <Button onClick={nextMonth}>Siguiente</Button>
+          </div>
+        }
+      />
 
       {/* Renderizado de la grilla mensual utilizando el componente Table */}
       <Table

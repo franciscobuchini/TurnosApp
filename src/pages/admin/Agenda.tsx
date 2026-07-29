@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import MainContent from '../../components/layout/MainContent';
-import MainContentHeader from '../../components/widgets/MainContentHeader';
+import ContentHeader from '../../components/widgets/ContentHeader';
 import Button from '../../components/interface/Button';
 import Select from '../../components/interface/Select';
 
@@ -41,7 +41,7 @@ function Agenda() {
   return (
     <Layout withSidebar>
       <MainContent>
-        <MainContentHeader
+        <ContentHeader
           title="Agenda"
           subtitle="Organizá el día, confirmá reservas y gestioná la disponibilidad."
           action={

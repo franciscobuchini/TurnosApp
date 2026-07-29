@@ -9,16 +9,24 @@ import { twMerge } from 'tailwind-merge';
 interface BoxProps {
   children: ReactNode;
   className?: string;
+  sizeClassName?: string;
+  colorClassName?: string;
+  shapeClassName?: string;
+  animationClassName?: string;
 }
 
 /* BoxStyle: clases de estilo, estas si se pueden variar */
 const BoxStyle = {
-  box: '',
+  base: 'w-full',
+  size: '',
+  color: '',
+  shape: '',
+  animation: '',
 };
 
-export default function Box({ children, className }: BoxProps) {
+export default function Box({ children, className, sizeClassName, colorClassName, shapeClassName, animationClassName }: BoxProps) {
   return (
-    <div className={twMerge('w-full',BoxStyle.box, className)}>
+    <div className={twMerge(BoxStyle.base, sizeClassName || BoxStyle.size, colorClassName || BoxStyle.color, shapeClassName || BoxStyle.shape, animationClassName || BoxStyle.animation, className)}>
       {children}
     </div>
   );

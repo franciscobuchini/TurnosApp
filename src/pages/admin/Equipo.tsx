@@ -9,7 +9,7 @@
 
 import Layout from '../../components/layout/Layout';
 import MainContent from '../../components/layout/MainContent';
-import MainContentHeader from '../../components/widgets/MainContentHeader';
+import ContentHeader from '../../components/widgets/ContentHeader';
 import TeamTable from '../../components/widgets/TeamTable';
 import Button from '../../components/interface/Button';
 
@@ -17,7 +17,7 @@ function Equipo() {
   return (
     <Layout withSidebar>
       <MainContent>
-        <MainContentHeader
+        <ContentHeader
           title="Equipo/Ambientes"
           subtitle="Coordiná los miembros de tu equipo, asigná sus roles y configurá sus horarios de trabajo."
           action={<Button>Agregar miembro</Button>}

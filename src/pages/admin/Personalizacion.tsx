@@ -5,13 +5,13 @@
 
 import Layout from '../../components/layout/Layout';
 import MainContent from '../../components/layout/MainContent';
-import MainContentHeader from '../../components/widgets/MainContentHeader';
+import ContentHeader from '../../components/widgets/ContentHeader';
 
 function Personalizacion() {
   return (
     <Layout withSidebar>
       <MainContent>
-        <MainContentHeader
+        <ContentHeader
           title="Personalizacion"
           subtitle="Personalizá el diseño, colores y la información pública de tu negocio."
         />

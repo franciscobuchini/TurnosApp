@@ -5,8 +5,29 @@
 */
 
 import { useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import Button from '../../components/interface/Button';
+import Box from '../../components/interface/Box';
+import ContentHeader from './ContentHeader';
+import WeekSelector from './WeekSelector';
 
-const WEEK_DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+interface DailyViewProps {
+  className?: string;
+  sizeClassName?: string;
+  colorClassName?: string;
+  shapeClassName?: string;
+  animationClassName?: string;
+}
+
+const DailyViewStyle = {
+  base: 'flex flex-col border border-black gap-(--size-xl) p-(--size-xl)',
+  size: '',
+  color: '',
+  shape: '',
+  animation: '',
+};
+
+const WEEK_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -15,10 +36,9 @@ const MONTH_NAMES = [
 const getWeekDays = (date: Date): Date[] => {
   const current = new Date(date);
   const day = current.getDay();
-  // Ajustar para que Lunes sea el primer día de la semana (0 = Domingo, 1 = Lunes, etc.)
   const diff = current.getDate() - day + (day === 0 ? -6 : 1);
   const monday = new Date(current.setDate(diff));
-  
+
   const week: Date[] = [];
   for (let i = 0; i < 7; i++) {
     const next = new Date(monday);
@@ -36,7 +56,13 @@ const formatDate = (date: Date): string => {
   return `${dayName}, ${dayNum} de ${monthName} de ${year}`;
 };
 
-export default function DailyView() {
+export default function DailyView({
+  className,
+  sizeClassName,
+  colorClassName,
+  shapeClassName,
+  animationClassName,
+}: DailyViewProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const hours = [
@@ -85,69 +111,38 @@ export default function DailyView() {
   };
 
   return (
-    <div className="flex flex-col w-full border border-black p-4 gap-4">
+    <Box
+      className={twMerge(
+        DailyViewStyle.base,
+        sizeClassName || DailyViewStyle.size,
+        colorClassName || DailyViewStyle.color,
+        shapeClassName || DailyViewStyle.shape,
+        animationClassName || DailyViewStyle.animation,
+        className,
+      )}
+    >
       {/* Controles superiores */}
-      <div className="flex flex-col tablet:flex-row justify-between items-center border-b border-black pb-4 gap-4">
-        <div className="flex flex-col items-center tablet:items-start">
-          <h2 className="text-lg font-bold">{formatDate(selectedDate)}</h2>
-          <span className="text-xs text-neutral-500">Horario de turnos de hoy</span>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={prevDay}
-            className="border border-black px-4 py-2 text-sm font-semibold hover:bg-black/5"
-          >
-            Día Ant.
-          </button>
-          <button
-            onClick={goToToday}
-            className="border border-black px-4 py-2 text-sm font-semibold hover:bg-black/5"
-          >
-            Hoy
-          </button>
-          <button
-            onClick={nextDay}
-            className="border border-black px-4 py-2 text-sm font-semibold hover:bg-black/5"
-          >
-            Día Sig.
-          </button>
-        </div>
-      </div>
+      <ContentHeader
+        title={formatDate(selectedDate)}
+        action={
+          <div className="flex gap-(--size-m)">
+            <Button onClick={prevDay}>Anterior</Button>
+            <Button onClick={goToToday}>Hoy</Button>
+            <Button onClick={nextDay}>Siguiente</Button>
+          </div>
+        }
+      />
 
       {/* Selector de días de la semana */}
-      <div className="flex items-center justify-between border border-black p-2">
-        <button
-          onClick={prevWeek}
-          className="border border-black px-3 py-1 text-xs font-bold hover:bg-black/5"
-        >
-          Semana Ant.
-        </button>
-
-        <div className="flex flex-1 justify-around mx-4 gap-1">
-          {weekDays.map((date, idx) => {
-            const active = isSameDay(date, selectedDate);
-            return (
-              <button
-                key={idx}
-                onClick={() => setSelectedDate(date)}
-                className={`flex-1 flex flex-col items-center justify-center p-2 border ${
-                  active ? 'border-2 border-black font-bold' : 'border-black/20 hover:border-black/50'
-                }`}
-              >
-                <span className="text-xs">{WEEK_DAYS[idx]}</span>
-                <span className="text-sm">{date.getDate()}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <button
-          onClick={nextWeek}
-          className="border border-black px-3 py-1 text-xs font-bold hover:bg-black/5"
-        >
-          Semana Sig.
-        </button>
-      </div>
+      <WeekSelector
+        weekDays={weekDays}
+        selectedDate={selectedDate}
+        onSelectDate={setSelectedDate}
+        onPrevWeek={prevWeek}
+        onNextWeek={nextWeek}
+        weekDaysNames={WEEK_DAYS}
+        isSameDay={isSameDay}
+      />
 
       {/* Agenda diaria (Bloques horarios) */}
       <div className="flex flex-col border border-black">
@@ -173,6 +168,6 @@ export default function DailyView() {
           );
         })}
       </div>
-    </div>
+    </Box>
   );
 }

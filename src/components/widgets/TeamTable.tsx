@@ -108,7 +108,7 @@ const columns: TableColumn<TeamMember>[] = [
     header: 'Nombre',
     cell: (member) => (
       <div className="flex items-center gap-4 py-1">
-        <Image sizeClassName="w-(--size-4xl) h-(--size-4xl)" borderClassName="rounded-full" />
+        <Image sizeClassName="w-(--size-4xl) h-(--size-4xl)" shapeClassName="rounded-full" />
         <div className="flex flex-col justify-center gap-(--size-3xs)">
           <span>{member.name}</span>
           <span className="text-sm">{member.role}</span>
