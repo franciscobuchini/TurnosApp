@@ -30,9 +30,9 @@ const TableStyle = {
   box: '',
   table: '',
   headerRow: 'h-(--size-2xl)',
-  headerCell: 'px-(--size-s) border-b-1 border-black',
+  headerCell: 'px-(--size-s)',
   bodyRow: '',
-  bodyCell: 'px-(--size-s) border-t-1 border-b-1 border-black',
+  bodyCell: 'px-(--size-s)',
 };
 
 export default function Table<T>({
@@ -51,24 +51,26 @@ export default function Table<T>({
             <col key={column.key} style={column.width ? { width: column.width } : undefined} />
           ))}
         </colgroup>
-        <thead>
-          <tr className={twMerge(rowHeightClassName, TableStyle.headerRow)}>
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                className={twMerge(
-                  defaultCellClassName,
-                  TableStyle.headerCell,
-                  column.alignClassName,
-                  column.className,
-                  column.headerClassName,
-                )}
-              >
-                {column.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
+        {columns.some((column) => column.header) && (
+          <thead>
+            <tr className={twMerge(rowHeightClassName, TableStyle.headerRow)}>
+              {columns.map((column) => (
+                <th
+                  key={column.key}
+                  className={twMerge(
+                    defaultCellClassName,
+                    TableStyle.headerCell,
+                    column.alignClassName,
+                    column.className,
+                    column.headerClassName,
+                  )}
+                >
+                  {column.header}
+                </th>
+              ))}
+            </tr>
+          </thead>
+        )}
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex} className={twMerge('last:[&>td]:border-b-0', rowHeightClassName, TableStyle.bodyRow)}>

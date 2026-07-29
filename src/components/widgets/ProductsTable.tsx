@@ -40,7 +40,7 @@ export default function ProductsTable() {
   const columns: TableColumn<Product>[] = [
     {
       key: 'info',
-      header: 'Producto / Servicio',
+      header: '',
       cell: (product) => (
         <div className="flex items-center gap-4 py-1">
           <Image />

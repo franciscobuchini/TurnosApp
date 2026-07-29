@@ -13,12 +13,12 @@ interface BoxProps {
 
 /* BoxStyle: clases de estilo, estas si se pueden variar */
 const BoxStyle = {
-  box: 'border-1 border-black w-full',
+  box: '',
 };
 
 export default function Box({ children, className }: BoxProps) {
   return (
-    <div className={twMerge(BoxStyle.box, className)}>
+    <div className={twMerge('w-full',BoxStyle.box, className)}>
       {children}
     </div>
   );
