@@ -10,10 +10,10 @@
 
   /* Spacing */
   --size-3xs: 2px; /* Gap productos */
-  --size-2xs: 4px;
+  --size-2xs: 4px; 
   --size-xs: 8px;
   --size-s: 12px; /* Gap y Margin Sidebar */
-  --size-m: 16px;
+  --size-m: 16px; /* Icons */
   --size-l: 24px;
   --size-xl: 32px;
   --size-2xl: 48px; /* Button height y Table Height Default */

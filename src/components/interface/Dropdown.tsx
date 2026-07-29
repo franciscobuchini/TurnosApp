@@ -22,7 +22,7 @@ interface DropdownMenuProps {
 
 /* DropdownMenuStyle: clases de estilo, estas si se pueden variar */
 const DropdownMenuStyle = {
-  menu: 'mt-(--size-xs) min-w-32 w-max bg-white shadow-lg border border-black/10',
+  menu: 'mt-(--size-xs) min-w-(--size-2xl) w-max bg-white shadow-lg border border-black/10',
   item: 'px-(--size-m) py-(--size-s) hover:bg-black/5',
 };
 

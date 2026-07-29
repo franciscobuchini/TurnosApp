@@ -17,7 +17,6 @@ export default function Sidebar() {
     >
       <nav className={twMerge('flex flex-col', SidebarStyle.nav)}>
         <Button to="/admin/agenda">Agenda/Turnos</Button>
-        <Button to="/admin/horarios">Horarios</Button>
         <Button to="/admin/equipo">Equipo/Ambientes</Button>
         <Button to="/admin/productos">Productos/Servicios</Button>
         <Button to="/admin/clientes">Clientes</Button>

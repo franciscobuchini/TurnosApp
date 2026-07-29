@@ -5,7 +5,7 @@
 
 export default function MainContent({ children }: { children?: React.ReactNode }) {
   return (
-    <main className="flex flex-1 gap-(--size-m) w-full flex-col items-start overflow-y-auto p-(--size-xl)">
+    <main className="flex flex-1 gap-(--size-xl) w-full flex-col items-start overflow-y-auto p-(--size-xl)">
       {children}
     </main>
   );

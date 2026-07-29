@@ -11,7 +11,10 @@ function Personalizacion() {
   return (
     <Layout withSidebar>
       <MainContent>
-        <MainContentHeader title="Personalizacion" />
+        <MainContentHeader
+          title="Personalizacion"
+          subtitle="Personalizá el diseño, colores y la información pública de tu negocio."
+        />
       </MainContent>
     </Layout>
   );

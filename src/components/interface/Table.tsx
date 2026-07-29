@@ -14,7 +14,7 @@ export interface TableColumn<T> {
   className?: string;
   alignClassName?: string;
   headerClassName?: string;
-  cellClassName?: string;
+  cellClassName?: string | ((row: T, rowIndex: number) => string);
   width?: string;
 }
 
@@ -73,21 +73,27 @@ export default function Table<T>({
         )}
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={twMerge('last:[&>td]:border-b-0', rowHeightClassName, TableStyle.bodyRow)}>
-              {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className={twMerge(
-                    defaultCellClassName,
-                    TableStyle.bodyCell,
-                    column.alignClassName,
-                    column.className,
-                    column.cellClassName,
-                  )}
-                >
-                  {column.cell(row, rowIndex)}
-                </td>
-              ))}
+            <tr key={rowIndex} className={twMerge('', rowHeightClassName, TableStyle.bodyRow)}>
+              {columns.map((column) => {
+                const resolvedCellClassName = typeof column.cellClassName === 'function'
+                  ? column.cellClassName(row, rowIndex)
+                  : column.cellClassName;
+
+                return (
+                  <td
+                    key={column.key}
+                    className={twMerge(
+                      defaultCellClassName,
+                      TableStyle.bodyCell,
+                      column.alignClassName,
+                      column.className,
+                      resolvedCellClassName,
+                    )}
+                  >
+                    {column.cell(row, rowIndex)}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
