@@ -3,21 +3,22 @@
   Lista de productos/servicios que ofrece el negocio.
 */
 
+import { PackagePlus } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import MainContent from '../../components/layout/MainContent';
-import ContentHeader from '../../components/widgets/ContentHeader';
 import ProductsTable from '../../components/widgets/ProductsTable';
 import Button from '../../components/interface/Button';
 
 function Productos() {
   return (
-    <Layout withSidebar>
+    <Layout
+      withSidebar
+      withSidebar2
+      sidebar2Title="Productos/Servicios"
+      sidebar2Action={<Button textAlign="center" icon={<PackagePlus size={20} />} />}
+      sidebar2Content={<></>}
+    >
       <MainContent>
-        <ContentHeader
-          title="Productos/Servicios"
-          subtitle="Definí los servicios y opciones que tus clientes pueden agendar online."
-          action={<Button>Agregar servicio</Button>}
-        />
         <ProductsTable />
       </MainContent>
     </Layout>

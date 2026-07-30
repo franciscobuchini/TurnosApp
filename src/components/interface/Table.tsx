@@ -23,19 +23,42 @@ interface TableProps<T> {
   rows: T[];
   rowHeightClassName: string;
   className?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
 }
 
-/* TableStyle: clases de estilo, estas si se pueden variar */
-const TableStyle = {
-  base: 'w-full table-fixed',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* TableClasses:
+   - required: estructura. No varía.
+   - style: color. Esto sí se puede modificar. */
+const TableClasses = {
+  required: 'w-full table-fixed',
+  style: '',
+};
+
+/* Consts sueltos de la tabla, ya preparados con required/style separados
+   para cuando se agregue color a cada uno. */
+const DefaultCellClasses = {
+  required: 'align-middle',
+  style: '',
+};
+
+const HeaderRowClasses = {
+  required: 'h-(--size-2xl)',
+  style: '',
+};
+
+const BodyRowClasses = {
+  required: '',
+  style: '',
+};
+
+const HeaderCellClasses = {
+  required: 'px-(--size-s)',
+  style: '',
+};
+
+const BodyCellClasses = {
+  required: 'px-(--size-s)',
+  style: '',
 };
 
 export default function Table<T>({
@@ -43,20 +66,11 @@ export default function Table<T>({
   rows,
   rowHeightClassName,
   className = '',
-  sizeClassName,
-  colorClassName,
-  shapeClassName,
-  animationClassName,
+  styleClassName,
 }: TableProps<T>) {
-  const defaultCellClassName = 'align-middle';
-  const headerRowClassName = 'h-(--size-2xl)';
-  const bodyRowClassName = '';
-  const headerCellClassName = 'px-(--size-s)';
-  const bodyCellClassName = 'px-(--size-s)';
-
   return (
     <Box>
-      <table className={twMerge(TableStyle.base, sizeClassName || TableStyle.size, colorClassName || TableStyle.color, shapeClassName || TableStyle.shape, animationClassName || TableStyle.animation, className)}>
+      <table className={twMerge(TableClasses.required, styleClassName || TableClasses.style, className)}>
         <colgroup>
           {columns.map((column) => (
             <col key={column.key} style={column.width ? { width: column.width } : undefined} />
@@ -64,13 +78,15 @@ export default function Table<T>({
         </colgroup>
         {columns.some((column) => column.header) && (
           <thead>
-            <tr className={twMerge(rowHeightClassName, headerRowClassName)}>
+            <tr className={twMerge(rowHeightClassName, HeaderRowClasses.required, HeaderRowClasses.style)}>
               {columns.map((column) => (
                 <th
                   key={column.key}
                   className={twMerge(
-                    defaultCellClassName,
-                    headerCellClassName,
+                    DefaultCellClasses.required,
+                    DefaultCellClasses.style,
+                    HeaderCellClasses.required,
+                    HeaderCellClasses.style,
                     column.alignClassName,
                     column.className,
                     column.headerClassName,
@@ -84,7 +100,7 @@ export default function Table<T>({
         )}
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={twMerge(bodyRowClassName, rowHeightClassName)}>
+            <tr key={rowIndex} className={twMerge(BodyRowClasses.required, BodyRowClasses.style, rowHeightClassName)}>
               {columns.map((column) => {
                 const resolvedCellClassName = typeof column.cellClassName === 'function'
                   ? column.cellClassName(row, rowIndex)
@@ -94,8 +110,10 @@ export default function Table<T>({
                   <td
                     key={column.key}
                     className={twMerge(
-                      defaultCellClassName,
-                      bodyCellClassName,
+                      DefaultCellClasses.required,
+                      DefaultCellClasses.style,
+                      BodyCellClasses.required,
+                      BodyCellClasses.style,
                       column.alignClassName,
                       column.className,
                       resolvedCellClassName,

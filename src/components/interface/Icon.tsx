@@ -9,32 +9,22 @@ import { twMerge } from 'tailwind-merge';
 export interface IconProps {
   name: keyof typeof icons;
   className?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
 }
 
-/* IconStyle: clases de estilo, estas si se pueden variar */
-const IconStyle = {
-  base: '',
-  size: 'w-(--size-m) h-(--size-m)',
-  color: '',
-  shape: '',
-  animation: '',
+/* IconClasses */
+
+const IconClasses = {
+  required: 'w-(--size-m) h-(--size-m)',
+  style: '',
 };
 
-export default function Icon({ name, className, sizeClassName, colorClassName, shapeClassName, animationClassName }: IconProps) {
+export default function Icon({ name, className, styleClassName }: IconProps) {
   const LucideIcon = icons[name];
-
-  if (!LucideIcon) {
-    console.warn(`Icon "${name}" not found in lucide-react.`);
-    return null;
-  }
 
   return (
     <LucideIcon
-      className={twMerge(IconStyle.base, sizeClassName || IconStyle.size, colorClassName || IconStyle.color, shapeClassName || IconStyle.shape, animationClassName || IconStyle.animation, className)}
+      className={twMerge(IconClasses.required, styleClassName || IconClasses.style, className)}
     />
   );
 }

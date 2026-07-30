@@ -20,29 +20,22 @@ interface DropdownMenuProps {
   onClose: () => void;
 }
 
-/* DropdownStyle: clases de estilo, estas si se pueden variar */
-const DropdownStyle = {
-  base: 'relative inline-flex justify-center',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* DropdownClasses*/
+const DropdownClasses = {
+  required: 'relative inline-flex justify-center',
+  style: '',
 };
 
-const DropdownMenuStyle = {
-  base: 'absolute right-0 top-full z-110',
-  size: 'mt-(--size-xs) min-w-(--size-2xl) w-max',
-  color: 'bg-white',
-  shape: 'shadow-lg border border-black/10',
-  animation: '',
+/* DropdownMenuClasses*/
+const DropdownMenuClasses = {
+  required: 'absolute right-0 top-full z-110 mt-(--size-xs) min-w-(--size-2xl) w-max',
+  style: 'bg-white shadow-lg border border-black/10',
 };
 
-const DropdownItemStyle = {
-  base: 'block text-left whitespace-nowrap w-full',
-  size: 'px-(--size-m) py-(--size-s)',
-  color: 'hover:bg-black/5',
-  shape: '',
-  animation: '',
+/* DropdownItemClasses*/
+const DropdownItemClasses = {
+  required: 'block text-left whitespace-nowrap px-(--size-m) py-(--size-s)',
+  style: 'hover:bg-black/5',
 };
 
 /* DropdownMenu: es el panel del dropdown */
@@ -50,20 +43,20 @@ function DropdownMenu({ items, onClose }: DropdownMenuProps) {
   return (
     <div
       role="menu"
-      className={twMerge(DropdownMenuStyle.base, DropdownMenuStyle.size, DropdownMenuStyle.color, DropdownMenuStyle.shape, DropdownMenuStyle.animation)}
+      className={twMerge(DropdownMenuClasses.required, DropdownMenuClasses.style)}
     >
       {items.map((item) => (
-        <button
+        <Button
           key={item.label}
           role="menuitem"
-          className={twMerge(DropdownItemStyle.base, DropdownItemStyle.size, DropdownItemStyle.color, DropdownItemStyle.shape, DropdownItemStyle.animation)}
+          className={twMerge(DropdownItemClasses.required, DropdownItemClasses.style)}
           onClick={() => {
             item.onClick?.();
             onClose();
           }}
         >
           {item.label}
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -77,14 +70,11 @@ function DropdownMenu({ items, onClose }: DropdownMenuProps) {
 interface DropdownProps {
   items: DropdownItem[];
   content: ReactNode;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
 }
 
 /* Dropdown: arma el boton trigger, controla el estado abierto/cerrado y renderiza DropdownMenu */
-export default function Dropdown({ items, content, sizeClassName, colorClassName, shapeClassName, animationClassName }: DropdownProps) {
+export default function Dropdown({ items, content, styleClassName }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -104,12 +94,12 @@ export default function Dropdown({ items, content, sizeClassName, colorClassName
   }, []);
 
   return (
-    <div ref={dropdownRef} className={twMerge(DropdownStyle.base, sizeClassName || DropdownStyle.size, colorClassName || DropdownStyle.color, shapeClassName || DropdownStyle.shape, animationClassName || DropdownStyle.animation)}>
+    <div ref={dropdownRef} className={twMerge(DropdownClasses.required, styleClassName || DropdownClasses.style)}>
       <Button
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((currentValue) => !currentValue)}
-        className={sizeClassName}
+        styleClassName={styleClassName}
       >
         {content}
       </Button>

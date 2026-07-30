@@ -3,27 +3,54 @@
   Vista mensual de la agenda, utilizando el componente Table genérico para la estructura.
 */
 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Button from '../../components/interface/Button';
-import Box from '../../components/interface/Box';
-import Table, { type TableColumn } from '../../components/interface/Table';
+import Button from '../interface/Button';
+import Box from '../interface/Box';
+import Table, { type TableColumn } from '../interface/Table';
 import ContentHeader from './ContentHeader';
 
-interface MonthlyViewProps {
+interface CalendarProps {
   className?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
 }
 
-const MonthlyViewStyle = {
-  base: 'flex flex-col border border-black gap-(--size-xl) p-(--size-xl)',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* MonthlyViewClasses: contenedor (Box)*/
+const MonthlyViewClasses = {
+  required: 'flex flex-col  w-full gap-(--size-m)',
+  style: 'bg-stone-900 rounded-3xl',
+};
+
+/* MonthlyViewActionsClasses: wrapper de los botones de navegación*/
+const MonthlyViewActionsClasses = {
+  required: 'flex gap-(--size-s)',
+  style: '',
+};
+
+/* MonthlyViewTableClasses: clase pasada al componente Table*/
+const MonthlyViewTableClasses = {
+  required: '',
+  style: 'text-white',
+};
+
+/* MonthlyViewDayCircleClasses: el círculo con el número del día, ahora es todo el contenido de la celda */
+const MonthlyViewDayCircleClasses = {
+  required: 'flex items-center justify-center w-(--size-xl) h-(--size-xl) mx-auto text-sm',
+  style: 'rounded-full',
+};
+const MonthlyViewDayCircleOtherMonthRequired = 'opacity-30';
+
+/* MonthlyViewTodayCircleClasses: resalte del círculo de hoy, ahora se aplica al círculo y no a toda la celda */
+const MonthlyViewTodayCircleClasses = {
+  required: '',
+  style: 'bg-white text-stone-800 rounded-full',
+};
+
+/* MonthlyViewColumnAlignClasses: alineación y padding de cada columna de la tabla*/
+const MonthlyViewColumnAlignClasses = {
+  required: 'align-middle p-(--size-xs) text-center',
+  style: '',
 };
 
 const MONTH_NAMES = [
@@ -96,19 +123,13 @@ const getDaysInMonth = (year: number, month: number): CalendarCell[] => {
   return cells;
 };
 
-export default function MonthlyView({
-  className,
-  sizeClassName,
-  colorClassName,
-  shapeClassName,
-  animationClassName,
-}: MonthlyViewProps) {
+export default function Calendar({ className, styleClassName }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
   const cells = getDaysInMonth(year, month);
 
   // Agrupar las celdas en filas de 7 días (semanas)
@@ -141,44 +162,28 @@ export default function MonthlyView({
       const cell = weekCells[idx];
       if (!cell) return null;
 
-      const isCurrentMonth = cell.isCurrentMonth;
-      // Simular algunos turnos de prueba en la vista actual
-      const hasTurno = isCurrentMonth && (cell.day + idx) % 7 === 0;
+      const isToday = isSameDay(cell.date, new Date());
 
       return (
         <div
-          className={`flex flex-col justify-between w-full min-h-(--size-5xl) ${
-            isCurrentMonth ? '' : 'opacity-30'
-          }`}
-        >
-          <span>{cell.day}</span>
-          {hasTurno && (
-            <div className="border border-black text-center">
-              Turno
-            </div>
+          className={twMerge(
+            MonthlyViewDayCircleClasses.required,
+            isToday ? MonthlyViewTodayCircleClasses.style : MonthlyViewDayCircleClasses.style,
+            !cell.isCurrentMonth ? MonthlyViewDayCircleOtherMonthRequired : '',
           )}
+        >
+          {cell.day}
         </div>
       );
     },
-    alignClassName: 'align-top border border-black p-(--size-xs)',
-    cellClassName: (weekCells) => {
-      const cell = weekCells[idx];
-      if (cell && isSameDay(cell.date, new Date())) {
-        return 'border-2 border-black';
-      }
-      return '';
-    },
-    headerClassName: 'text-center font-bold p-(--size-xs)',
+    alignClassName: twMerge(MonthlyViewColumnAlignClasses.required, MonthlyViewColumnAlignClasses.style),
   }));
 
   return (
     <Box
       className={twMerge(
-        MonthlyViewStyle.base,
-        sizeClassName || MonthlyViewStyle.size,
-        colorClassName || MonthlyViewStyle.color,
-        shapeClassName || MonthlyViewStyle.shape,
-        animationClassName || MonthlyViewStyle.animation,
+        MonthlyViewClasses.required,
+        styleClassName || MonthlyViewClasses.style,
         className,
       )}
     >
@@ -186,9 +191,9 @@ export default function MonthlyView({
       <ContentHeader
         title={`${MONTH_NAMES[month]} ${year}`}
         action={
-          <div className="flex gap-(--size-m)">
-            <Button onClick={prevMonth}>Anterior</Button>
-            <Button onClick={nextMonth}>Siguiente</Button>
+          <div className={twMerge(MonthlyViewActionsClasses.required, MonthlyViewActionsClasses.style)}>
+            <Button textAlign="center" height="h-(--size-xl)" onClick={prevMonth} icon={<ChevronLeft size={18} />} />
+            <Button textAlign="center" height="h-(--size-xl)" onClick={nextMonth} icon={<ChevronRight size={18} />} />
           </div>
         }
       />
@@ -198,7 +203,7 @@ export default function MonthlyView({
         columns={columns}
         rows={weeks}
         rowHeightClassName="h-auto"
-        className="border-collapse"
+        className={twMerge(MonthlyViewTableClasses.required, MonthlyViewTableClasses.style)}
       />
     </Box>
   );

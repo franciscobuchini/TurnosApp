@@ -6,32 +6,57 @@
 
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Button from '../../components/interface/Button';
 import Box from '../../components/interface/Box';
-import ContentHeader from './ContentHeader';
 import WeekSelector from './WeekSelector';
 
 interface DailyViewProps {
   className?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
 }
 
-const DailyViewStyle = {
-  base: 'flex flex-col border border-black gap-(--size-xl) p-(--size-xl)',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* DailyViewClasses: contenedor (Box)*/
+const DailyViewClasses = {
+  required: 'flex flex-col gap-(--size-xl)',
+  style: 'border border-black',
+};
+
+/* DailyViewGridClasses: wrapper de la grilla de horas*/
+const DailyViewGridClasses = {
+  required: 'flex flex-col',
+  style: 'border border-black',
+};
+
+/* DailyViewRowClasses: cada fila de hora*/
+const DailyViewRowClasses = {
+  required: 'flex py-2 items-center',
+  style: 'border-b border-black last:border-b-0',
+};
+
+/* DailyViewRowLabelClasses: la etiqueta de la hora*/
+const DailyViewRowLabelClasses = {
+  required: 'w-20 pr-4 text-right font-semibold',
+  style: 'border-r border-black',
+};
+
+/* DailyViewRowSlotClasses: wrapper del contenido de cada fila*/
+const DailyViewRowSlotClasses = {
+  required: 'flex-1 pl-4 flex gap-2',
+  style: '',
+};
+
+/* DailyViewEventBadgeClasses: el bloque de "Turno Reservado"*/
+const DailyViewEventBadgeClasses = {
+  required: 'flex-1 h-8 flex items-center justify-center text-sm',
+  style: 'border border-dashed border-black',
+};
+
+/* DailyViewEmptySlotClasses: el espacio vacío cuando no hay turno*/
+const DailyViewEmptySlotClasses = {
+  required: 'flex-1 h-8',
+  style: '',
 };
 
 const WEEK_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
 
 const getWeekDays = (date: Date): Date[] => {
   const current = new Date(date);
@@ -48,21 +73,7 @@ const getWeekDays = (date: Date): Date[] => {
   return week;
 };
 
-const formatDate = (date: Date): string => {
-  const dayName = WEEK_DAYS[date.getDay()];
-  const dayNum = date.getDate();
-  const monthName = MONTH_NAMES[date.getMonth()];
-  const year = date.getFullYear();
-  return `${dayName}, ${dayNum} de ${monthName} de ${year}`;
-};
-
-export default function DailyView({
-  className,
-  sizeClassName,
-  colorClassName,
-  shapeClassName,
-  animationClassName,
-}: DailyViewProps) {
+export default function DailyView({ className, styleClassName }: DailyViewProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const hours = [
@@ -71,19 +82,6 @@ export default function DailyView({
   ];
 
   const weekDays = getWeekDays(selectedDate);
-
-  // Navegación diaria
-  const prevDay = () => {
-    const next = new Date(selectedDate);
-    next.setDate(selectedDate.getDate() - 1);
-    setSelectedDate(next);
-  };
-
-  const nextDay = () => {
-    const next = new Date(selectedDate);
-    next.setDate(selectedDate.getDate() + 1);
-    setSelectedDate(next);
-  };
 
   // Navegación semanal
   const prevWeek = () => {
@@ -98,10 +96,6 @@ export default function DailyView({
     setSelectedDate(next);
   };
 
-  const goToToday = () => {
-    setSelectedDate(new Date());
-  };
-
   const isSameDay = (date1: Date, date2: Date) => {
     return (
       date1.getDate() === date2.getDate() &&
@@ -113,25 +107,11 @@ export default function DailyView({
   return (
     <Box
       className={twMerge(
-        DailyViewStyle.base,
-        sizeClassName || DailyViewStyle.size,
-        colorClassName || DailyViewStyle.color,
-        shapeClassName || DailyViewStyle.shape,
-        animationClassName || DailyViewStyle.animation,
+        DailyViewClasses.required,
+        styleClassName || DailyViewClasses.style,
         className,
       )}
     >
-      {/* Controles superiores */}
-      <ContentHeader
-        title={formatDate(selectedDate)}
-        action={
-          <div className="flex gap-(--size-m)">
-            <Button onClick={prevDay}>Anterior</Button>
-            <Button onClick={goToToday}>Hoy</Button>
-            <Button onClick={nextDay}>Siguiente</Button>
-          </div>
-        }
-      />
 
       {/* Selector de días de la semana */}
       <WeekSelector
@@ -145,23 +125,23 @@ export default function DailyView({
       />
 
       {/* Agenda diaria (Bloques horarios) */}
-      <div className="flex flex-col border border-black">
+      <div className={twMerge(DailyViewGridClasses.required, DailyViewGridClasses.style)}>
         {hours.map((hour, index) => {
           // Mostrar un turno de ejemplo diferente según el día seleccionado para simular datos reales
           const hasEvent = (selectedDate.getDate() + index) % 4 === 0;
 
           return (
-            <div key={hour} className="flex border-b border-black last:border-b-0 py-2 items-center">
-              <div className="w-20 border-r border-black pr-4 text-right font-semibold">
+            <div key={hour} className={twMerge(DailyViewRowClasses.required, DailyViewRowClasses.style)}>
+              <div className={twMerge(DailyViewRowLabelClasses.required, DailyViewRowLabelClasses.style)}>
                 {hour}
               </div>
-              <div className="flex-1 pl-4 flex gap-2">
+              <div className={twMerge(DailyViewRowSlotClasses.required, DailyViewRowSlotClasses.style)}>
                 {hasEvent ? (
-                  <div className="flex-1 border border-dashed border-black h-8 flex items-center justify-center text-sm">
+                  <div className={twMerge(DailyViewEventBadgeClasses.required, DailyViewEventBadgeClasses.style)}>
                     Turno Reservado ({hour})
                   </div>
                 ) : (
-                  <div className="flex-1 h-8" />
+                  <div className={twMerge(DailyViewEmptySlotClasses.required, DailyViewEmptySlotClasses.style)} />
                 )}
               </div>
             </div>

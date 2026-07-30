@@ -8,39 +8,23 @@ import { twMerge } from 'tailwind-merge';
 interface ImageProps {
   src?: string;
   alt?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
   className?: string;
 }
 
-/* ImageStyle: clases de estilo, estas si se pueden variar */
-const ImageStyle = {
-  base: 'flex items-center justify-center select-none',
-  size: 'w-(--size-4xl) h-(--size-4xl)',
-  color: 'bg-neutral-200',
-  shape: '',
-  animation: '',
+/* ImageClasses:
+   - required: estructura y tamaño. No varía.
+   - style: color. Esto sí se puede modificar. */
+const ImageClasses = {
+  required: 'flex items-center justify-center select-none w-(--size-4xl) h-(--size-4xl)',
+  style: 'bg-neutral-200',
 };
 
-export default function Image({ src, alt, sizeClassName, colorClassName, shapeClassName, animationClassName, className }: ImageProps) {
-  const mergedClassName = twMerge(
-    sizeClassName || ImageStyle.size,
-    colorClassName || ImageStyle.color,
-    shapeClassName || ImageStyle.shape,
-    animationClassName || ImageStyle.animation,
-    className,
-  );
+export default function Image({ src, alt, styleClassName, className }: ImageProps) {
+  const mergedClassName = twMerge(ImageClasses.required, styleClassName || ImageClasses.style, className);
 
   if (src) {
-    return (
-      <img
-        src={src}
-        alt={alt || ''}
-        className={twMerge(ImageStyle.base, mergedClassName)}
-      />
-    );
+    return <img src={src} alt={alt || ''} className={mergedClassName} />;
   }
 
   return (

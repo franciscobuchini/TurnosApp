@@ -3,21 +3,22 @@
   Lista de clientes.
 */
 
+import { SmilePlus } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import MainContent from '../../components/layout/MainContent';
-import ContentHeader from '../../components/widgets/ContentHeader';
 import ClientsTable from '../../components/widgets/ClientsTable';
 import Button from '../../components/interface/Button';
 
 function Clientes() {
   return (
-    <Layout withSidebar>
+    <Layout
+      withSidebar
+      withSidebar2
+      sidebar2Title="Clientes"
+      sidebar2Action={<Button textAlign="center" icon={<SmilePlus size={20} />} />}
+      sidebar2Content={<>Contenido del sidebar</>}
+    >
       <MainContent>
-        <ContentHeader
-          title="Clientes"
-          subtitle="Administrá la información de tus clientes, datos de contacto y sus historiales."
-          action={<Button>Agregar cliente</Button>}
-        />
         <ClientsTable />
       </MainContent>
     </Layout>

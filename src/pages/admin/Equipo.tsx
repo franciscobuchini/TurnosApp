@@ -7,21 +7,22 @@
   Entonces de acá salen las agendas, pero el usuario no va a entender que esto le corresponde a un trabajador o a una cancha de f5, tengo que darle a entender eso.
 */
 
+import { BookmarkPlus } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import MainContent from '../../components/layout/MainContent';
-import ContentHeader from '../../components/widgets/ContentHeader';
 import TeamTable from '../../components/widgets/TeamTable';
 import Button from '../../components/interface/Button';
 
 function Equipo() {
   return (
-    <Layout withSidebar>
+    <Layout
+      withSidebar
+      withSidebar2
+      sidebar2Title="Equipo/Ambientes"
+      sidebar2Action={<Button textAlign="center" icon={<BookmarkPlus size={20} />} />}
+      sidebar2Content={<></>}
+    >
       <MainContent>
-        <ContentHeader
-          title="Equipo/Ambientes"
-          subtitle="Coordiná los miembros de tu equipo, asigná sus roles y configurá sus horarios de trabajo."
-          action={<Button>Agregar miembro</Button>}
-        />
         <TeamTable />
       </MainContent>
     </Layout>

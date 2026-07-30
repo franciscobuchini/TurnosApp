@@ -7,46 +7,54 @@ interface ContentHeaderProps {
   subtitle?: string;
   action?: ReactNode;
   className?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
 }
 
-const ContentHeaderStyle = {
-  base: 'min-h-(--size-4xl) flex items-center justify-between px-(--size-m) py-(--size-s)',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* ContentHeaderClasses: contenedor (Box)*/
+const ContentHeaderClasses = {
+  required: 'flex items-center justify-between',
+  style: '',
 };
 
-export default function ContentHeader({
-  title,
-  subtitle,
-  action,
-  className,
-  sizeClassName,
-  colorClassName,
-  shapeClassName,
-  animationClassName,
-}: ContentHeaderProps) {
+/* ContentHeaderTitleColumnClasses: columna de título y subtítulo*/
+const ContentHeaderTitleColumnClasses = {
+  required: 'flex flex-1 flex-col gap-(--size-2xs)',
+  style: '',
+};
+
+/* ContentHeaderTitleClasses*/
+const ContentHeaderTitleClasses = {
+  required: '',
+  style: 'text-xl font-semibold text-white tracking-tight',
+};
+
+/* ContentHeaderSubtitleClasses*/
+const ContentHeaderSubtitleClasses = {
+  required: 'line-clamp-2 text-sm',
+  style: 'text-neutral-500',
+};
+
+/* ContentHeaderActionClasses: contenedor de la acción*/
+const ContentHeaderActionClasses = {
+  required: 'flex shrink-0 items-center',
+  style: '',
+};
+
+export default function ContentHeader({ title, subtitle, action, className }: ContentHeaderProps) {
   return (
-    <Box
-      className={twMerge(
-        ContentHeaderStyle.base,
-        sizeClassName || ContentHeaderStyle.size,
-        colorClassName || ContentHeaderStyle.color,
-        shapeClassName || ContentHeaderStyle.shape,
-        animationClassName || ContentHeaderStyle.animation,
-        className,
-      )}
-    >
-      <div className="flex flex-col gap-(--size-3xs)">
-        <h1 className="text-xl font-bold">{title}</h1>
-        {subtitle && <span className="text-sm text-neutral-500">{subtitle}</span>}
+    <Box className={twMerge(ContentHeaderClasses.required, ContentHeaderClasses.style, className)}>
+      <div className={twMerge(ContentHeaderTitleColumnClasses.required, ContentHeaderTitleColumnClasses.style)}>
+        <h1 className={twMerge(ContentHeaderTitleClasses.required, ContentHeaderTitleClasses.style)}>{title}</h1>
+        {subtitle && (
+          <span className={twMerge(ContentHeaderSubtitleClasses.required, ContentHeaderSubtitleClasses.style)}>
+            {subtitle}
+          </span>
+        )}
       </div>
-      {action}
+      {action && (
+        <div className={twMerge(ContentHeaderActionClasses.required, ContentHeaderActionClasses.style)}>
+          {action}
+        </div>
+      )}
     </Box>
   );
 }

@@ -3,8 +3,6 @@
   Esta tabla muestra la lista de clientes con sus datos y acciones disponibles.
 */
 
-
-
 import Dropdown from '../interface/Dropdown';
 import Table, { type TableColumn } from '../interface/Table';
 
@@ -78,7 +76,6 @@ const columns: TableColumn<Client>[] = [
     cell: () => (
       <Dropdown
         content=":"
-        sizeClassName="h-(--size-xl) w-(--size-xl)"
         items={[
           { label: 'Ver historial' },
           { label: 'WhatsApp' },
@@ -92,5 +89,5 @@ const columns: TableColumn<Client>[] = [
 ];
 
 export default function ClientsTable() {
-  return <Table columns={columns} rows={clients} rowHeightClassName="h-(--size-2xl)" />;
+  return <Table columns={columns} rows={clients} rowHeightClassName="h-(--size-3xl)" />;
 }

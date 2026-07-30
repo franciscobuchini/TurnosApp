@@ -5,17 +5,19 @@
 
 import Layout from '../../components/layout/Layout';
 import MainContent from '../../components/layout/MainContent';
-import ContentHeader from '../../components/widgets/ContentHeader';
+import Button from '../../components/interface/Button';
+import { Eye } from 'lucide-react';
 
 function Personalizacion() {
   return (
-    <Layout withSidebar>
-      <MainContent>
-        <ContentHeader
-          title="Personalizacion"
-          subtitle="Personalizá el diseño, colores y la información pública de tu negocio."
-        />
-      </MainContent>
+    <Layout
+      withSidebar
+      withSidebar2
+      sidebar2Title="Personalizacion"
+      sidebar2Action={<Button textAlign="center" icon={<Eye size={20} />} />}
+      sidebar2Content={<></>}
+    >
+      <MainContent />
     </Layout>
   );
 }

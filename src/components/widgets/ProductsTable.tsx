@@ -4,6 +4,7 @@
 */
 
 import { useState } from 'react';
+import { twMerge } from 'tailwind-merge';
 import Badge from '../interface/Badge';
 import Dropdown from '../interface/Dropdown';
 import Image from '../interface/Image';
@@ -44,6 +45,42 @@ const products: Product[] = [
   },
 ];
 
+/* ProductsTableInfoCellClasses: wrapper de la celda de info (imagen + texto) */
+const ProductsTableInfoCellClasses = {
+  required: 'flex items-center gap-4 py-1',
+  style: '',
+};
+
+/* ProductsTableAvatarShapeClasses: forma de la imagen del producto, se pasa como className a Image */
+const ProductsTableAvatarShapeClasses = {
+  required: 'rounded-(--radius-s)',
+  style: '',
+};
+
+/* ProductsTableInfoColumnClasses: columna de nombre, descripción y badges */
+const ProductsTableInfoColumnClasses = {
+  required: 'flex flex-col justify-center gap-(--size-3xs)',
+  style: '',
+};
+
+/* ProductsTableDescriptionClasses: texto de la descripción */
+const ProductsTableDescriptionClasses = {
+  required: 'text-sm',
+  style: '',
+};
+
+/* ProductsTableBadgeGroupClasses: wrapper de los badges de precio y duración */
+const ProductsTableBadgeGroupClasses = {
+  required: 'flex gap-(--size-2xs)',
+  style: '',
+};
+
+/* ProductsTableActionsClasses: tamaño del trigger de acciones, se pasa como className a Dropdown */
+const ProductsTableActionsClasses = {
+  required: 'h-(--size-xl) w-(--size-xl)',
+  style: '',
+};
+
 export default function ProductsTable() {
   const [activeStates, setActiveStates] = useState<boolean[]>(products.map(() => true));
 
@@ -58,12 +95,14 @@ export default function ProductsTable() {
       key: 'info',
       header: '',
       cell: (product) => (
-        <div className="flex items-center gap-4 py-1">
-          <Image sizeClassName="w-(--size-4xl) h-(--size-4xl)" shapeClassName="rounded-(--radius-s)" />
-          <div className="flex flex-col justify-center gap-(--size-3xs)">
-            <span className="">{product.name}</span>
-            <span className="text-sm">{product.description}</span>
-            <div className="flex gap-(--size-2xs)">
+        <div className={twMerge(ProductsTableInfoCellClasses.required, ProductsTableInfoCellClasses.style)}>
+          <Image className={twMerge(ProductsTableAvatarShapeClasses.required, ProductsTableAvatarShapeClasses.style)} />
+          <div className={twMerge(ProductsTableInfoColumnClasses.required, ProductsTableInfoColumnClasses.style)}>
+            <span>{product.name}</span>
+            <span className={twMerge(ProductsTableDescriptionClasses.required, ProductsTableDescriptionClasses.style)}>
+              {product.description}
+            </span>
+            <div className={twMerge(ProductsTableBadgeGroupClasses.required, ProductsTableBadgeGroupClasses.style)}>
               <Badge>{currencyFormatter.format(product.price)}</Badge>
               <Badge>{product.duration}</Badge>
             </div>
@@ -79,7 +118,7 @@ export default function ProductsTable() {
       cell: (_product, rowIndex) => (
         <Dropdown
           content=":"
-          sizeClassName="h-(--size-xl) w-(--size-xl)"
+          styleClassName={twMerge(ProductsTableActionsClasses.required, ProductsTableActionsClasses.style)}
           items={[
             { label: 'Ver info' },
             { label: 'Editar' },

@@ -8,34 +8,21 @@ import { twMerge } from 'tailwind-merge';
 
 interface BadgeProps {
   children: ReactNode;
-  colorClassName?: string;
-  sizeClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
   className?: string;
 }
 
-/* BadgeStyle: clases de estilo, estas si se pueden variar */
-const BadgeStyle = {
-  base: 'inline-flex items-center justify-center',
-  size: 'px-(--size-xs) py-(--size-3xs) text-sm',
-  color: 'bg-neutral-200',
-  shape: 'rounded-full',
-  animation: '',
+/* BadgeClasses:
+   - required: estructura, tamaño y forma. No varía.
+   - style: color. Esto sí se puede modificar. */
+const BadgeClasses = {
+  required: 'inline-flex items-center justify-center px-(--size-xs) py-(--size-3xs) text-sm rounded-full',
+  style: 'bg-neutral-200',
 };
 
-export default function Badge({ children, colorClassName, sizeClassName, shapeClassName, animationClassName, className }: BadgeProps) {
+export default function Badge({ children, styleClassName, className }: BadgeProps) {
   return (
-    <span
-      className={twMerge(
-        BadgeStyle.base,
-        sizeClassName || BadgeStyle.size,
-        colorClassName || BadgeStyle.color,
-        shapeClassName || BadgeStyle.shape,
-        animationClassName || BadgeStyle.animation,
-        className,
-      )}
-    >
+    <span className={twMerge(BadgeClasses.required, styleClassName || BadgeClasses.style, className)}>
       {children}
     </span>
   );

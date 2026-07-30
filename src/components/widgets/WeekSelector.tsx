@@ -11,19 +11,20 @@ interface WeekSelectorProps {
   weekDaysNames: string[];
   isSameDay: (date1: Date, date2: Date) => boolean;
   className?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
 }
 
-const WeekSelectorStyle = {
-  base: 'flex items-center justify-between',
-  size: 'p-(--size-xs)',
-  color: 'border border-black',
-  shape: '',
-  animation: '',
+/* WeekSelectorClasses:
+   - required: estructura y tamaño. No varía.
+   - style: color (borde). Esto sí se puede modificar. */
+const WeekSelectorClasses = {
+  required: 'flex items-center justify-between p-(--size-xs)',
+  style: 'border border-black',
 };
+
+const WeekSelectorDaysRequired = 'flex flex-1 justify-around mx-4 gap-1';
+const WeekSelectorDayLabelRequired = 'text-xs';
+const WeekSelectorDayNumberRequired = 'text-sm';
 
 export default function WeekSelector({
   weekDays,
@@ -34,37 +35,25 @@ export default function WeekSelector({
   weekDaysNames,
   isSameDay,
   className,
-  sizeClassName,
-  colorClassName,
-  shapeClassName,
-  animationClassName,
+  styleClassName,
 }: WeekSelectorProps) {
   return (
-    <div
-      className={twMerge(
-        WeekSelectorStyle.base,
-        sizeClassName || WeekSelectorStyle.size,
-        colorClassName || WeekSelectorStyle.color,
-        shapeClassName || WeekSelectorStyle.shape,
-        animationClassName || WeekSelectorStyle.animation,
-        className,
-      )}
-    >
+    <div className={twMerge(WeekSelectorClasses.required, styleClassName || WeekSelectorClasses.style, className)}>
       <Button onClick={onPrevWeek} className="p-(--size-s)">
         <Icon name="ChevronLeft" />
       </Button>
 
-      <div className="flex flex-1 justify-around mx-4 gap-1">
+      <div className={WeekSelectorDaysRequired}>
         {weekDays.map((date, idx) => {
           const isSelected = isSameDay(date, selectedDate);
           return (
             <Button
               key={idx}
               onClick={() => onSelectDate(date)}
-              colorClassName={isSelected ? 'bg-black text-white' : undefined}
+              styleClassName={isSelected ? 'bg-black text-white' : undefined}
             >
-              <span className="text-xs">{weekDaysNames[idx]}</span>
-              <span className="text-sm">{date.getDate()}</span>
+              <span className={WeekSelectorDayLabelRequired}>{weekDaysNames[idx]}</span>
+              <span className={WeekSelectorDayNumberRequired}>{date.getDate()}</span>
             </Button>
           );
         })}

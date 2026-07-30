@@ -19,6 +19,8 @@
   --size-2xl: 48px; /* Button height y Table Height Default */
   --size-3xl: 56px; /* Header, Sidebar Tablet */
   --size-4xl: 64px; /* Image */
-  --size-5xl: 96px; /* Sidebar Tablet */
+
+  --size-5xl: 80px; /* Sidebar Tablet */
   --size-6xl: 256px; /* Sidebar Desktop */
+  --size-7xl: 480px; /* Sidebar 2 */
 }

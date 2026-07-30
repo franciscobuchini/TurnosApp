@@ -19,57 +19,47 @@ interface SelectMenuProps {
   onClose: () => void;
 }
 
-const SelectStyle = {
-  base: 'relative inline-flex flex-col',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* SelectClasses (contenedor)*/
+const SelectClasses = {
+  required: 'relative inline-flex flex-col h-(--size-2xl) px-(--size-m)',
+  style: '',
 };
 
-const SelectTriggerStyle = {
-  base: 'flex justify-between items-center w-full gap-4',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* SelectTriggerClasses (Button interno)*/
+const SelectTriggerClasses = {
+  required: 'flex justify-between items-center w-full gap-4 h-(--size-2xl) px-(--size-m)',
+  style: '',
 };
 
-const SelectIconStyle = {
-  base: 'transition-transform duration-200',
-  size: '',
-  color: '',
-  shape: '',
-  animation: '',
+/* SelectIconClasses (chevron)*/
+const SelectIconClasses = {
+  required: 'transition-transform duration-200 h-(--size-2xl) px-(--size-m)',
+  style: 'text-black',
 };
 
-const SelectMenuStyle = {
-  base: 'absolute left-0 top-full z-110 w-full',
-  size: 'mt-(--size-xs) min-w-(--size-2xl)',
-  color: 'bg-white',
-  shape: 'shadow-lg border border-black/10',
-  animation: '',
+/* SelectMenuClasses (panel flotante)*/
+const SelectMenuClasses = {
+  required: 'absolute left-0 top-full z-110 w-full mt-(--size-xs) min-w-(--size-2xl)',
+  style: 'bg-white shadow-lg border border-black/10',
 };
 
-const SelectItemStyle = {
-  base: 'block w-full whitespace-nowrap text-left',
-  size: 'px-(--size-m) py-(--size-s)',
-  color: '',
-  shape: '',
-  animation: '',
+/* SelectItemClasses (cada opción del menu)*/
+const SelectItemClasses = {
+  required: 'block w-full whitespace-nowrap text-left px-(--size-m) py-(--size-s)',
+  style: '',
 };
 
 function SelectMenu({ options, onSelect, onClose }: SelectMenuProps) {
   return (
     <div
       role="listbox"
-      className={twMerge(SelectMenuStyle.base, SelectMenuStyle.size, SelectMenuStyle.color, SelectMenuStyle.shape, SelectMenuStyle.animation)}
+      className={twMerge(SelectMenuClasses.required, SelectMenuClasses.style)}
     >
       {options.map((option) => (
         <button
           key={option.value}
           role="option"
-          className={twMerge(SelectItemStyle.base, SelectItemStyle.size, SelectItemStyle.color, SelectItemStyle.shape, SelectItemStyle.animation)}
+          className={twMerge(SelectItemClasses.required, SelectItemClasses.style)}
           onClick={() => {
             onSelect(option);
             onClose();
@@ -87,10 +77,7 @@ interface SelectProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  sizeClassName?: string;
-  colorClassName?: string;
-  shapeClassName?: string;
-  animationClassName?: string;
+  styleClassName?: string;
   className?: string;
 }
 
@@ -99,10 +86,7 @@ export default function Select({
   value,
   onChange,
   placeholder = 'Seleccionar...',
-  sizeClassName = 'h-(--size-2xl) px-(--size-m)',
-  colorClassName,
-  shapeClassName,
-  animationClassName,
+  styleClassName,
   className = '',
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -124,17 +108,18 @@ export default function Select({
   }, []);
 
   return (
-    <div ref={selectRef} className={twMerge(SelectStyle.base, sizeClassName || SelectStyle.size, colorClassName || SelectStyle.color, shapeClassName || SelectStyle.shape, animationClassName || SelectStyle.animation, className)}>
+    <div ref={selectRef} className={twMerge(SelectClasses.required, styleClassName || SelectClasses.style, className)}>
       <Button
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((prev) => !prev)}
-        className={twMerge(SelectTriggerStyle.base, sizeClassName || SelectTriggerStyle.size, colorClassName || SelectTriggerStyle.color, shapeClassName || SelectTriggerStyle.shape, animationClassName || SelectTriggerStyle.animation)}
+        styleClassName={styleClassName}
+        className={SelectTriggerClasses.required}
       >
         <span>{selectedOption ? selectedOption.label : placeholder}</span>
         <Icon
           name="ChevronDown"
-          className={twMerge(SelectIconStyle.base, sizeClassName || SelectIconStyle.size, colorClassName || SelectIconStyle.color, shapeClassName || SelectIconStyle.shape, animationClassName || SelectIconStyle.animation, isOpen ? 'rotate-180' : '')}
+          className={twMerge(SelectIconClasses.required, SelectIconClasses.style, isOpen ? 'rotate-180' : '')}
         />
       </Button>
 
