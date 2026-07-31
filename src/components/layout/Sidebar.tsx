@@ -1,24 +1,16 @@
 /* 
-  src/components/interface/Sidebar.tsx
-  Sidebar de la aplicación: barra de navegación con íconos + panel de acciones con header y contenido.
+  src/components/layout/Sidebar.tsx
+  Sidebar: barra de navegación con íconos (nav, fija) + panel de contenido (children libres).
 */
 
 import { CalendarDays, Palette, Package, Store, Smile } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
-import Box from '../interface/Box';
-import SidebarHeader from '../widgets/SidebarHeader';
 
 interface SidebarProps {
-  withNav?: boolean;
-  withActions?: boolean;
-  title?: string;
-  subtitle?: string;
-  action?: ReactNode;
   children?: ReactNode;
   className?: string;
-  styleClassName?: string;
 }
 
 const navItems = [
@@ -30,13 +22,13 @@ const navItems = [
 ];
 
 // ============================================================
-// Sidebar: contenedor padre que envuelve nav y actions
+// Sidebar: contenedor padre que envuelve nav y content
 // ============================================================
 
-/* SidebarClasses: envuelve SidebarNav y SidebarActions para que ambos
+/* SidebarClasses: envuelve SidebarNav y SidebarContent para que ambos
    se comporten como un solo item flex dentro de Layout. */
 const SidebarClasses = {
-  required: 'flex h-full p-(--size-m) gap-(--size-xs)',
+  required: 'flex h-full gap-(--size-m) pr-(--size-m)',
   style: '',
 };
 
@@ -73,59 +65,25 @@ function SidebarNav() {
 }
 
 // ============================================================
-// Actions: panel ancho con header (título/subtítulo/acción) y contenido
+// Content: panel ancho con contenido libre (children)
 // ============================================================
 
-const SidebarActionsClasses = {
-  required: 'hidden h-full flex flex-col w-(--size-7xl) gap-(--size-m) overflow-hidden',
-  style: 'bg-stone-950',
-};
-
-const SidebarActionsContentClasses = {
-  required: 'flex-1',
+const SidebarContentClasses = {
+  required: 'h-full flex flex-col w-(--size-8xl) gap-(--size-m) overflow-hidden',
   style: '',
 };
-
-interface SidebarActionsProps {
-  title: string;
-  subtitle?: string;
-  action?: ReactNode;
-  children?: ReactNode;
-}
-
-function SidebarActions({ title, subtitle, action, children }: SidebarActionsProps) {
-  return (
-    <aside className={twMerge(SidebarActionsClasses.required, SidebarActionsClasses.style)}>
-      <SidebarHeader title={title} subtitle={subtitle} action={action} />
-      <Box className={twMerge(SidebarActionsContentClasses.required, SidebarActionsContentClasses.style)}>
-        {children}
-      </Box>
-    </aside>
-  );
-}
 
 // ============================================================
 // Sidebar: componente principal exportado
 // ============================================================
 
-export default function Sidebar({
-  withNav = false,
-  withActions = false,
-  title,
-  subtitle,
-  action,
-  children,
-  className,
-  styleClassName,
-}: SidebarProps) {
+export default function Sidebar({ children, className }: SidebarProps) {
   return (
-    <div className={twMerge(SidebarClasses.required, styleClassName || SidebarClasses.style, className)}>
-      {withNav && <SidebarNav />}
-      {withActions && (
-        <SidebarActions title={title || ''} subtitle={subtitle} action={action}>
-          {children}
-        </SidebarActions>
-      )}
+    <div className={twMerge(SidebarClasses.required, SidebarClasses.style)}>
+      <SidebarNav />
+      <aside className={twMerge(SidebarContentClasses.required, SidebarContentClasses.style, className)}>
+        {children}
+      </aside>
     </div>
   );
 }

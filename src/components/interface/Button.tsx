@@ -17,6 +17,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   text?: ReactNode;
   textAlign?: 'left' | 'center' | 'right';
   textClassName?: string;
+  contentClassName?: string;
 }
 
 /* ButtonClasses: el botón/link en sí*/
@@ -59,6 +60,7 @@ export default function Button({
   text,
   textAlign = 'center',
   textClassName,
+  contentClassName,
   ...props
 }: ButtonProps) {
   const hasTextContent = Boolean(text || children);
@@ -80,6 +82,7 @@ export default function Button({
         ButtonAlignmentClasses[textAlign],
         hasTextContent && icon ? ButtonContentClasses.withIconGap : '',
         isOnlyIcon ? ButtonContentClasses.iconOnlyFill : '',
+        contentClassName,
       )}
     >
       {icon && iconPosition === 'left' ? (

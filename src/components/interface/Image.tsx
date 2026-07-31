@@ -16,7 +16,7 @@ interface ImageProps {
    - required: estructura y tamaño. No varía.
    - style: color. Esto sí se puede modificar. */
 const ImageClasses = {
-  required: 'flex items-center justify-center select-none w-(--size-4xl) h-(--size-4xl)',
+  required: 'flex items-center justify-center select-none w-(--size-5xl) h-(--size-5xl)',
   style: 'bg-neutral-200',
 };
 

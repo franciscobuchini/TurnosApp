@@ -118,7 +118,7 @@ export default function ProductsTable() {
       cell: (_product, rowIndex) => (
         <Dropdown
           content=":"
-          styleClassName={twMerge(ProductsTableActionsClasses.required, ProductsTableActionsClasses.style)}
+          className={twMerge(ProductsTableActionsClasses.required, ProductsTableActionsClasses.style)}
           items={[
             { label: 'Ver info' },
             { label: 'Editar' },
@@ -136,5 +136,5 @@ export default function ProductsTable() {
     },
   ];
 
-  return <Table columns={columns} rows={products} rowHeightClassName="h-(--size-5xl)" />;
+  return <Table columns={columns} rows={products} rowHeightClassName="h-(--size-6xl)" />;
 }

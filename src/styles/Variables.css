@@ -14,13 +14,14 @@
   --size-xs: 8px;
   --size-s: 12px; /* Gap y Margin Sidebar */
   --size-m: 16px; /* Icons */
+  /* hay que agregar 20px para icons */
   --size-l: 24px;
   --size-xl: 32px;
   --size-2xl: 48px; /* Button height y Table Height Default */
   --size-3xl: 56px; /* Header, Sidebar Tablet */
   --size-4xl: 64px; /* Image */
-
   --size-5xl: 80px; /* Sidebar Tablet */
-  --size-6xl: 256px; /* Sidebar Desktop */
-  --size-7xl: 480px; /* Sidebar 2 */
+  --size-6xl: 96px; /* Sidebar Tablet */
+  --size-7xl: 256px; /* Sidebar Desktop */
+  --size-8xl: 420px; /* Sidebar 2 */
 }

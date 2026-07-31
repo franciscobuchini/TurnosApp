@@ -11,7 +11,7 @@ interface ContentHeaderProps {
 
 /* ContentHeaderClasses: contenedor (Box)*/
 const ContentHeaderClasses = {
-  required: 'flex items-center justify-between',
+  required: 'flex items-center justify-between px-(--size-l)',
   style: '',
 };
 

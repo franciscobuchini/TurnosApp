@@ -70,11 +70,11 @@ function DropdownMenu({ items, onClose }: DropdownMenuProps) {
 interface DropdownProps {
   items: DropdownItem[];
   content: ReactNode;
-  styleClassName?: string;
+  className?: string;
 }
 
 /* Dropdown: arma el boton trigger, controla el estado abierto/cerrado y renderiza DropdownMenu */
-export default function Dropdown({ items, content, styleClassName }: DropdownProps) {
+export default function Dropdown({ items, content, className }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -94,12 +94,12 @@ export default function Dropdown({ items, content, styleClassName }: DropdownPro
   }, []);
 
   return (
-    <div ref={dropdownRef} className={twMerge(DropdownClasses.required, styleClassName || DropdownClasses.style)}>
+    <div ref={dropdownRef} className={twMerge(DropdownClasses.required, className || DropdownClasses.style)}>
       <Button
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((currentValue) => !currentValue)}
-        styleClassName={styleClassName}
+        className={className}
       >
         {content}
       </Button>

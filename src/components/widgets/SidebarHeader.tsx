@@ -11,7 +11,7 @@ interface SidebarHeaderProps {
 
 /* SidebarHeaderClasses: contenedor (Box) */
 const SidebarHeaderClasses = {
-  required: 'flex items-center justify-between p-(--size-m)',
+  required: 'flex items-center justify-between py-(--size-m) px-(--size-xl)',
   style: '',
 };
 

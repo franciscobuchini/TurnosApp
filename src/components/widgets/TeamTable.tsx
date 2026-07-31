@@ -108,7 +108,7 @@ const columns: TableColumn<TeamMember>[] = [
     header: 'Nombre',
     cell: (member) => (
       <div className="flex items-center gap-4 py-1">
-        <Image styleClassName="w-(--size-4xl) h-(--size-4xl)" className="rounded-full" />
+        <Image className="w-(--size-5xl) h-(--size-5xl) rounded-full" />
         <div className="flex flex-col justify-center gap-(--size-3xs)">
           <span>{member.name}</span>
           <span className="text-sm">{member.role}</span>
@@ -160,7 +160,7 @@ const columns: TableColumn<TeamMember>[] = [
     cell: () => (
       <Dropdown
         content=":"
-        styleClassName="h-(--size-xl) w-(--size-xl)"
+        className="h-(--size-xl) w-(--size-xl)"
         items={[
           { label: 'Ver perfil' },
           { label: 'Ver agenda' },
@@ -175,5 +175,5 @@ const columns: TableColumn<TeamMember>[] = [
 ];
 
 export default function TeamTable() {
-  return <Table columns={columns} rows={teamMembers} rowHeightClassName="h-(--size-5xl)" />;
+  return <Table columns={columns} rows={teamMembers} rowHeightClassName="h-(--size-6xl)" />;
 }

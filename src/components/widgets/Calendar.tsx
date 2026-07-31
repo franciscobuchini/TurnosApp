@@ -1,5 +1,5 @@
 /* 
-  src/components/widgets/MonthlyView.tsx
+  src/components/widgets/Calendar.tsx
   Vista mensual de la agenda, utilizando el componente Table genérico para la estructura.
 */
 
@@ -10,53 +10,53 @@ import Button from '../interface/Button';
 import Box from '../interface/Box';
 import Table, { type TableColumn } from '../interface/Table';
 import ContentHeader from './ContentHeader';
+import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../functions/dateName';
 
 interface CalendarProps {
+  weekDaysNames?: string[];
   className?: string;
   styleClassName?: string;
 }
 
-/* MonthlyViewClasses: contenedor (Box)*/
-const MonthlyViewClasses = {
-  required: 'flex flex-col  w-full gap-(--size-m)',
+/* CalendarClasses: contenedor (Box)*/
+const CalendarClasses = {
+  required: 'flex flex-col  w-full gap-(--size-xs)',
   style: 'bg-stone-900 rounded-3xl',
 };
 
-/* MonthlyViewActionsClasses: wrapper de los botones de navegación*/
-const MonthlyViewActionsClasses = {
+/* CalendarActionsClasses: wrapper de los botones de navegación*/
+const CalendarActionsClasses = {
   required: 'flex gap-(--size-s)',
   style: '',
 };
 
-/* MonthlyViewTableClasses: clase pasada al componente Table*/
-const MonthlyViewTableClasses = {
+/* CalendarTableClasses: clase pasada al componente Table*/
+const CalendarTableClasses = {
   required: '',
   style: 'text-white',
 };
 
-/* MonthlyViewDayCircleClasses: el círculo con el número del día, ahora es todo el contenido de la celda */
-const MonthlyViewDayCircleClasses = {
+/* CalendarDayCircleClasses: el círculo con el número del día, ahora es todo el contenido de la celda */
+const CalendarDayCircleClasses = {
   required: 'flex items-center justify-center w-(--size-xl) h-(--size-xl) mx-auto text-sm',
   style: 'rounded-full',
 };
-const MonthlyViewDayCircleOtherMonthRequired = 'opacity-30';
+const CalendarDayCircleOtherMonthRequired = 'opacity-30';
 
-/* MonthlyViewTodayCircleClasses: resalte del círculo de hoy, ahora se aplica al círculo y no a toda la celda */
-const MonthlyViewTodayCircleClasses = {
+/* CalendarTodayCircleClasses: resalte del círculo de hoy, ahora se aplica al círculo y no a toda la celda */
+const CalendarTodayCircleClasses = {
   required: '',
   style: 'bg-white text-stone-800 rounded-full',
 };
 
-/* MonthlyViewColumnAlignClasses: alineación y padding de cada columna de la tabla*/
-const MonthlyViewColumnAlignClasses = {
+/* CalendarColumnAlignClasses: alineación y padding de cada columna de la tabla*/
+const CalendarColumnAlignClasses = {
   required: 'align-middle p-(--size-xs) text-center',
   style: '',
 };
 
-const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
+/* MONDAY_FIRST_DAY_NAMES: DAY_NAMES reordenado para que la semana arranque en Lunes */
+const MONDAY_FIRST_DAY_NAMES = [1, 2, 3, 4, 5, 6, 0].map((i) => DAY_NAMES[i]);
 
 interface CalendarCell {
   day: number;
@@ -123,13 +123,12 @@ const getDaysInMonth = (year: number, month: number): CalendarCell[] => {
   return cells;
 };
 
-export default function Calendar({ className, styleClassName }: CalendarProps) {
+export default function Calendar({ weekDaysNames = MONDAY_FIRST_DAY_NAMES, className, styleClassName }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
   const cells = getDaysInMonth(year, month);
 
   // Agrupar las celdas en filas de 7 días (semanas)
@@ -146,18 +145,10 @@ export default function Calendar({ className, styleClassName }: CalendarProps) {
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  const isSameDay = (date1: Date, date2: Date) => {
-    return (
-      date1.getDate() === date2.getDate() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getFullYear() === date2.getFullYear()
-    );
-  };
-
   // Configuración de las columnas de la tabla
-  const columns: TableColumn<CalendarCell[]>[] = daysOfWeek.map((day, idx) => ({
-    key: day,
-    header: day,
+  const columns: TableColumn<CalendarCell[]>[] = weekDaysNames.map((name, idx) => ({
+    key: `day-${idx}`,
+    header: name.slice(0, 2),
     cell: (weekCells) => {
       const cell = weekCells[idx];
       if (!cell) return null;
@@ -167,23 +158,23 @@ export default function Calendar({ className, styleClassName }: CalendarProps) {
       return (
         <div
           className={twMerge(
-            MonthlyViewDayCircleClasses.required,
-            isToday ? MonthlyViewTodayCircleClasses.style : MonthlyViewDayCircleClasses.style,
-            !cell.isCurrentMonth ? MonthlyViewDayCircleOtherMonthRequired : '',
+            CalendarDayCircleClasses.required,
+            isToday ? CalendarTodayCircleClasses.style : CalendarDayCircleClasses.style,
+            !cell.isCurrentMonth ? CalendarDayCircleOtherMonthRequired : '',
           )}
         >
           {cell.day}
         </div>
       );
     },
-    alignClassName: twMerge(MonthlyViewColumnAlignClasses.required, MonthlyViewColumnAlignClasses.style),
+    alignClassName: twMerge(CalendarColumnAlignClasses.required, CalendarColumnAlignClasses.style),
   }));
 
   return (
     <Box
       className={twMerge(
-        MonthlyViewClasses.required,
-        styleClassName || MonthlyViewClasses.style,
+        CalendarClasses.required,
+        styleClassName || CalendarClasses.style,
         className,
       )}
     >
@@ -191,7 +182,7 @@ export default function Calendar({ className, styleClassName }: CalendarProps) {
       <ContentHeader
         title={`${MONTH_NAMES[month]} ${year}`}
         action={
-          <div className={twMerge(MonthlyViewActionsClasses.required, MonthlyViewActionsClasses.style)}>
+          <div className={twMerge(CalendarActionsClasses.required, CalendarActionsClasses.style)}>
             <Button textAlign="center" height="h-(--size-xl)" onClick={prevMonth} icon={<ChevronLeft size={18} />} />
             <Button textAlign="center" height="h-(--size-xl)" onClick={nextMonth} icon={<ChevronRight size={18} />} />
           </div>
@@ -203,7 +194,7 @@ export default function Calendar({ className, styleClassName }: CalendarProps) {
         columns={columns}
         rows={weeks}
         rowHeightClassName="h-auto"
-        className={twMerge(MonthlyViewTableClasses.required, MonthlyViewTableClasses.style)}
+        className={twMerge(CalendarTableClasses.required, CalendarTableClasses.style)}
       />
     </Box>
   );
