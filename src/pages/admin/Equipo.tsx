@@ -9,19 +9,21 @@
 
 import { BookmarkPlus } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
+import Sidebar from '../../components/layout/Sidebar';
+import SidebarHeader from '../../components/widgets/SidebarHeader';
 import MainContent from '../../components/layout/MainContent';
 import TeamTable from '../../components/widgets/TeamTable';
 import Button from '../../components/interface/Button';
 
 function Equipo() {
   return (
-    <Layout
-      withSidebar
-      withSidebar2
-      sidebar2Title="Equipo/Ambientes"
-      sidebar2Action={<Button textAlign="center" icon={<BookmarkPlus size={20} />} />}
-      sidebar2Content={<></>}
-    >
+    <Layout>
+      <Sidebar>
+        <SidebarHeader
+          title="Equipo/Ambientes"
+          action={<Button textAlign="center" icon={<BookmarkPlus size={20} />} />}
+        />
+      </Sidebar>
       <MainContent>
         <TeamTable />
       </MainContent>
