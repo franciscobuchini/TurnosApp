@@ -5,7 +5,6 @@
 
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Box from './Box';
 
 export interface TableColumn<T> {
   key: string;
@@ -67,64 +66,62 @@ export default function Table<T>({
   className = '',
 }: TableProps<T>) {
   return (
-    <Box>
-      <table className={twMerge(TableClasses.required, TableClasses.style, className)}>
-        <colgroup>
-          {columns.map((column) => (
-            <col key={column.key} style={column.width ? { width: column.width } : undefined} />
-          ))}
-        </colgroup>
-        {columns.some((column) => column.header) && (
-          <thead>
-            <tr className={twMerge(rowHeightClassName, HeaderRowClasses.required, HeaderRowClasses.style)}>
-              {columns.map((column) => (
-                <th
+    <table className={twMerge(TableClasses.required, TableClasses.style, className)}>
+      <colgroup>
+        {columns.map((column) => (
+          <col key={column.key} style={column.width ? { width: column.width } : undefined} />
+        ))}
+      </colgroup>
+      {columns.some((column) => column.header) && (
+        <thead>
+          <tr className={twMerge(rowHeightClassName, HeaderRowClasses.required, HeaderRowClasses.style)}>
+            {columns.map((column) => (
+              <th
+                key={column.key}
+                className={twMerge(
+                  DefaultCellClasses.required,
+                  DefaultCellClasses.style,
+                  HeaderCellClasses.required,
+                  HeaderCellClasses.style,
+                  column.alignClassName,
+                  column.className,
+                  column.headerClassName,
+                )}
+              >
+                {column.header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+      )}
+      <tbody>
+        {rows.map((row, rowIndex) => (
+          <tr key={rowIndex} className={twMerge(BodyRowClasses.required, BodyRowClasses.style, rowHeightClassName)}>
+            {columns.map((column) => {
+              const resolvedCellClassName = typeof column.cellClassName === 'function'
+                ? column.cellClassName(row, rowIndex)
+                : column.cellClassName;
+
+              return (
+                <td
                   key={column.key}
                   className={twMerge(
                     DefaultCellClasses.required,
                     DefaultCellClasses.style,
-                    HeaderCellClasses.required,
-                    HeaderCellClasses.style,
+                    BodyCellClasses.required,
+                    BodyCellClasses.style,
                     column.alignClassName,
                     column.className,
-                    column.headerClassName,
+                    resolvedCellClassName,
                   )}
                 >
-                  {column.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-        )}
-        <tbody>
-          {rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={twMerge(BodyRowClasses.required, BodyRowClasses.style, rowHeightClassName)}>
-              {columns.map((column) => {
-                const resolvedCellClassName = typeof column.cellClassName === 'function'
-                  ? column.cellClassName(row, rowIndex)
-                  : column.cellClassName;
-
-                return (
-                  <td
-                    key={column.key}
-                    className={twMerge(
-                      DefaultCellClasses.required,
-                      DefaultCellClasses.style,
-                      BodyCellClasses.required,
-                      BodyCellClasses.style,
-                      column.alignClassName,
-                      column.className,
-                      resolvedCellClassName,
-                    )}
-                  >
-                    {column.cell(row, rowIndex)}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Box>
+                  {column.cell(row, rowIndex)}
+                </td>
+              );
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

@@ -1,10 +1,11 @@
 /* 
   src/components/widgets/Schedule.tsx
-  Vista diaria de la agenda, organizada por bloques horarios representados con bordes.
+  Vista diaria de la agenda, organizada por bloques horarios representados con una tabla.
 */
 
 import { twMerge } from 'tailwind-merge';
 import Box from '../../components/interface/Box';
+import Table, { type TableColumn } from '../../components/interface/Table';
 
 interface ScheduleProps {
   selectedDate: Date;
@@ -13,84 +14,75 @@ interface ScheduleProps {
 
 /* ScheduleClasses: contenedor (Box)*/
 const ScheduleClasses = {
-  required: 'flex flex-col gap-(--size-xl) flex-1',
-  style: 'rounded-3xl bg-white',
+  required: 'flex flex-col flex-1 p-0',
+  style: 'rounded-3xl bg-white overflow-hidden',
 };
 
-/* ScheduleGridClasses: wrapper de la grilla de horas*/
-const ScheduleGridClasses = {
-  required: 'flex flex-col',
-  style: 'border border-black',
-};
-
-/* ScheduleRowClasses: cada fila de hora*/
-const ScheduleRowClasses = {
-  required: 'flex py-2 items-center',
-  style: 'border-b border-black last:border-b-0',
-};
-
-/* ScheduleRowLabelClasses: la etiqueta de la hora*/
-const ScheduleRowLabelClasses = {
-  required: 'w-20 pr-4 text-right font-semibold',
-  style: 'border-r border-black',
-};
-
-/* ScheduleRowSlotClasses: wrapper del contenido de cada fila*/
-const ScheduleRowSlotClasses = {
-  required: 'flex-1 pl-4 flex gap-2',
+/* ScheduleScrollClasses: wrapper interno que permite scroll vertical sin mostrar la scrollbar */
+const ScheduleScrollClasses = {
+  required: 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
   style: '',
 };
 
-/* ScheduleEventBadgeClasses: el bloque de "Turno Reservado"*/
-const ScheduleEventBadgeClasses = {
-  required: 'flex-1 h-8 flex items-center justify-center text-sm',
-  style: 'border border-dashed border-black',
-};
-
-/* ScheduleEmptySlotClasses: el espacio vacío cuando no hay turno*/
-const ScheduleEmptySlotClasses = {
-  required: 'flex-1 h-8',
+/* ScheduleTableClasses*/
+const ScheduleTableClasses = {
+  required: '',
   style: '',
 };
 
-export default function Schedule({ selectedDate, className }: ScheduleProps) {
-  const hours = [
-    '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
-    '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
+/* ScheduleRowHeightClasses*/
+const ScheduleRowHeightClasses = {
+  required: 'h-(--size-2xl)',
+  style: '',
+};
+
+/* ScheduleLabelCellClasses: la celda de la etiqueta de hora, relative para anclar el label */
+const ScheduleLabelCellClasses = {
+  required: 'relative w-(--size-4xl) text-center',
+  style: '',
+};
+
+/* ScheduleSlotCellClasses: la celda del contenido de cada fila*/
+const ScheduleSlotCellClasses = {
+  required: '',
+  style: 'border-t border-t-stone-200',
+};
+
+export default function Schedule({ className }: ScheduleProps) {
+  const slots = Array.from({ length: 24 * 4 }, (_, index) => {
+    const totalMinutes = index * 15;
+    const hour = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const displayHour = hour.toString().padStart(2, '0');
+    const formattedMinutes = minutes === 0 ? '' : `:${minutes.toString().padStart(2, '0')}`;
+    return `${displayHour}${formattedMinutes} hs`;
+  });
+
+  const columns: TableColumn<string>[] = [
+    {
+      key: 'label',
+      header: null,
+      cellClassName: twMerge(ScheduleLabelCellClasses.required, ScheduleLabelCellClasses.style),
+      cell: (slot, index) =>
+        index === 0 ? '' : index % 4 === 0 ? <span className="absolute inset-x-0 top-0 -translate-y-1/2">{slot}</span> : '',
+    },
+    {
+      key: 'slot',
+      header: null,
+      cellClassName: twMerge(ScheduleSlotCellClasses.required, ScheduleSlotCellClasses.style),
+      cell: () => null,
+    },
   ];
 
   return (
-    <Box
-      className={twMerge(
-        ScheduleClasses.required,
-        ScheduleClasses.style,
-        className,
-      )}
-    >
-
-      {/* Agenda diaria (Bloques horarios) */}
-      <div className={twMerge(ScheduleGridClasses.required, ScheduleGridClasses.style)}>
-        {hours.map((hour, index) => {
-          // Mostrar un turno de ejemplo diferente según el día seleccionado para simular datos reales
-          const hasEvent = (selectedDate.getDate() + index) % 4 === 0;
-
-          return (
-            <div key={hour} className={twMerge(ScheduleRowClasses.required, ScheduleRowClasses.style)}>
-              <div className={twMerge(ScheduleRowLabelClasses.required, ScheduleRowLabelClasses.style)}>
-                {hour}
-              </div>
-              <div className={twMerge(ScheduleRowSlotClasses.required, ScheduleRowSlotClasses.style)}>
-                {hasEvent ? (
-                  <div className={twMerge(ScheduleEventBadgeClasses.required, ScheduleEventBadgeClasses.style)}>
-                    Turno Reservado ({hour})
-                  </div>
-                ) : (
-                  <div className={twMerge(ScheduleEmptySlotClasses.required, ScheduleEmptySlotClasses.style)} />
-                )}
-              </div>
-            </div>
-          );
-        })}
+    <Box className={twMerge(ScheduleClasses.required, ScheduleClasses.style, className)}>
+      <div className={twMerge(ScheduleScrollClasses.required, ScheduleScrollClasses.style)}>
+        <Table
+          columns={columns}
+          rows={slots}
+          rowHeightClassName={twMerge(ScheduleRowHeightClasses.required, ScheduleRowHeightClasses.style)}
+          className={twMerge(ScheduleTableClasses.required, ScheduleTableClasses.style)}
+        />
       </div>
     </Box>
   );
