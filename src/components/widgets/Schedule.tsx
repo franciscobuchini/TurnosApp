@@ -6,6 +6,7 @@
 import { twMerge } from 'tailwind-merge';
 import Box from '../../components/interface/Box';
 import Table, { type TableColumn } from '../../components/interface/Table';
+import CurrentTimeLine from '../interface/CurrentTimeLine';
 
 interface ScheduleProps {
   selectedDate: Date;
@@ -18,9 +19,15 @@ const ScheduleClasses = {
   style: 'rounded-3xl bg-white overflow-hidden',
 };
 
-/* ScheduleScrollClasses: wrapper interno que permite scroll vertical sin mostrar la scrollbar */
+/* ScheduleScrollClasses: wrapper que scrollea, altura fija por flex-1 */
 const ScheduleScrollClasses = {
   required: 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
+  style: '',
+};
+
+/* ScheduleContentClasses: wrapper relative que sí tiene la altura real de la tabla (crece con su contenido) */
+const ScheduleContentClasses = {
+  required: 'relative',
   style: '',
 };
 
@@ -48,7 +55,7 @@ const ScheduleSlotCellClasses = {
   style: 'border-t border-t-stone-200',
 };
 
-export default function Schedule({ className }: ScheduleProps) {
+export default function Schedule({ selectedDate, className }: ScheduleProps) {
   const slots = Array.from({ length: 24 * 4 }, (_, index) => {
     const totalMinutes = index * 15;
     const hour = Math.floor(totalMinutes / 60);
@@ -77,12 +84,15 @@ export default function Schedule({ className }: ScheduleProps) {
   return (
     <Box className={twMerge(ScheduleClasses.required, ScheduleClasses.style, className)}>
       <div className={twMerge(ScheduleScrollClasses.required, ScheduleScrollClasses.style)}>
-        <Table
-          columns={columns}
-          rows={slots}
-          rowHeightClassName={twMerge(ScheduleRowHeightClasses.required, ScheduleRowHeightClasses.style)}
-          className={twMerge(ScheduleTableClasses.required, ScheduleTableClasses.style)}
-        />
+        <div className={twMerge(ScheduleContentClasses.required, ScheduleContentClasses.style)}>
+          <Table
+            columns={columns}
+            rows={slots}
+            rowHeightClassName={twMerge(ScheduleRowHeightClasses.required, ScheduleRowHeightClasses.style)}
+            className={twMerge(ScheduleTableClasses.required, ScheduleTableClasses.style)}
+          />
+          <CurrentTimeLine selectedDate={selectedDate} />
+        </div>
       </div>
     </Box>
   );

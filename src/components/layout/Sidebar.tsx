@@ -29,7 +29,7 @@ const navItems = [
 /* SidebarClasses: envuelve SidebarNav y SidebarContent para que ambos
    se comporten como un solo item flex dentro de Layout. */
 const SidebarClasses = {
-  required: 'flex h-full gap-(--size-m) pr-(--size-m)',
+  required: 'flex h-full gap-(--size-m) p-(--size-m)',
   style: '',
 };
 
