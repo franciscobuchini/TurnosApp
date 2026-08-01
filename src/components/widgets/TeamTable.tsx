@@ -10,76 +10,10 @@ import Badge from '../interface/Badge';
 import Dropdown from '../interface/Dropdown';
 import Image from '../interface/Image';
 import Table, { type TableColumn } from '../interface/Table';
+import type { TeamMember, DaySchedule } from '../../variables/types.ts';
+import { getTeamMembers } from '../../variables/data.ts';
 
-type DaySchedule = {
-  day: string;
-  hours: string[];
-};
-
-type TeamMember = {
-  name: string;
-  role: string;
-  email: string;
-  phone: string;
-  services: string[];
-  schedule: DaySchedule[] | string;
-};
-
-const teamMembers: TeamMember[] = [
-  {
-    name: 'Carlos Rodriguez',
-    role: 'Peluquero',
-    email: 'carlos@mail.com',
-    phone: '+54 9 11 5678-1234',
-    services: ['Corte', 'Barba', 'Coloración'],
-    schedule: [
-      { day: 'L', hours: ['9:00 - 18:00'] },
-      { day: 'M', hours: ['9:00 - 18:00'] },
-      { day: 'X', hours: ['9:00 - 18:00'] },
-      { day: 'J', hours: ['9:00 - 18:00'] },
-      { day: 'V', hours: ['9:00 - 18:00'] },
-    ],
-  },
-  {
-    name: 'Mariana Lopez',
-    role: 'Estilista',
-    email: 'mariana@mail.com',
-    phone: '+54 9 11 6789-2345',
-    services: ['Coloración', 'Reflejos'],
-    schedule: [
-      { day: 'M', hours: ['10:00 - 19:00'] },
-      { day: 'X', hours: ['10:00 - 19:00'] },
-      { day: 'J', hours: ['10:00 - 19:00'] },
-      { day: 'V', hours: ['10:00 - 19:00'] },
-      { day: 'S', hours: ['10:00 - 19:00'] },
-    ],
-  },
-  {
-    name: 'Diego Fernandez',
-    role: 'Barbero',
-    email: 'diego@mail.com',
-    phone: '+54 9 11 7890-3456',
-    services: ['Corte', 'Barba'],
-    schedule: [
-      { day: 'L', hours: ['8:00 - 12:00'] },
-      { day: 'L', hours: ['14:00 - 18:00'] },
-      { day: 'M', hours: ['8:00 - 16:00'] },
-      { day: 'X', hours: ['8:00 - 16:00'] },
-      { day: 'J', hours: ['8:00 - 12:00'] },
-      { day: 'J', hours: ['14:00 - 18:00'] },
-      { day: 'V', hours: ['8:00 - 16:00'] },
-      { day: 'S', hours: ['8:00 - 12:00'] },
-    ],
-  },
-  {
-    name: 'Carlos Rodriguez',
-    role: 'Peluquero',
-    email: 'carlos@mail.com',
-    phone: '+54 9 11 5678-1234',
-    services: ['Corte', 'Barba', 'Coloración'],
-    schedule: 'Sin horarios asignados',
-  }
-];
+const teamMembers = getTeamMembers();
 
 function calculateWeeklyHours(schedule: DaySchedule[] | string): string {
   if (typeof schedule === 'string') {

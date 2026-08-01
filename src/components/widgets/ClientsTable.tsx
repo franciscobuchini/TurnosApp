@@ -7,41 +7,10 @@ import { Ellipsis } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Dropdown from '../interface/Dropdown';
 import Table, { type TableColumn } from '../interface/Table';
+import type { Client } from '../../variables/types.ts';
+import { getClients, currencyFormatter } from '../../variables/data.ts';
 
-type Client = {
-  name: string;
-  phone: string;
-  appointmentsCount: number;
-  totalSpent: number;
-};
-
-const clients: Client[] = [
-  {
-    name: 'Sofia Martinez',
-    phone: '+54 9 11 2345-6789',
-    appointmentsCount: 12,
-    totalSpent: 145000,
-  },
-  {
-    name: 'Lucas Perez',
-    phone: '+54 9 11 3456-7890',
-    appointmentsCount: 4,
-    totalSpent: 38000,
-  },
-  {
-    name: 'Valentina Gomez',
-    phone: '+54 9 11 4567-8901',
-    appointmentsCount: 8,
-    totalSpent: 96500,
-  },
-];
-
-/* currencyFormatter: formatea numeros como pesos argentinos, sin decimales */
-const currencyFormatter = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-  maximumFractionDigits: 0,
-});
+const clients = getClients();
 
 const ClientsTableActionsClasses = {
   required: 'h-(--size-xl) w-(--size-xl)',

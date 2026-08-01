@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Sofia Martinez",
+    "phone": "+54 9 11 2345-6789",
+    "appointmentsCount": 12,
+    "totalSpent": 145000
+  },
+  {
+    "name": "Lucas Perez",
+    "phone": "+54 9 11 3456-7890",
+    "appointmentsCount": 4,
+    "totalSpent": 38000
+  },
+  {
+    "name": "Valentina Gomez",
+    "phone": "+54 9 11 4567-8901",
+    "appointmentsCount": 8,
+    "totalSpent": 96500
+  }
+]
