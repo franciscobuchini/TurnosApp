@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
-import { getDayName, getMonthName, isSameDay } from '../../functions/dateName';
+import { getDayName, isSameDay } from '../../functions/dateName';
 
 interface WeekSelectorProps {
   weekDays: Date[];
@@ -44,21 +44,21 @@ const WeekSelectorDaySelectedClasses = {
   style: 'bg-stone-900 text-white rounded-2xl',
 };
 
-/* WeekSelectorDayLabelClasses: label de 3 letras (Lun, Mar, Mié...), más chico que el número */
-const WeekSelectorDayLabelClasses = {
-  required: 'text-l',
+/* WeekSelectorDayColumnClasses: wrapper interno que pone nombre y número en columna */
+const WeekSelectorDayColumnClasses = {
+  required: 'flex flex-col items-center',
   style: '',
 };
 
-/* WeekSelectorDayMonthClasses: label de 3 letras del mes (Ene, Feb, Mar...), más chico que el día */
-const WeekSelectorDayMonthClasses = {
+/* WeekSelectorDayLabelClasses: nombre completo del día (Lunes, Martes...) */
+const WeekSelectorDayLabelClasses = {
   required: 'text-l',
   style: '',
 };
 
 /* WeekSelectorDayNumberClasses: número del día, mucho más grande que el label */
 const WeekSelectorDayNumberClasses = {
-  required: 'text-5xl font-semibold px-(--size-2xs)',
+  required: 'text-4xl font-semibold px-(--size-2xs)',
   style: '',
 };
 
@@ -96,14 +96,13 @@ export default function WeekSelector({
                   twMerge(WeekSelectorDaySelectedClasses.required, WeekSelectorDaySelectedClasses.style),
               )}
             >
-              <span className={twMerge(WeekSelectorDayLabelClasses.required, WeekSelectorDayLabelClasses.style)}>
-                {getDayName(date, 3)}
-              </span>
-              <span className={twMerge(WeekSelectorDayNumberClasses.required, WeekSelectorDayNumberClasses.style)}>
-                {date.getDate()}
-              </span>
-              <span className={twMerge(WeekSelectorDayMonthClasses.required, WeekSelectorDayMonthClasses.style)}>
-                {getMonthName(date, 3)}
+              <span className={twMerge(WeekSelectorDayColumnClasses.required, WeekSelectorDayColumnClasses.style)}>
+                <span className={twMerge(WeekSelectorDayLabelClasses.required, WeekSelectorDayLabelClasses.style)}>
+                  {getDayName(date)}
+                </span>
+                <span className={twMerge(WeekSelectorDayNumberClasses.required, WeekSelectorDayNumberClasses.style)}>
+                  {date.getDate()}
+                </span>
               </span>
             </Button>
           );
