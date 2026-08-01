@@ -5,6 +5,7 @@
 
 
 
+import { Ellipsis } from 'lucide-react';
 import Badge from '../interface/Badge';
 import Dropdown from '../interface/Dropdown';
 import Image from '../interface/Image';
@@ -159,7 +160,8 @@ const columns: TableColumn<TeamMember>[] = [
     header: '',
     cell: () => (
       <Dropdown
-        content=":"
+        content={<Ellipsis size={14} />}
+        iconOnly="left"
         className="h-(--size-xl) w-(--size-xl)"
         items={[
           { label: 'Ver perfil' },

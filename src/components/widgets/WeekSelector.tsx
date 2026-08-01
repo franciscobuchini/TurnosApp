@@ -1,6 +1,6 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
-import Icon from '../interface/Icon';
 import { getDayName, getMonthName, isSameDay } from '../../functions/dateName';
 
 interface WeekSelectorProps {
@@ -28,26 +28,20 @@ const WeekSelectorDaysClasses = {
 
 /* WeekSelectorNavButtonClasses: botones de flecha prev/next, comparten el mismo look */
 const WeekSelectorNavButtonClasses = {
-  required: 'h-(--size-6xl)',
-  style: '',
+  required: 'h-(--size-6xl) w-(--size-4xl)',
+  style: 'rounded-2xl',
 };
 
 /* WeekSelectorDayButtonClasses: botones de día, pasado como prop height a Button */
 const WeekSelectorDayButtonClasses = {
   required: 'h-(--size-6xl) flex-1',
-  style: '',
-};
-
-/* WeekSelectorDayContentClasses: layout interno del botón de día (label, número, mes apilados) */
-const WeekSelectorDayContentClasses = {
-  required: 'gap-(--size-xs)',
-  style: '',
+  style: 'rounded-2xl',
 };
 
 /* WeekSelectorDaySelectedClasses: estado activo del botón de día, pisa el style default de Button */
 const WeekSelectorDaySelectedClasses = {
   required: '',
-  style: 'bg-black text-white rounded-xl',
+  style: 'bg-stone-900 text-white rounded-2xl',
 };
 
 /* WeekSelectorDayLabelClasses: label de 3 letras (Lun, Mar, Mié...), más chico que el número */
@@ -64,7 +58,7 @@ const WeekSelectorDayMonthClasses = {
 
 /* WeekSelectorDayNumberClasses: número del día, mucho más grande que el label */
 const WeekSelectorDayNumberClasses = {
-  required: 'text-5xl font-semibold',
+  required: 'text-5xl font-semibold px-(--size-2xs)',
   style: '',
 };
 
@@ -82,9 +76,10 @@ export default function WeekSelector({
     <div className={twMerge(WeekSelectorClasses.required, WeekSelectorClasses.style, className)}>
       <Button
         onClick={onPrevWeek}
+        iconOnly="right"
         className={twMerge(WeekSelectorNavButtonClasses.required, WeekSelectorNavButtonClasses.style, prevButtonClassName)}
       >
-        <Icon name="ChevronLeft" />
+        <ChevronLeft />
       </Button>
 
       <div className={twMerge(WeekSelectorDaysClasses.required, WeekSelectorDaysClasses.style)}>
@@ -94,8 +89,6 @@ export default function WeekSelector({
             <Button
               key={idx}
               onClick={() => onSelectDate(date)}
-              height="h-(--size-6xl)"
-              contentClassName={twMerge(WeekSelectorDayContentClasses.required, WeekSelectorDayContentClasses.style)}
               className={twMerge(
                 WeekSelectorDayButtonClasses.required,
                 WeekSelectorDayButtonClasses.style,
@@ -119,9 +112,10 @@ export default function WeekSelector({
 
       <Button
         onClick={onNextWeek}
+        iconOnly="left"
         className={twMerge(WeekSelectorNavButtonClasses.required, WeekSelectorNavButtonClasses.style, nextButtonClassName)}
       >
-        <Icon name="ChevronRight" />
+        <ChevronRight />
       </Button>
     </div>
   );

@@ -4,6 +4,7 @@
 */
 
 import { useState } from 'react';
+import { Ellipsis } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Badge from '../interface/Badge';
 import Dropdown from '../interface/Dropdown';
@@ -117,7 +118,8 @@ export default function ProductsTable() {
       header: '',
       cell: (_product, rowIndex) => (
         <Dropdown
-          content=":"
+          content={<Ellipsis size={14} />}
+          iconOnly="left"
           className={twMerge(ProductsTableActionsClasses.required, ProductsTableActionsClasses.style)}
           items={[
             { label: 'Ver info' },

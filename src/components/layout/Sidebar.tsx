@@ -7,6 +7,7 @@ import { CalendarDays, Palette, Package, Store, Smile } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
+import { FiltersGroupProvider } from '../../functions/filtersGroupContext';
 
 interface SidebarProps {
   children?: ReactNode;
@@ -14,11 +15,11 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { to: '/admin/agenda', icon: CalendarDays },
-  { to: '/admin/equipo', icon: Store },
-  { to: '/admin/productos', icon: Package },
-  { to: '/admin/clientes', icon: Smile },
-  { to: '/admin/personalizacion', icon: Palette },
+  { to: '/admin/agenda', icon: CalendarDays, label: 'Agenda' },
+  { to: '/admin/equipo', icon: Store, label: 'Equipo/Ambientes' },
+  { to: '/admin/productos', icon: Package, label: 'Productos/Servicios' },
+  { to: '/admin/clientes', icon: Smile, label: 'Clientes' },
+  { to: '/admin/personalizacion', icon: Palette, label: 'Personalizacion' },
 ];
 
 // ============================================================
@@ -50,13 +51,14 @@ function SidebarNav() {
   return (
     <aside className={twMerge(SidebarNavClasses.required, SidebarNavClasses.style)}>
       <nav className={twMerge(SidebarNavListClasses.required, SidebarNavListClasses.style)}>
-        {navItems.map(({ to, icon: Icon }) => (
+        {navItems.map(({ to, icon: Icon, label }) => (
           <Button
             key={to}
             to={to}
             textAlign="center"
             icon={<Icon size={20} />}
-            textClassName="tablet:hidden desktop:inline"
+            text={label}
+            iconOnly="right"
           />
         ))}
       </nav>
@@ -82,7 +84,7 @@ export default function Sidebar({ children, className }: SidebarProps) {
     <div className={twMerge(SidebarClasses.required, SidebarClasses.style)}>
       <SidebarNav />
       <aside className={twMerge(SidebarContentClasses.required, SidebarContentClasses.style, className)}>
-        {children}
+        <FiltersGroupProvider value="sidebar">{children}</FiltersGroupProvider>
       </aside>
     </div>
   );

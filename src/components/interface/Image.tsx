@@ -8,7 +8,6 @@ import { twMerge } from 'tailwind-merge';
 interface ImageProps {
   src?: string;
   alt?: string;
-  styleClassName?: string;
   className?: string;
 }
 
@@ -20,8 +19,8 @@ const ImageClasses = {
   style: 'bg-neutral-200',
 };
 
-export default function Image({ src, alt, styleClassName, className }: ImageProps) {
-  const mergedClassName = twMerge(ImageClasses.required, styleClassName || ImageClasses.style, className);
+export default function Image({ src, alt, className }: ImageProps) {
+  const mergedClassName = twMerge(ImageClasses.required, ImageClasses.style, className);
 
   if (src) {
     return <img src={src} alt={alt || ''} className={mergedClassName} />;

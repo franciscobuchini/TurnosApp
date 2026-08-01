@@ -3,6 +3,8 @@
   Esta tabla muestra la lista de clientes con sus datos y acciones disponibles.
 */
 
+import { Ellipsis } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import Dropdown from '../interface/Dropdown';
 import Table, { type TableColumn } from '../interface/Table';
 
@@ -41,6 +43,11 @@ const currencyFormatter = new Intl.NumberFormat('es-AR', {
   maximumFractionDigits: 0,
 });
 
+const ClientsTableActionsClasses = {
+  required: 'h-(--size-xl) w-(--size-xl)',
+  style: '',
+};
+
 const columns: TableColumn<Client>[] = [
   {
     key: 'name',
@@ -75,7 +82,9 @@ const columns: TableColumn<Client>[] = [
     header: '',
     cell: () => (
       <Dropdown
-        content=":"
+        content={<Ellipsis size={14} />}
+        iconOnly="left"
+        className={twMerge(ClientsTableActionsClasses.required, ClientsTableActionsClasses.style)}
         items={[
           { label: 'Ver historial' },
           { label: 'WhatsApp' },

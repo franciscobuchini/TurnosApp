@@ -8,7 +8,6 @@ import { twMerge } from 'tailwind-merge';
 
 interface BadgeProps {
   children: ReactNode;
-  styleClassName?: string;
   className?: string;
 }
 
@@ -20,9 +19,9 @@ const BadgeClasses = {
   style: 'bg-neutral-200',
 };
 
-export default function Badge({ children, styleClassName, className }: BadgeProps) {
+export default function Badge({ children, className }: BadgeProps) {
   return (
-    <span className={twMerge(BadgeClasses.required, styleClassName || BadgeClasses.style, className)}>
+    <span className={twMerge(BadgeClasses.required, BadgeClasses.style, className)}>
       {children}
     </span>
   );

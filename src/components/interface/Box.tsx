@@ -8,7 +8,6 @@ import { twMerge } from 'tailwind-merge';
 
 interface BoxProps {
   children: ReactNode;
-  styleClassName?: string;
   className?: string;
 }
 
@@ -20,9 +19,9 @@ const BoxClasses = {
   style: '',
 };
 
-export default function Box({ children, styleClassName, className }: BoxProps) {
+export default function Box({ children, className }: BoxProps) {
   return (
-    <div className={twMerge(BoxClasses.required, styleClassName || BoxClasses.style, className)}>
+    <div className={twMerge(BoxClasses.required, BoxClasses.style, className)}>
       {children}
     </div>
   );

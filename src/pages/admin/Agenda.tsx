@@ -7,10 +7,11 @@ import { useState } from 'react';
 import { CalendarPlus } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import Sidebar from '../../components/layout/Sidebar';
-import SidebarHeader from '../../components/widgets/SidebarHeader';
+import MainHeader from '../../components/widgets/MainHeader';
 import MainContent from '../../components/layout/MainContent';
 import Button from '../../components/interface/Button';
 import Calendar from '../../components/widgets/Calendar';
+import Filters, { type FiltersOption } from '../../components/interface/Filters';
 import Schedule from '../../components/widgets/Schedule';
 import WeekSelector from '../../components/widgets/WeekSelector';
 
@@ -25,9 +26,24 @@ const getWeekDays = (date: Date): Date[] => {
   return week;
 };
 
+const initialTeamFilters: FiltersOption[] = [
+  { id: 'carlos-rodriguez', label: 'Carlos Rodriguez' },
+  { id: 'mariana-lopez', label: 'Mariana Lopez' },
+  { id: 'diego-fernandez', label: 'Diego Fernandez' },
+];
+
+const initialServiceFilters: FiltersOption[] = [
+  { id: 'corte', label: 'Corte' },
+  { id: 'barba', label: 'Barba' },
+  { id: 'coloracion', label: 'Coloracion' },
+  { id: 'reflejos', label: 'Reflejos' },
+];
+
 function Agenda() {
   const [viewDate, setViewDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [teamFilters, setTeamFilters] = useState(initialTeamFilters);
+  const [serviceFilters, setServiceFilters] = useState(initialServiceFilters);
 
   const weekDays = getWeekDays(viewDate);
 
@@ -43,15 +59,36 @@ function Agenda() {
     setViewDate(next);
   };
 
+  const toggleTeamFilter = (id: string, checked: boolean) => {
+    setTeamFilters((filters) =>
+      filters.map((filter) => (filter.id === id ? { ...filter, checked } : filter)),
+    );
+  };
+
+  const toggleServiceFilter = (id: string, checked: boolean) => {
+    setServiceFilters((filters) =>
+      filters.map((filter) => (filter.id === id ? { ...filter, checked } : filter)),
+    );
+  };
+
   return (
     <Layout>
       <Sidebar>
-        <SidebarHeader
+        <MainHeader
           title="Agenda"
-          action={<Button textAlign="center" icon={<CalendarPlus size={20} />} />}
+          action={<Button iconOnly="bottom" text="Agregar turno" icon={<CalendarPlus size={20} />} />}
         />
         <Calendar />
-        {/* <Filters /> */}
+        <Filters
+          title="Equipo"
+          options={teamFilters}
+          onToggleOption={toggleTeamFilter}
+        />
+        <Filters
+          title="Servicios"
+          options={serviceFilters}
+          onToggleOption={toggleServiceFilter}
+        />
       </Sidebar>
       <MainContent>
         <WeekSelector

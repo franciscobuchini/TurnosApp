@@ -15,7 +15,6 @@ import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../functions/dateName';
 interface CalendarProps {
   weekDaysNames?: string[];
   className?: string;
-  styleClassName?: string;
 }
 
 /* CalendarClasses: contenedor (Box)*/
@@ -27,6 +26,11 @@ const CalendarClasses = {
 /* CalendarActionsClasses: wrapper de los botones de navegación*/
 const CalendarActionsClasses = {
   required: 'flex gap-(--size-s)',
+  style: '',
+};
+
+const CalendarActionButtonClasses = {
+  required: 'h-(--size-xl)',
   style: '',
 };
 
@@ -123,7 +127,7 @@ const getDaysInMonth = (year: number, month: number): CalendarCell[] => {
   return cells;
 };
 
-export default function Calendar({ weekDaysNames = MONDAY_FIRST_DAY_NAMES, className, styleClassName }: CalendarProps) {
+export default function Calendar({ weekDaysNames = MONDAY_FIRST_DAY_NAMES, className }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
   const year = currentDate.getFullYear();
@@ -174,7 +178,7 @@ export default function Calendar({ weekDaysNames = MONDAY_FIRST_DAY_NAMES, class
     <Box
       className={twMerge(
         CalendarClasses.required,
-        styleClassName || CalendarClasses.style,
+        CalendarClasses.style,
         className,
       )}
     >
@@ -183,8 +187,20 @@ export default function Calendar({ weekDaysNames = MONDAY_FIRST_DAY_NAMES, class
         title={`${MONTH_NAMES[month]} ${year}`}
         action={
           <div className={twMerge(CalendarActionsClasses.required, CalendarActionsClasses.style)}>
-            <Button textAlign="center" height="h-(--size-xl)" onClick={prevMonth} icon={<ChevronLeft size={18} />} />
-            <Button textAlign="center" height="h-(--size-xl)" onClick={nextMonth} icon={<ChevronRight size={18} />} />
+            <Button
+              onClick={prevMonth}
+              iconOnly="bottom"
+              className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
+            >
+              <ChevronLeft size={18} />
+            </Button>
+            <Button
+              onClick={nextMonth}
+              iconOnly="bottom"
+              className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
+            >
+              <ChevronRight size={18} />
+            </Button>
           </div>
         }
       />

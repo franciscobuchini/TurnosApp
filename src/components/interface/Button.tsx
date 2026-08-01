@@ -6,24 +6,21 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
+import Tooltip, { type TooltipPosition } from './Tooltip';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
   to?: string;
-  styleClassName?: string;
-  height?: string;
   icon?: ReactNode;
   iconPosition?: 'left' | 'right';
+  iconOnly?: TooltipPosition;
   text?: ReactNode;
   textAlign?: 'left' | 'center' | 'right';
-  textClassName?: string;
-  contentClassName?: string;
 }
 
 /* ButtonClasses: el botón/link en sí*/
 const ButtonClasses = {
-  required: 'flex items-center justify-center min-w-(--size-2xl) p-(--size-s) ',
-  height: 'h-(--size-2xl)',
+  required: 'relative flex h-(--size-2xl) items-center justify-center min-w-(--size-2xl) p-(--size-s) group',
   style: 'bg-red-500 rounded-xl',
   iconOnly: 'aspect-square min-w-0 p-0',
 };
@@ -53,23 +50,20 @@ export default function Button({
   children,
   to,
   className,
-  styleClassName,
-  height = ButtonClasses.height,
   icon,
   iconPosition = 'left',
+  iconOnly,
   text,
   textAlign = 'center',
-  textClassName,
-  contentClassName,
   ...props
 }: ButtonProps) {
   const hasTextContent = Boolean(text || children);
-  const isOnlyIcon = !hasTextContent && Boolean(icon);
+  const isOnlyIcon = Boolean(iconOnly && (icon || children));
+  const showTooltip = Boolean(iconOnly && icon && hasTextContent);
 
   const buttonClassName = twMerge(
     ButtonClasses.required,
-    height,
-    styleClassName || ButtonClasses.style,
+    ButtonClasses.style,
     isOnlyIcon && ButtonClasses.iconOnly,
     className,
   );
@@ -80,26 +74,29 @@ export default function Button({
         ButtonContentClasses.required,
         ButtonContentClasses.style,
         ButtonAlignmentClasses[textAlign],
-        hasTextContent && icon ? ButtonContentClasses.withIconGap : '',
+        hasTextContent && icon && !isOnlyIcon ? ButtonContentClasses.withIconGap : '',
         isOnlyIcon ? ButtonContentClasses.iconOnlyFill : '',
-        contentClassName,
       )}
     >
       {icon && iconPosition === 'left' ? (
         <span className={twMerge(ButtonIconWrapperClasses.required, ButtonIconWrapperClasses.style)}>{icon}</span>
       ) : null}
-      {text !== undefined ? <span className={textClassName}>{text}</span> : null}
-      {children}
+      {!isOnlyIcon && text !== undefined ? <span>{text}</span> : null}
+      {!isOnlyIcon && children}
+      {isOnlyIcon && !icon ? children : null}
       {icon && iconPosition === 'right' ? (
         <span className={twMerge(ButtonIconWrapperClasses.required, ButtonIconWrapperClasses.style)}>{icon}</span>
       ) : null}
     </span>
   );
 
+  const tooltip = showTooltip && iconOnly ? <Tooltip position={iconOnly}>{text ?? children}</Tooltip> : null;
+
   if (to) {
     return (
       <Link to={to} className={buttonClassName}>
         {content}
+        {tooltip}
       </Link>
     );
   }
@@ -107,6 +104,7 @@ export default function Button({
   return (
     <button {...props} className={buttonClassName}>
       {content}
+      {tooltip}
     </button>
   );
 }

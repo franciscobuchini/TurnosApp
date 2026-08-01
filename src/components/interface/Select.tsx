@@ -4,8 +4,8 @@
 */
 
 import { useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import Icon from './Icon';
 import Button from './Button';
 
 export interface SelectOption {
@@ -77,7 +77,6 @@ interface SelectProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  styleClassName?: string;
   className?: string;
 }
 
@@ -86,7 +85,6 @@ export default function Select({
   value,
   onChange,
   placeholder = 'Seleccionar...',
-  styleClassName,
   className = '',
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,17 +106,15 @@ export default function Select({
   }, []);
 
   return (
-    <div ref={selectRef} className={twMerge(SelectClasses.required, styleClassName || SelectClasses.style, className)}>
+    <div ref={selectRef} className={twMerge(SelectClasses.required, SelectClasses.style, className)}>
       <Button
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((prev) => !prev)}
-        styleClassName={styleClassName}
         className={SelectTriggerClasses.required}
       >
         <span>{selectedOption ? selectedOption.label : placeholder}</span>
-        <Icon
-          name="ChevronDown"
+        <ChevronDown
           className={twMerge(SelectIconClasses.required, SelectIconClasses.style, isOpen ? 'rotate-180' : '')}
         />
       </Button>

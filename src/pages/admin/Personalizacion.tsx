@@ -5,7 +5,7 @@
 
 import Layout from '../../components/layout/Layout';
 import Sidebar from '../../components/layout/Sidebar';
-import SidebarHeader from '../../components/widgets/SidebarHeader';
+import MainHeader from '../../components/widgets/MainHeader';
 import MainContent from '../../components/layout/MainContent';
 import Button from '../../components/interface/Button';
 import { Eye } from 'lucide-react';
@@ -14,9 +14,9 @@ function Personalizacion() {
   return (
     <Layout>
       <Sidebar>
-        <SidebarHeader
+        <MainHeader
           title="Personalizacion"
-          action={<Button textAlign="center" icon={<Eye size={20} />} />}
+          action={<Button iconOnly="bottom" text="Visitar sitio" icon={<Eye size={20} />} />}
         />
       </Sidebar>
       <MainContent />

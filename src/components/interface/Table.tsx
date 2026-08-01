@@ -23,7 +23,6 @@ interface TableProps<T> {
   rows: T[];
   rowHeightClassName: string;
   className?: string;
-  styleClassName?: string;
 }
 
 /* TableClasses:
@@ -66,11 +65,10 @@ export default function Table<T>({
   rows,
   rowHeightClassName,
   className = '',
-  styleClassName,
 }: TableProps<T>) {
   return (
     <Box>
-      <table className={twMerge(TableClasses.required, styleClassName || TableClasses.style, className)}>
+      <table className={twMerge(TableClasses.required, TableClasses.style, className)}>
         <colgroup>
           {columns.map((column) => (
             <col key={column.key} style={column.width ? { width: column.width } : undefined} />

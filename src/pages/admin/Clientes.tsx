@@ -6,7 +6,7 @@
 import { SmilePlus } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import Sidebar from '../../components/layout/Sidebar';
-import SidebarHeader from '../../components/widgets/SidebarHeader';
+import MainHeader from '../../components/widgets/MainHeader';
 import MainContent from '../../components/layout/MainContent';
 import ClientsTable from '../../components/widgets/ClientsTable';
 import Button from '../../components/interface/Button';
@@ -15,9 +15,9 @@ function Clientes() {
   return (
     <Layout>
       <Sidebar>
-        <SidebarHeader
+        <MainHeader
           title="Clientes"
-          action={<Button textAlign="center" icon={<SmilePlus size={20} />} />}
+          action={<Button iconOnly="bottom" text="Agregar cliente" icon={<SmilePlus size={20} />} />}
         />
         Contenido del sidebar
       </Sidebar>

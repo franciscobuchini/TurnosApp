@@ -9,13 +9,12 @@ import Box from '../../components/interface/Box';
 interface ScheduleProps {
   selectedDate: Date;
   className?: string;
-  styleClassName?: string;
 }
 
 /* ScheduleClasses: contenedor (Box)*/
 const ScheduleClasses = {
-  required: 'flex flex-col gap-(--size-xl)',
-  style: 'border border-black',
+  required: 'flex flex-col gap-(--size-xl) flex-1',
+  style: 'rounded-3xl bg-white',
 };
 
 /* ScheduleGridClasses: wrapper de la grilla de horas*/
@@ -54,7 +53,7 @@ const ScheduleEmptySlotClasses = {
   style: '',
 };
 
-export default function Schedule({ selectedDate, className, styleClassName }: ScheduleProps) {
+export default function Schedule({ selectedDate, className }: ScheduleProps) {
   const hours = [
     '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
     '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'
@@ -64,7 +63,7 @@ export default function Schedule({ selectedDate, className, styleClassName }: Sc
     <Box
       className={twMerge(
         ScheduleClasses.required,
-        styleClassName || ScheduleClasses.style,
+        ScheduleClasses.style,
         className,
       )}
     >

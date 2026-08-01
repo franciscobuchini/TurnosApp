@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Button from './Button';
+import type { TooltipPosition } from './Tooltip';
 
 /* DropdownItem: forma de cada opcion del menu, se comparte entre Dropdown y DropdownMenu */
 interface DropdownItem {
@@ -70,11 +71,12 @@ function DropdownMenu({ items, onClose }: DropdownMenuProps) {
 interface DropdownProps {
   items: DropdownItem[];
   content: ReactNode;
+  iconOnly?: TooltipPosition;
   className?: string;
 }
 
 /* Dropdown: arma el boton trigger, controla el estado abierto/cerrado y renderiza DropdownMenu */
-export default function Dropdown({ items, content, className }: DropdownProps) {
+export default function Dropdown({ items, content, iconOnly, className }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -99,6 +101,7 @@ export default function Dropdown({ items, content, className }: DropdownProps) {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((currentValue) => !currentValue)}
+        iconOnly={iconOnly}
         className={className}
       >
         {content}
