@@ -8,6 +8,7 @@ import { ChevronDown } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
 import Dropdown from '../interface/Dropdown';
+import Image from '../interface/Image';
 import Table, { type TableColumn } from '../interface/Table';
 import ContentHeader from './ContentHeader';
 import { useFiltersGroup } from '../../functions/filtersGroupContext';
@@ -19,12 +20,18 @@ export interface DetailsPanelOption {
   disabled?: boolean;
 }
 
+export interface DetailsPanelDropdownItem {
+  label: string;
+  onClick?: () => void;
+}
+
 interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   title: string;
   options: DetailsPanelOption[];
   onToggleOption?: (id: string, checked: boolean) => void;
   actionLabel?: string;
   onActionClick?: () => void;
+  dropdownItems?: DetailsPanelDropdownItem[];
 }
 
 /* FilterPanelClasses: contenedor nativo del panel. shrink-0 en la base: cerrado, nunca se comprime.
@@ -58,12 +65,16 @@ const FilterPanelActionButtonClasses = {
 /* FilterPanelTableCellLabelClasses: clase para la celda del texto/label */
 const FilterPanelTableCellLabelClasses = 'h-10 p-0 pl-(--size-s) align-middle text-left text-sm';
 
+/* FilterPanelTableSideCellClasses: clases para las columnas laterales pequeñas */
+const FilterPanelTableSideCellClasses = 'h-(--size-xl) w-(--size-xl) p-0 align-middle text-center';
+
 export default function DetailsPanel({
   title,
   options,
   onToggleOption,
   actionLabel,
   onActionClick,
+  dropdownItems,
   className,
   name,
   ...props
@@ -74,19 +85,31 @@ export default function DetailsPanel({
 
   const columns: TableColumn<DetailsPanelOption>[] = [
     {
+      key: 'left-action',
+      header: null,
+      width: 'var(--size-xl)',
+      cellClassName: FilterPanelTableSideCellClasses,
+      cell: () => (
+        <Image className="h-(--size-xl) w-(--size-xl) rounded-full" />
+      ),
+    },
+    {
       key: 'label',
       header: null,
       cellClassName: FilterPanelTableCellLabelClasses,
-      cell: (option) => (
+      cell: (option) => <span>{option.label}</span>,
+    },
+    {
+      key: 'right-action',
+      header: null,
+      width: 'var(--size-xl)',
+      cellClassName: FilterPanelTableSideCellClasses,
+      cell: () => (
         <Dropdown
-          items={[
-            {
-              label: option.checked ? 'Desactivar' : 'Activar',
-              onClick: () => onToggleOption?.(option.id, !Boolean(option.checked)),
-            },
-          ]}
-          content={option.label}
-          disabled={option.disabled}
+          items={dropdownItems ?? []}
+          content={<span className="text-sm">•</span>}
+          iconOnly="bottom"
+          className="h-(--size-xl) w-(--size-xl) rounded-xl p-0"
         />
       ),
     },

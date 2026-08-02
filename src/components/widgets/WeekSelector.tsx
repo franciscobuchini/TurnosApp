@@ -63,9 +63,7 @@ const WeekSelectorDayTodayClasses = {
 };
 
 /* WeekSelectorDayVisibilityClasses: cuántos días se ven según el ANCHO DEL CONTENEDOR (no el viewport),
-   medido por distancia al día central. distancia 0 = día central (siempre visible),
-   1 = ±1 día (desde 380px de contenedor: 3 días), 2 = ±2 días (desde 620px: 5 días),
-   3 = ±3 días (desde 840px: 7 días). */
+   medido por distancia al día central. distancia 0 = día central (siempre visible) */
 const WeekSelectorDayVisibilityClasses: Record<number, { required: string; style: string }> = {
   0: { required: '', style: '' },
   1: { required: 'hidden @min-[380px]:flex', style: '' },

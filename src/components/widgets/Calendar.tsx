@@ -4,7 +4,7 @@
 */
 
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
 import Table, { type TableColumn } from '../interface/Table';
@@ -201,27 +201,20 @@ export default function Calendar({
 
   const groupName = useFiltersGroup();
 
-  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const handleSummaryClick = (event: React.MouseEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest('button')) return;
 
-  const handleToggle = () => {
-    const details = detailsRef.current;
-    if (details?.open || !groupName) return;
-
-    const openedFilter = document.querySelector(
-      `details[name="${groupName}"][data-filter-panel][open]`,
-    );
-
-    if (!openedFilter && details) {
-      details.open = true;
+    const details = event.currentTarget.parentElement as HTMLDetailsElement | null;
+    if (details?.open) {
+      event.preventDefault();
+      event.stopPropagation();
     }
   };
 
   return (
     <details
       data-calendar
-      ref={detailsRef}
       open
-      onToggle={handleToggle}
       name={groupName}
       className={twMerge(
         CalendarClasses.required,
@@ -230,7 +223,10 @@ export default function Calendar({
       )}
     >
       {/* Cabecera de navegación */}
-      <summary className="list-none outline-none [&::-webkit-details-marker]:hidden">
+      <summary
+        className="list-none outline-none [&::-webkit-details-marker]:hidden"
+        onClick={handleSummaryClick}
+      >
         <ContentHeader
           title={`${MONTH_NAMES[month]} ${year}`}
           action={

@@ -4,12 +4,10 @@
 */
 
 import { useState } from 'react';
-import { CalendarPlus } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import Sidebar from '../../components/layout/Sidebar';
 import MainHeader from '../../components/widgets/MainHeader';
 import MainContent from '../../components/layout/MainContent';
-import Button from '../../components/interface/Button';
 import Calendar from '../../components/widgets/Calendar';
 import DetailsPanel from '../../components/widgets/DetailsPanel';
 import { getTeamFilters, getServiceFilters, getClientFilters } from '../../variables/data.ts';
@@ -34,6 +32,21 @@ function Agenda() {
   const [teamFilters, setTeamFilters] = useState(getTeamFilters);
   const [serviceFilters, setServiceFilters] = useState(getServiceFilters);
   const [clientFilters, setClientFilters] = useState(getClientFilters);
+
+  const teamDropdownItems = [
+    { label: 'Ver perfil', onClick: () => console.log('Ver perfil clicked') },
+    { label: 'Asignar turno', onClick: () => console.log('Asignar turno clicked') },
+  ];
+
+  const serviceDropdownItems = [
+    { label: 'Editar servicio', onClick: () => console.log('Editar servicio clicked') },
+    { label: 'Ver historial', onClick: () => console.log('Ver historial clicked') },
+  ];
+
+  const clientDropdownItems = [
+    { label: 'Contactar', onClick: () => console.log('Contactar clicked') },
+    { label: 'Ver agenda', onClick: () => console.log('Ver agenda clicked') },
+  ];
 
   const weekDays = getWeekDays(viewDate);
   const selectedMembers = getSelectedMembers(teamFilters);
@@ -78,7 +91,6 @@ function Agenda() {
       <Sidebar>
         <MainHeader
           title="minube.site"
-          action={<Button iconOnly="bottom" text="Agregar turno" icon={<CalendarPlus size={20} />} />}
         />
         <Calendar selectedDate={selectedDate} onSelectDate={selectDate} />
         <DetailsPanel
@@ -87,6 +99,7 @@ function Agenda() {
           onToggleOption={toggleTeamFilter}
           actionLabel="+ Agregar miembro"
           onActionClick={() => console.log('Agregar miembro clicked')}
+          dropdownItems={teamDropdownItems}
         />
         <DetailsPanel
           title="Servicios"
@@ -94,6 +107,7 @@ function Agenda() {
           onToggleOption={toggleServiceFilter}
           actionLabel="+ Agregar producto"
           onActionClick={() => console.log('Agregar producto clicked')}
+          dropdownItems={serviceDropdownItems}
         />
         <DetailsPanel
           title="Clientes"
@@ -101,6 +115,7 @@ function Agenda() {
           onToggleOption={toggleClientFilter}
           actionLabel="+ Agregar cliente"
           onActionClick={() => console.log('Agregar cliente clicked')}
+          dropdownItems={clientDropdownItems}
         />
       </Sidebar>
       <MainContent>
