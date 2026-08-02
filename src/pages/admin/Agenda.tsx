@@ -47,6 +47,11 @@ function Agenda() {
     setViewDate(next);
   };
 
+  const selectDate = (date: Date) => {
+    setViewDate(date);
+    setSelectedDate(date);
+  };
+
   const toggleTeamFilter = (id: string, checked: boolean) => {
     setTeamFilters((filters) =>
       filters.map((filter) => (filter.id === id ? { ...filter, checked } : filter)),
@@ -66,7 +71,7 @@ function Agenda() {
           title="Agenda"
           action={<Button iconOnly="bottom" text="Agregar turno" icon={<CalendarPlus size={20} />} />}
         />
-        <Calendar />
+        <Calendar selectedDate={selectedDate} onSelectDate={selectDate} />
         <Filters
           title="Equipo"
           options={teamFilters}

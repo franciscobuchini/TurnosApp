@@ -15,9 +15,10 @@ interface CurrentTimeLineProps {
 
 const MINUTES_IN_DAY = 24 * 60;
 
-/* CurrentTimeLineClasses: línea horizontal, arranca después de la columna de horas y llega hasta el borde derecho */
+/* CurrentTimeLineClasses: línea horizontal, arranca después de la columna de horas y llega hasta el borde derecho.
+   scroll-mt-(--size-m): margen que respeta scrollIntoView, para que la línea no quede pegada al borde. */
 const CurrentTimeLineClasses = {
-  required: 'absolute left-(--size-4xl) right-0 h-0.5 pointer-events-none',
+  required: 'absolute left-(--size-4xl) right-0 h-0.5 scroll-mt-(--size-m) pointer-events-none',
   style: 'bg-red-500',
 };
 

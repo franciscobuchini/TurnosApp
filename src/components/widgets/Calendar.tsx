@@ -14,6 +14,8 @@ import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../functions/dateName';
 
 interface CalendarProps {
   weekDaysNames?: string[];
+  selectedDate?: Date;
+  onSelectDate?: (date: Date) => void;
   className?: string;
 }
 
@@ -42,13 +44,19 @@ const CalendarTableClasses = {
 
 /* CalendarDayCircleClasses: el círculo con el número del día, ahora es todo el contenido de la celda */
 const CalendarDayCircleClasses = {
-  required: 'flex items-center justify-center w-(--size-xl) h-(--size-xl) mx-auto text-sm',
+  required: 'flex items-center justify-center w-(--size-xl) h-(--size-xl) mx-auto text-sm cursor-pointer',
   style: 'rounded-full',
 };
 const CalendarDayCircleOtherMonthRequired = 'opacity-30';
 
-/* CalendarTodayCircleClasses: resalte del círculo de hoy, ahora se aplica al círculo y no a toda la celda */
+/* CalendarTodayCircleClasses: resalte del círculo cuando ese día es hoy, pero no está seleccionado */
 const CalendarTodayCircleClasses = {
+  required: '',
+  style: 'ring-2 ring-white rounded-full',
+};
+
+/* CalendarSelectedCircleClasses: resalte del círculo del día seleccionado (prioridad sobre el de hoy) */
+const CalendarSelectedCircleClasses = {
   required: '',
   style: 'bg-white text-stone-800 rounded-full',
 };
@@ -71,14 +79,14 @@ interface CalendarCell {
 const getDaysInMonth = (year: number, month: number): CalendarCell[] => {
   const firstDay = new Date(year, month, 1);
   const totalDays = new Date(year, month + 1, 0).getDate();
-  
+
   // Obtener el día de la semana del primer día (0 = Domingo, 1 = Lunes, etc.)
   let firstDayIndex = firstDay.getDay();
   // Ajustar para que Lunes sea 0 y Domingo 6
   firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
 
   const cells: CalendarCell[] = [];
-  
+
   // Días del mes anterior para rellenar
   const prevMonthDays = new Date(year, month, 0).getDate();
   for (let i = firstDayIndex - 1; i >= 0; i--) {
@@ -127,9 +135,14 @@ const getDaysInMonth = (year: number, month: number): CalendarCell[] => {
   return cells;
 };
 
-export default function Calendar({ weekDaysNames = MONDAY_FIRST_DAY_NAMES, className }: CalendarProps) {
+export default function Calendar({
+  weekDaysNames = MONDAY_FIRST_DAY_NAMES,
+  selectedDate,
+  onSelectDate,
+  className,
+}: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
@@ -158,12 +171,18 @@ export default function Calendar({ weekDaysNames = MONDAY_FIRST_DAY_NAMES, class
       if (!cell) return null;
 
       const isToday = isSameDay(cell.date, new Date());
+      const isSelected = selectedDate ? isSameDay(cell.date, selectedDate) : false;
 
       return (
         <div
+          onClick={() => onSelectDate?.(cell.date)}
           className={twMerge(
             CalendarDayCircleClasses.required,
-            isToday ? CalendarTodayCircleClasses.style : CalendarDayCircleClasses.style,
+            isSelected
+              ? twMerge(CalendarSelectedCircleClasses.required, CalendarSelectedCircleClasses.style)
+              : isToday
+                ? twMerge(CalendarTodayCircleClasses.required, CalendarTodayCircleClasses.style)
+                : CalendarDayCircleClasses.style,
             !cell.isCurrentMonth ? CalendarDayCircleOtherMonthRequired : '',
           )}
         >
