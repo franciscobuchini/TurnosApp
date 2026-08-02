@@ -11,7 +11,7 @@ import MainHeader from '../../components/widgets/MainHeader';
 import MainContent from '../../components/layout/MainContent';
 import Button from '../../components/interface/Button';
 import Calendar from '../../components/widgets/Calendar';
-import FilterPanel from '../../components/widgets/FilterPanel';
+import DetailsPanel from '../../components/widgets/DetailsPanel';
 import { getTeamFilters, getServiceFilters, getClientFilters } from '../../variables/data.ts';
 import { getSelectedMembers } from '../../functions/teamFilters';
 import Schedule from '../../components/widgets/Schedule';
@@ -77,25 +77,25 @@ function Agenda() {
     <Layout>
       <Sidebar>
         <MainHeader
-          title="Agenda"
+          title="minube.site"
           action={<Button iconOnly="bottom" text="Agregar turno" icon={<CalendarPlus size={20} />} />}
         />
         <Calendar selectedDate={selectedDate} onSelectDate={selectDate} />
-        <FilterPanel
+        <DetailsPanel
           title="Equipo"
           options={teamFilters}
           onToggleOption={toggleTeamFilter}
           actionLabel="+ Agregar miembro"
           onActionClick={() => console.log('Agregar miembro clicked')}
         />
-        <FilterPanel
+        <DetailsPanel
           title="Servicios"
           options={serviceFilters}
           onToggleOption={toggleServiceFilter}
           actionLabel="+ Agregar producto"
           onActionClick={() => console.log('Agregar producto clicked')}
         />
-        <FilterPanel
+        <DetailsPanel
           title="Clientes"
           options={clientFilters}
           onToggleOption={toggleClientFilter}

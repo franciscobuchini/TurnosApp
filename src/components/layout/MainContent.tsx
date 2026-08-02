@@ -8,7 +8,7 @@ import { FiltersGroupProvider } from '../../functions/filtersGroupContext';
  
 /* MainContentClasses*/
 const MainContentClasses = {
-  required: 'flex flex-1 gap-(--size-2xl) w-full flex-col items-start overflow-y-auto p-(--size-m)',
+  required: 'flex flex-1 min-h-0 min-w-0 flex-col items-start gap-(--size-2xl) overflow-hidden p-(--size-m)',
   style: 'bg-cyan-100 rounded-l-4xl',
 };
  

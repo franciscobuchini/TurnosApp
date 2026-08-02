@@ -16,5 +16,77 @@
     "description": "Tinte completo o reflejos con productos de alta calidad para cuidar la salud capilar.",
     "price": 15000,
     "duration": "90 min"
+  },
+  {
+    "name": "Manicura Rusa",
+    "description": "Limpieza profunda de cutículas y esmaltado semipermanente.",
+    "price": 7500,
+    "duration": "60 min"
+  },
+  {
+    "name": "Pedicura Completa",
+    "description": "Tratamiento de pies con exfoliación y esmaltado.",
+    "price": 9000,
+    "duration": "75 min"
+  },
+  {
+    "name": "Nail Art Complejo",
+    "description": "Diseños a mano alzada en cada uña.",
+    "price": 4000,
+    "duration": "30 min"
+  },
+  {
+    "name": "Masaje Descontracturante",
+    "description": "Masaje corporal intenso de espalda y cuello para liberar tensiones.",
+    "price": 12000,
+    "duration": "50 min"
+  },
+  {
+    "name": "Masaje Relajante",
+    "description": "Masaje suave de cuerpo completo con aromaterapia.",
+    "price": 11000,
+    "duration": "60 min"
+  },
+  {
+    "name": "Tratamiento de Nutrición Capilar",
+    "description": "Baño de crema hidratante y sellado de puntas.",
+    "price": 6500,
+    "duration": "40 min"
+  },
+  {
+    "name": "Balayage",
+    "description": "Técnica de aclarado degradado natural en puntas.",
+    "price": 18000,
+    "duration": "120 min"
+  },
+  {
+    "name": "Corte Infantil",
+    "description": "Corte divertido para niños menores de 12 años.",
+    "price": 5500,
+    "duration": "30 min"
+  },
+  {
+    "name": "Manicura Rusa",
+    "description": "Limpieza profunda de cutículas y esmaltado semipermanente.",
+    "price": 7500,
+    "duration": "60 min"
+  },
+  {
+    "name": "Pedicura Completa",
+    "description": "Tratamiento de pies con exfoliación y esmaltado.",
+    "price": 9000,
+    "duration": "75 min"
+  },
+  {
+    "name": "Nail Art Complejo",
+    "description": "Diseños a mano alzada en cada uña.",
+    "price": 4000,
+    "duration": "30 min"
+  },
+  {
+    "name": "Masaje Descontracturante",
+    "description": "Masaje corporal intenso de espalda y cuello para liberar tensiones.",
+    "price": 12000,
+    "duration": "50 min"
   }
 ]

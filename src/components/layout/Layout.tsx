@@ -15,7 +15,7 @@ const LayoutClasses = {
 };
 
 const LayoutContentClasses = {
-  required: 'flex flex-1 overflow-hidden pr-0',
+  required: 'flex flex-1 min-h-0 overflow-hidden pr-0',
   style: '',
 };
 

@@ -6,3 +6,11 @@
 @import "./Reset.css" layer(base);
 @import "tailwindcss";
 @import "./Variables.css";
+
+/* Desactivar selección de texto en toda la app */
+@layer base {
+  *, *::before, *::after {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}

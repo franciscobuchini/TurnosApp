@@ -17,6 +17,7 @@
   /* hay que agregar 20px para icons */
   --size-l: 24px;
   --size-xl: 32px;
+  /* hay que agregar 40px para tabla de filters */
   --size-2xl: 48px; /* Button height y Table Height Default */
   --size-3xl: 56px; /* Header, Sidebar Tablet */
   --size-4xl: 64px; /* Image */

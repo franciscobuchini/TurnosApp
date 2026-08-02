@@ -38,6 +38,12 @@ const WeekSelectorNavButtonClasses = {
   style: 'rounded-2xl',
 };
 
+/* WeekSelectorNavButtonSelectedClasses: estado activo de la flecha de navegación cuando la fecha seleccionada está fuera de la semana visible. */
+const WeekSelectorNavButtonSelectedClasses = {
+  required: '',
+  style: 'bg-stone-900 text-white rounded-2xl',
+};
+
 /* WeekSelectorDayButtonClasses: botones de día, pasado como prop height a Button */
 const WeekSelectorDayButtonClasses = {
   required: 'h-(--size-6xl) flex-1',
@@ -96,13 +102,25 @@ export default function WeekSelector({
   nextButtonClassName,
 }: WeekSelectorProps) {
   const centerIdx = Math.floor(weekDays.length / 2);
+  const normalizedSelectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+  const firstWeekDay = new Date(weekDays[0].getFullYear(), weekDays[0].getMonth(), weekDays[0].getDate());
+  const lastWeekDay = new Date(weekDays[weekDays.length - 1].getFullYear(), weekDays[weekDays.length - 1].getMonth(), weekDays[weekDays.length - 1].getDate());
+  const isSelectedBeforeWeek = normalizedSelectedDate < firstWeekDay;
+  const isSelectedAfterWeek = normalizedSelectedDate > lastWeekDay;
 
   return (
     <div className={twMerge(WeekSelectorClasses.required, WeekSelectorClasses.style, className)}>
       <Button
         onClick={onPrevWeek}
         iconOnly="right"
-        className={twMerge(WeekSelectorNavButtonClasses.required, WeekSelectorNavButtonClasses.style, prevButtonClassName)}
+        className={twMerge(
+          WeekSelectorNavButtonClasses.required,
+          WeekSelectorNavButtonClasses.style,
+          isSelectedBeforeWeek
+            ? twMerge(WeekSelectorNavButtonSelectedClasses.required, WeekSelectorNavButtonSelectedClasses.style)
+            : '',
+          prevButtonClassName,
+        )}
       >
         <ChevronLeft />
       </Button>
@@ -146,7 +164,14 @@ export default function WeekSelector({
       <Button
         onClick={onNextWeek}
         iconOnly="left"
-        className={twMerge(WeekSelectorNavButtonClasses.required, WeekSelectorNavButtonClasses.style, nextButtonClassName)}
+        className={twMerge(
+          WeekSelectorNavButtonClasses.required,
+          WeekSelectorNavButtonClasses.style,
+          isSelectedAfterWeek
+            ? twMerge(WeekSelectorNavButtonSelectedClasses.required, WeekSelectorNavButtonSelectedClasses.style)
+            : '',
+          nextButtonClassName,
+        )}
       >
         <ChevronRight />
       </Button>

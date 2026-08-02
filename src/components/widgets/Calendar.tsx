@@ -3,14 +3,14 @@
   Vista mensual de la agenda, utilizando el componente Table genérico para la estructura.
 */
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
-import Box from '../interface/Box';
 import Table, { type TableColumn } from '../interface/Table';
 import ContentHeader from './ContentHeader';
 import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../functions/dateName';
+import { useFiltersGroup } from '../../functions/filtersGroupContext';
 
 interface CalendarProps {
   weekDaysNames?: string[];
@@ -19,9 +19,11 @@ interface CalendarProps {
   className?: string;
 }
 
-/* CalendarClasses: contenedor (Box)*/
+/* CalendarClasses: contenedor (details). shrink-0: Calendar está siempre abierto (open fijo),
+   así que sin esto compite por el espacio comprimido junto con el FilterPanel abierto,
+   en vez de dejarle ceder espacio solo a este último. */
 const CalendarClasses = {
-  required: 'flex flex-col  w-full gap-(--size-xs)',
+  required: 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-(--size-xs) p-(--size-xs)',
   style: 'bg-stone-900 rounded-3xl',
 };
 
@@ -154,11 +156,15 @@ export default function Calendar({
     weeks.push(cells.slice(i, i + 7));
   }
 
-  const prevMonth = () => {
+  const prevMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setCurrentDate(new Date(year, month - 1, 1));
   };
 
-  const nextMonth = () => {
+  const nextMonth = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
@@ -193,8 +199,30 @@ export default function Calendar({
     alignClassName: twMerge(CalendarColumnAlignClasses.required, CalendarColumnAlignClasses.style),
   }));
 
+  const groupName = useFiltersGroup();
+
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+
+  const handleToggle = () => {
+    const details = detailsRef.current;
+    if (details?.open || !groupName) return;
+
+    const openedFilter = document.querySelector(
+      `details[name="${groupName}"][data-filter-panel][open]`,
+    );
+
+    if (!openedFilter && details) {
+      details.open = true;
+    }
+  };
+
   return (
-    <Box
+    <details
+      data-calendar
+      ref={detailsRef}
+      open
+      onToggle={handleToggle}
+      name={groupName}
       className={twMerge(
         CalendarClasses.required,
         CalendarClasses.style,
@@ -202,27 +230,34 @@ export default function Calendar({
       )}
     >
       {/* Cabecera de navegación */}
-      <ContentHeader
-        title={`${MONTH_NAMES[month]} ${year}`}
-        action={
-          <div className={twMerge(CalendarActionsClasses.required, CalendarActionsClasses.style)}>
-            <Button
-              onClick={prevMonth}
-              iconOnly="bottom"
-              className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
-            >
-              <ChevronLeft size={18} />
-            </Button>
-            <Button
-              onClick={nextMonth}
-              iconOnly="bottom"
-              className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
-            >
-              <ChevronRight size={18} />
-            </Button>
-          </div>
-        }
-      />
+      <summary className="list-none outline-none [&::-webkit-details-marker]:hidden">
+        <ContentHeader
+          title={`${MONTH_NAMES[month]} ${year}`}
+          action={
+            <div className={twMerge(CalendarActionsClasses.required, CalendarActionsClasses.style)}>
+              {/* Controles de navegación: sólo visibles cuando está abierto */}
+              <div className="hidden group-open:flex gap-(--size-s)">
+                <Button
+                  onClick={prevMonth}
+                  iconOnly="bottom"
+                  className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
+                >
+                  <ChevronLeft size={18} />
+                </Button>
+                <Button
+                  onClick={nextMonth}
+                  iconOnly="bottom"
+                  className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
+                >
+                  <ChevronRight size={18} />
+                </Button>
+              </div>
+              {/* Flecha de expandir: sólo visible cuando está colapsado */}
+              <ChevronDown className="block group-open:hidden text-white" size={20} />
+            </div>
+          }
+        />
+      </summary>
 
       {/* Renderizado de la grilla mensual utilizando el componente Table */}
       <Table
@@ -231,6 +266,6 @@ export default function Calendar({
         rowHeightClassName="h-auto"
         className={twMerge(CalendarTableClasses.required, CalendarTableClasses.style)}
       />
-    </Box>
+    </details>
   );
 }

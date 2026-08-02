@@ -16,5 +16,47 @@
     "phone": "+54 9 11 4567-8901",
     "appointmentsCount": 8,
     "totalSpent": 96500
+  },
+  {
+    "name": "Juan Ignacio Rossi",
+    "phone": "+54 9 11 5678-9012",
+    "appointmentsCount": 15,
+    "totalSpent": 182000
+  },
+  {
+    "name": "Camila Diaz",
+    "phone": "+54 9 11 6789-0123",
+    "appointmentsCount": 3,
+    "totalSpent": 24500
+  },
+  {
+    "name": "Esteban Quito",
+    "phone": "+54 9 11 7890-1234",
+    "appointmentsCount": 1,
+    "totalSpent": 8500
+  },
+  {
+    "name": "Florencia Benitez",
+    "phone": "+54 9 11 8901-2345",
+    "appointmentsCount": 6,
+    "totalSpent": 52000
+  },
+  {
+    "name": "Gabriel Sosa",
+    "phone": "+54 9 11 9012-3456",
+    "appointmentsCount": 10,
+    "totalSpent": 115000
+  },
+  {
+    "name": "Martina Lopez",
+    "phone": "+54 9 11 0123-4567",
+    "appointmentsCount": 2,
+    "totalSpent": 17000
+  },
+  {
+    "name": "Nicolas Castro",
+    "phone": "+54 9 11 1234-5678",
+    "appointmentsCount": 7,
+    "totalSpent": 64000
   }
 ]
