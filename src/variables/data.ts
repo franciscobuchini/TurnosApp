@@ -37,6 +37,7 @@ export function getTeamFilters(): FiltersOption[] {
       filters.push({
         id: member.name.toLowerCase().replace(/\s+/g, '-'),
         label: member.name,
+        checked: true,
       });
     }
   }
@@ -58,6 +59,25 @@ export function getServiceFilters(): FiltersOption[] {
           label: service,
         });
       }
+    }
+  }
+
+  return filters;
+}
+
+export function getClientFilters(): FiltersOption[] {
+  const clients = getClients();
+  const seen = new Set<string>();
+  const filters: FiltersOption[] = [];
+
+  for (const client of clients) {
+    if (!seen.has(client.name)) {
+      seen.add(client.name);
+      filters.push({
+        id: client.name.toLowerCase().replace(/\s+/g, '-'),
+        label: client.name,
+        checked: true,
+      });
     }
   }
 

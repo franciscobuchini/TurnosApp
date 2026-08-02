@@ -11,8 +11,9 @@ import MainHeader from '../../components/widgets/MainHeader';
 import MainContent from '../../components/layout/MainContent';
 import Button from '../../components/interface/Button';
 import Calendar from '../../components/widgets/Calendar';
-import Filters from '../../components/interface/Filters';
-import { getTeamFilters, getServiceFilters } from '../../variables/data.ts';
+import FilterPanel from '../../components/widgets/FilterPanel';
+import { getTeamFilters, getServiceFilters, getClientFilters } from '../../variables/data.ts';
+import { getSelectedMembers } from '../../functions/teamFilters';
 import Schedule from '../../components/widgets/Schedule';
 import WeekSelector from '../../components/widgets/WeekSelector';
 
@@ -32,8 +33,10 @@ function Agenda() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [teamFilters, setTeamFilters] = useState(getTeamFilters);
   const [serviceFilters, setServiceFilters] = useState(getServiceFilters);
+  const [clientFilters, setClientFilters] = useState(getClientFilters);
 
   const weekDays = getWeekDays(viewDate);
+  const selectedMembers = getSelectedMembers(teamFilters);
 
   const prevWeek = () => {
     const next = new Date(viewDate);
@@ -64,6 +67,12 @@ function Agenda() {
     );
   };
 
+  const toggleClientFilter = (id: string, checked: boolean) => {
+    setClientFilters((filters) =>
+      filters.map((filter) => (filter.id === id ? { ...filter, checked } : filter)),
+    );
+  };
+
   return (
     <Layout>
       <Sidebar>
@@ -72,15 +81,26 @@ function Agenda() {
           action={<Button iconOnly="bottom" text="Agregar turno" icon={<CalendarPlus size={20} />} />}
         />
         <Calendar selectedDate={selectedDate} onSelectDate={selectDate} />
-        <Filters
+        <FilterPanel
           title="Equipo"
           options={teamFilters}
           onToggleOption={toggleTeamFilter}
+          actionLabel="+ Agregar miembro"
+          onActionClick={() => console.log('Agregar miembro clicked')}
         />
-        <Filters
+        <FilterPanel
           title="Servicios"
           options={serviceFilters}
           onToggleOption={toggleServiceFilter}
+          actionLabel="+ Agregar producto"
+          onActionClick={() => console.log('Agregar producto clicked')}
+        />
+        <FilterPanel
+          title="Clientes"
+          options={clientFilters}
+          onToggleOption={toggleClientFilter}
+          actionLabel="+ Agregar cliente"
+          onActionClick={() => console.log('Agregar cliente clicked')}
         />
       </Sidebar>
       <MainContent>
@@ -91,7 +111,7 @@ function Agenda() {
           onPrevWeek={prevWeek}
           onNextWeek={nextWeek}
         />
-        <Schedule selectedDate={selectedDate} />
+        <Schedule selectedDate={selectedDate} members={selectedMembers} />
       </MainContent>
     </Layout>
   );

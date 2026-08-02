@@ -3,7 +3,7 @@
   Sidebar: barra de navegación con íconos (nav, fija) + panel de contenido (children libres).
 */
 
-import { CalendarDays, Palette, Package, Store, Smile } from 'lucide-react';
+import { CalendarDays, Palette, Smile } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
@@ -16,8 +16,6 @@ interface SidebarProps {
 
 const navItems = [
   { to: '/admin/agenda', icon: CalendarDays, label: 'Agenda' },
-  { to: '/admin/equipo', icon: Store, label: 'Equipo/Ambientes' },
-  { to: '/admin/productos', icon: Package, label: 'Productos/Servicios' },
   { to: '/admin/clientes', icon: Smile, label: 'Clientes' },
   { to: '/admin/personalizacion', icon: Palette, label: 'Personalizacion' },
 ];
