@@ -84,7 +84,7 @@ export default function Schedule({ selectedDate, members, className }: ScheduleP
      en el reparto equitativo — las columnas de miembros se dividen el espacio sobrante. */
   const labelColumn: TableColumn<string> = {
     key: 'label',
-    header: null,
+    header: <span className="sr-only">Horas</span>,
     width: 'var(--size-4xl)',
     cellClassName: twMerge(ScheduleLabelCellClasses.required, ScheduleLabelCellClasses.style),
     cell: (slot, index) =>
@@ -108,7 +108,7 @@ export default function Schedule({ selectedDate, members, className }: ScheduleP
 
   return (
     <Box className={twMerge(ScheduleClasses.required, ScheduleClasses.style, className)}>
-      <div className={twMerge(ScheduleScrollClasses.required, ScheduleScrollClasses.style)}>
+      <div data-schedule-scroll className={twMerge(ScheduleScrollClasses.required, ScheduleScrollClasses.style)}>
         <div className={twMerge(ScheduleContentClasses.required, ScheduleContentClasses.style)}>
           <Table
             columns={columns}

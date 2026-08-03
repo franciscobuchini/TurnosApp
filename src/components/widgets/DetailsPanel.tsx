@@ -89,8 +89,8 @@ export default function DetailsPanel({
       header: null,
       width: 'var(--size-xl)',
       cellClassName: FilterPanelTableSideCellClasses,
-      cell: () => (
-        <Image className="h-(--size-xl) w-(--size-xl) rounded-full" />
+      cell: (option) => (
+        <Image name={option.label} className="h-(--size-xl) w-(--size-xl) rounded-full" />
       ),
     },
     {

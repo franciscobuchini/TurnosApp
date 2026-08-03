@@ -6,6 +6,7 @@
 import { Ellipsis } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Dropdown from '../interface/Dropdown';
+import Image from '../interface/Image';
 import Table, { type TableColumn } from '../interface/Table';
 import type { Client } from '../../variables/types.ts';
 import { getClients, currencyFormatter } from '../../variables/data.ts';
@@ -19,11 +20,20 @@ const ClientsTableActionsClasses = {
 
 const columns: TableColumn<Client>[] = [
   {
+    key: 'avatar',
+    header: '',
+    cell: (client) => (
+      <Image src={client.photo} name={client.name} className="w-(--size-xl) h-(--size-xl) rounded-full" />
+    ),
+    alignClassName: 'text-left',
+    width: '5%',
+  },
+  {
     key: 'name',
     header: 'Cliente',
     cell: (client) => client.name,
     alignClassName: 'text-left',
-    width: '30%',
+    width: '25%',
   },
   {
     key: 'phone',

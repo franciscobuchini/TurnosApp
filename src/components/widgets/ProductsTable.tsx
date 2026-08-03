@@ -66,7 +66,7 @@ export default function ProductsTable() {
       header: '',
       cell: (product) => (
         <div className={twMerge(ProductsTableInfoCellClasses.required, ProductsTableInfoCellClasses.style)}>
-          <Image className={twMerge(ProductsTableAvatarShapeClasses.required, ProductsTableAvatarShapeClasses.style)} />
+          <Image src={product.photo} name={product.name} className={twMerge(ProductsTableAvatarShapeClasses.required, ProductsTableAvatarShapeClasses.style)} />
           <div className={twMerge(ProductsTableInfoColumnClasses.required, ProductsTableInfoColumnClasses.style)}>
             <span>{product.name}</span>
             <span className={twMerge(ProductsTableDescriptionClasses.required, ProductsTableDescriptionClasses.style)}>

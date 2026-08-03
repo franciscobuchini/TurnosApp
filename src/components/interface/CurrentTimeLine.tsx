@@ -52,7 +52,15 @@ export default function CurrentTimeLine({ selectedDate, className }: CurrentTime
 
     setLineTop(nextTop);
 
-    lineRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    /* Scroll del contenedor scrollable para que la línea quede casi arriba,
+       con un pequeño margen superior (~10% del viewport) para dar contexto. */
+    const scrollable = lineRef.current.closest<HTMLElement>('[data-schedule-scroll]');
+
+    if (scrollable && scrollable.scrollHeight > scrollable.clientHeight) {
+      const topMargin = scrollable.clientHeight * 0.1;
+      const targetScroll = nextTop - topMargin;
+      scrollable.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+    }
   }, [isToday, now]);
 
   if (!isToday) return null;

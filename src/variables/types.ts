@@ -11,6 +11,7 @@ export type DaySchedule = {
 
 export type TeamMember = {
   name: string;
+  photo?: string;
   role: string;
   email: string;
   phone: string;
@@ -20,6 +21,7 @@ export type TeamMember = {
 
 export type Product = {
   name: string;
+  photo?: string;
   description: string;
   price: number;
   duration: string;
@@ -27,6 +29,7 @@ export type Product = {
 
 export type Client = {
   name: string;
+  photo?: string;
   phone: string;
   appointmentsCount: number;
   totalSpent: number;
