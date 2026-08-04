@@ -33,21 +33,6 @@ function Agenda() {
   const [serviceFilters, setServiceFilters] = useState(getServiceFilters);
   const [clientFilters, setClientFilters] = useState(getClientFilters);
 
-  const teamDropdownItems = [
-    { label: 'Ver perfil', onClick: () => console.log('Ver perfil clicked') },
-    { label: 'Asignar turno', onClick: () => console.log('Asignar turno clicked') },
-  ];
-
-  const serviceDropdownItems = [
-    { label: 'Editar servicio', onClick: () => console.log('Editar servicio clicked') },
-    { label: 'Ver historial', onClick: () => console.log('Ver historial clicked') },
-  ];
-
-  const clientDropdownItems = [
-    { label: 'Contactar', onClick: () => console.log('Contactar clicked') },
-    { label: 'Ver agenda', onClick: () => console.log('Ver agenda clicked') },
-  ];
-
   const weekDays = getWeekDays(viewDate);
   const selectedMembers = getSelectedMembers(teamFilters);
 
@@ -99,7 +84,6 @@ function Agenda() {
           onToggleOption={toggleTeamFilter}
           actionLabel="+ Agregar miembro"
           onActionClick={() => console.log('Agregar miembro clicked')}
-          dropdownItems={teamDropdownItems}
         />
         <DetailsPanel
           title="Servicios"
@@ -107,7 +91,6 @@ function Agenda() {
           onToggleOption={toggleServiceFilter}
           actionLabel="+ Agregar producto"
           onActionClick={() => console.log('Agregar producto clicked')}
-          dropdownItems={serviceDropdownItems}
         />
         <DetailsPanel
           title="Clientes"
@@ -115,7 +98,6 @@ function Agenda() {
           onToggleOption={toggleClientFilter}
           actionLabel="+ Agregar cliente"
           onActionClick={() => console.log('Agregar cliente clicked')}
-          dropdownItems={clientDropdownItems}
         />
       </Sidebar>
       <MainContent>

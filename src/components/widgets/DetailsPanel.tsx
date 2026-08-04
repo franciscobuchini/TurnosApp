@@ -7,7 +7,6 @@ import type { DetailsHTMLAttributes } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
-import Dropdown from '../interface/Dropdown';
 import Image from '../interface/Image';
 import Table, { type TableColumn } from '../interface/Table';
 import ContentHeader from './ContentHeader';
@@ -20,18 +19,12 @@ export interface DetailsPanelOption {
   disabled?: boolean;
 }
 
-export interface DetailsPanelDropdownItem {
-  label: string;
-  onClick?: () => void;
-}
-
 interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   title: string;
   options: DetailsPanelOption[];
   onToggleOption?: (id: string, checked: boolean) => void;
   actionLabel?: string;
   onActionClick?: () => void;
-  dropdownItems?: DetailsPanelDropdownItem[];
 }
 
 /* FilterPanelClasses: contenedor nativo del panel. shrink-0 en la base: cerrado, nunca se comprime.
@@ -74,7 +67,6 @@ export default function DetailsPanel({
   onToggleOption,
   actionLabel,
   onActionClick,
-  dropdownItems,
   className,
   name,
   ...props
@@ -98,20 +90,6 @@ export default function DetailsPanel({
       header: null,
       cellClassName: FilterPanelTableCellLabelClasses,
       cell: (option) => <span>{option.label}</span>,
-    },
-    {
-      key: 'right-action',
-      header: null,
-      width: 'var(--size-xl)',
-      cellClassName: FilterPanelTableSideCellClasses,
-      cell: () => (
-        <Dropdown
-          items={dropdownItems ?? []}
-          content={<span className="text-sm">•</span>}
-          iconOnly="bottom"
-          className="h-(--size-xl) w-(--size-xl) rounded-xl p-0"
-        />
-      ),
     },
   ];
 

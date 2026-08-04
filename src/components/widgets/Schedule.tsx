@@ -52,6 +52,18 @@ const ScheduleLabelCellClasses = {
   style: '',
 };
 
+/* ScheduleLabelTextClasses: etiqueta de texto de la hora flotante */
+const ScheduleLabelTextClasses = {
+  required: 'absolute inset-x-0 top-0 -translate-y-1/2',
+  style: '',
+};
+
+/* ScheduleLabelHeaderClasses: cabecera invisible para accesibilidad de horas */
+const ScheduleLabelHeaderClasses = {
+  required: 'sr-only',
+  style: '',
+};
+
 /* ScheduleSlotCellClasses: la celda del contenido de cada fila */
 const ScheduleSlotCellClasses = {
   required: '',
@@ -84,11 +96,11 @@ export default function Schedule({ selectedDate, members, className }: ScheduleP
      en el reparto equitativo — las columnas de miembros se dividen el espacio sobrante. */
   const labelColumn: TableColumn<string> = {
     key: 'label',
-    header: <span className="sr-only">Horas</span>,
+    header: <span className={twMerge(ScheduleLabelHeaderClasses.required, ScheduleLabelHeaderClasses.style)}>Horas</span>,
     width: 'var(--size-4xl)',
     cellClassName: twMerge(ScheduleLabelCellClasses.required, ScheduleLabelCellClasses.style),
     cell: (slot, index) =>
-      index === 0 ? '' : index % 4 === 0 ? <span className="absolute inset-x-0 top-0 -translate-y-1/2">{slot}</span> : '',
+      index === 0 ? '' : index % 4 === 0 ? <span className={twMerge(ScheduleLabelTextClasses.required, ScheduleLabelTextClasses.style)}>{slot}</span> : '',
   };
 
   /* Una columna por cada miembro seleccionado. Si no hay ninguno,
