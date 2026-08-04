@@ -3,14 +3,16 @@
   Panel colapsable reutilizable con details/summary.
 */
 
-import type { DetailsHTMLAttributes } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import type { DetailsHTMLAttributes, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Button from '../interface/Button';
+import Dropdown from '../interface/Dropdown';
 import Image from '../interface/Image';
 import Table, { type TableColumn } from '../interface/Table';
 import ContentHeader from './ContentHeader';
 import { useFiltersGroup } from '../../functions/filtersGroupContext';
+import AddButton from '../buttons/AddButton';
+import SummaryButton from '../buttons/SummaryButton';
 
 export interface DetailsPanelOption {
   id: string;
@@ -22,51 +24,56 @@ export interface DetailsPanelOption {
 interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   title: string;
   options: DetailsPanelOption[];
-  onToggleOption?: (id: string, checked: boolean) => void;
+  renderDropdownItems?: (option: DetailsPanelOption) => ReactNode[];
   actionLabel?: string;
-  onActionClick?: () => void;
 }
 
-/* FilterPanelClasses: contenedor nativo del panel. shrink-0 en la base: cerrado, nunca se comprime.
-   open:shrink: solo cuando está abierto participa de la compresión del flex-col del Sidebar,
-   así se hace tan grande como el contenido le permita, y cuando el conjunto del Sidebar
-   ya no tiene más espacio, se comprime y el overflow-y-auto de FilterPanelOptionsClasses
-   activa el scroll interno. */
+/* FilterPanelClasses: contenedor nativo del panel */
 const FilterPanelClasses = {
-  required: 'group flex w-full flex-col cursor-pointer p-(--size-xs) shrink-0 open:shrink open:gap-(--size-s) open:min-h-0 open:overflow-hidden',
+  required: 'group w-full cursor-pointer p-(--size-xs) shrink-0',
   style: 'bg-stone-900 rounded-3xl text-white',
-};
-
-/* FilterPanelSummaryIconClasses: flecha del summary, rota cuando details está abierto */
-const FilterPanelSummaryIconClasses = {
-  required: 'transition-transform duration-200 group-open:rotate-180',
-  style: '',
 };
 
 /* FilterPanelBodyClasses: wrapper de la lista de opciones + botón de acción, dentro del details abierto */
 const FilterPanelBodyClasses = {
-  required: 'flex flex-col flex-1 min-h-0 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-stone-850 [&::-webkit-scrollbar-thumb]:rounded-full',
+  required: 'flex flex-col gap-(--size-s) flex-1 min-h-0 overflow-y-auto',
+  style: '',
+  scrollbar: '[scrollbar-width:thin] [scrollbar-color:var(--color-stone-600)_transparent] [scrollbar-gutter:stable] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-stone-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-corner]:bg-transparent'
+};
+
+/* DetailsPanelContentClasses: wrapper del contenido del trigger (imagen + label). */
+const DetailsPanelContentClasses = {
+  required: 'flex items-center gap-(--size-s) w-full h-(--size-2xl) text-left',
   style: '',
 };
 
-/* FilterPanelActionButtonClasses: estilo para el botón de acción al final */
-const FilterPanelActionButtonClasses = {
-  required: 'w-full mt-(--size-s) shrink-0',
-  style: 'bg-transparent',
+/* DetailsPanelAvatarClasses: forma y tamaño de la imagen del trigger. */
+const DetailsPanelAvatarClasses = {
+  required: 'h-(--size-xl) w-(--size-xl) rounded-full shrink-0',
+  style: '',
 };
 
-/* FilterPanelTableCellLabelClasses: clase para la celda del texto/label */
-const FilterPanelTableCellLabelClasses = 'h-10 p-0 pl-(--size-s) align-middle text-left text-sm';
+/* DetailsPanelLabelClasses: texto del nombre en el trigger. */
+const DetailsPanelLabelClasses = {
+  required: '',
+  style: '',
+};
 
-/* FilterPanelTableSideCellClasses: clases para las columnas laterales pequeñas */
-const FilterPanelTableSideCellClasses = 'h-(--size-xl) w-(--size-xl) p-0 align-middle text-center';
+/* el trigger completo (Dropdown) de cada fila. */
+const DetailsPanelTriggerClasses = {
+  required: 'w-full justify-start px-(--size-xs)',
+  style: 'bg-transparent hover:bg-stone-950',
+};
+/* estilo que se aplica al trigger cuando el dropdown está abierto */
+const DetailsPanelTriggerOpenClasses = {
+  style: 'bg-stone-950',
+};
 
 export default function DetailsPanel({
   title,
   options,
-  onToggleOption,
+  renderDropdownItems,
   actionLabel,
-  onActionClick,
   className,
   name,
   ...props
@@ -74,34 +81,103 @@ export default function DetailsPanel({
   /* Si no se pasa un name explícito, usa el del contenedor (sidebar/maincontent)
      para que abrir este panel cierre a los demás del mismo contenedor. */
   const groupName = useFiltersGroup();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const [bodyMaxHeight, setBodyMaxHeight] = useState<number | undefined>();
+
+  useEffect(() => {
+    const details = detailsRef.current;
+    if (!details) return;
+
+    const updateBodyMaxHeight = () => {
+      if (!details.open) {
+        setBodyMaxHeight(undefined);
+        return;
+      }
+
+      const parent = details.parentElement;
+      const summary = details.querySelector('summary');
+      const body = details.querySelector<HTMLElement>('[data-filter-panel-body]');
+
+      if (!parent || !summary || !body) return;
+
+      const parentStyles = getComputedStyle(parent);
+      const detailsStyles = getComputedStyle(details);
+      const parentRect = parent.getBoundingClientRect();
+      const detailsRect = details.getBoundingClientRect();
+      const summaryRect = summary.getBoundingClientRect();
+
+      const parentPaddingBottom = Number.parseFloat(parentStyles.paddingBottom) || 0;
+      const detailsPaddingTop = Number.parseFloat(detailsStyles.paddingTop) || 0;
+      const detailsPaddingBottom = Number.parseFloat(detailsStyles.paddingBottom) || 0;
+      const detailsGap = Number.parseFloat(detailsStyles.rowGap) || Number.parseFloat(detailsStyles.gap) || 0;
+
+      const availablePanelHeight = parentRect.bottom
+        - parentPaddingBottom
+        - detailsRect.top
+        - detailsPaddingTop
+        - detailsPaddingBottom;
+
+      const nextBodyMaxHeight = Math.max(0, availablePanelHeight - summaryRect.height - detailsGap);
+
+      setBodyMaxHeight(nextBodyMaxHeight);
+    };
+
+    updateBodyMaxHeight();
+
+    const resizeObserver = new ResizeObserver(updateBodyMaxHeight);
+    resizeObserver.observe(details);
+    resizeObserver.observe(document.body);
+
+    details.addEventListener('resize-filter-panel', updateBodyMaxHeight);
+    window.addEventListener('resize', updateBodyMaxHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      details.removeEventListener('resize-filter-panel', updateBodyMaxHeight);
+      window.removeEventListener('resize', updateBodyMaxHeight);
+    };
+  }, []);
 
   const columns: TableColumn<DetailsPanelOption>[] = [
     {
-      key: 'left-action',
+      key: 'content',
       header: null,
-      width: 'var(--size-xl)',
-      cellClassName: FilterPanelTableSideCellClasses,
+      cellClassName: 'p-0',
       cell: (option) => (
-        <Image name={option.label} className="h-(--size-xl) w-(--size-xl) rounded-full" />
+        <Dropdown
+          items={renderDropdownItems ? renderDropdownItems(option) : []}
+          content={
+            <div className={twMerge(DetailsPanelContentClasses.required, DetailsPanelContentClasses.style)}>
+              <Image
+                name={option.label}
+                className={twMerge(DetailsPanelAvatarClasses.required, DetailsPanelAvatarClasses.style)}
+              />
+              <span className={twMerge(DetailsPanelLabelClasses.required, DetailsPanelLabelClasses.style)}>
+                {option.label}
+              </span>
+            </div>
+          }
+          className={twMerge(DetailsPanelTriggerClasses.required, DetailsPanelTriggerClasses.style)}
+          openClassName={twMerge(DetailsPanelTriggerOpenClasses.style)}
+        />
       ),
-    },
-    {
-      key: 'label',
-      header: null,
-      cellClassName: FilterPanelTableCellLabelClasses,
-      cell: (option) => <span>{option.label}</span>,
     },
   ];
 
   return (
     <details
       {...props}
+      ref={detailsRef}
       data-filter-panel
       name={name ?? groupName}
       onToggle={(e) => {
         props.onToggle?.(e);
 
         const details = e.currentTarget;
+
+        window.requestAnimationFrame(() => {
+          details.dispatchEvent(new Event('resize-filter-panel'));
+        });
 
         if (details.open || !groupName) return;
 
@@ -124,28 +200,25 @@ export default function DetailsPanel({
       <summary>
         <ContentHeader
           title={title}
-          action={<ChevronDown className={twMerge(FilterPanelSummaryIconClasses.required, FilterPanelSummaryIconClasses.style)} size={20} />}
+          action={<SummaryButton />}
         />
       </summary>
 
-      <div className={twMerge(FilterPanelBodyClasses.required, FilterPanelBodyClasses.style)}>
+      <div
+        data-filter-panel-body
+        className={twMerge(FilterPanelBodyClasses.required, FilterPanelBodyClasses.style, FilterPanelBodyClasses.scrollbar)}
+        style={bodyMaxHeight === undefined ? undefined : { maxHeight: bodyMaxHeight }}
+      >
         <Table
           columns={columns}
           rows={options}
           rowHeightClassName=""
-          className="w-full text-white"
+          footer={
+            actionLabel ? (
+              <AddButton text={actionLabel} />
+            ) : undefined
+          }
         />
-
-        {actionLabel && (
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              onActionClick?.();
-            }}
-            text={actionLabel}
-            className={twMerge(FilterPanelActionButtonClasses.required, FilterPanelActionButtonClasses.style)}
-          />
-        )}
       </div>
     </details>
   );

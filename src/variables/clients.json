@@ -58,5 +58,65 @@
     "phone": "+54 9 11 1234-5678",
     "appointmentsCount": 7,
     "totalSpent": 64000
+  },
+  {
+    "name": "Agustina Fernandez",
+    "phone": "+54 9 11 2345-1111",
+    "appointmentsCount": 9,
+    "totalSpent": 108000
+  },
+  {
+    "name": "Tomas Alvarez",
+    "phone": "+54 9 11 2345-2222",
+    "appointmentsCount": 5,
+    "totalSpent": 47000
+  },
+  {
+    "name": "Julieta Herrera",
+    "phone": "+54 9 11 2345-3333",
+    "appointmentsCount": 11,
+    "totalSpent": 132000
+  },
+  {
+    "name": "Franco Molina",
+    "phone": "+54 9 11 2345-4444",
+    "appointmentsCount": 14,
+    "totalSpent": 176500
+  },
+  {
+    "name": "Micaela Torres",
+    "phone": "+54 9 11 2345-5555",
+    "appointmentsCount": 2,
+    "totalSpent": 19500
+  },
+  {
+    "name": "Benjamin Romero",
+    "phone": "+54 9 11 2345-6666",
+    "appointmentsCount": 13,
+    "totalSpent": 154000
+  },
+  {
+    "name": "Candela Acosta",
+    "phone": "+54 9 11 2345-7777",
+    "appointmentsCount": 4,
+    "totalSpent": 36500
+  },
+  {
+    "name": "Federico Silva",
+    "phone": "+54 9 11 2345-8888",
+    "appointmentsCount": 16,
+    "totalSpent": 198000
+  },
+  {
+    "name": "Milagros Rios",
+    "phone": "+54 9 11 2345-9999",
+    "appointmentsCount": 7,
+    "totalSpent": 73500
+  },
+  {
+    "name": "Leandro Vega",
+    "phone": "+54 9 11 3456-1111",
+    "appointmentsCount": 3,
+    "totalSpent": 28500
   }
 ]

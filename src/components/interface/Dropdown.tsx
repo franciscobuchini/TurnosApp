@@ -1,65 +1,46 @@
-/* Dropdown.tsx: componente principal, arma el trigger y controla la apertura del menu */
+/* 
+  src/components/interface/Dropdown.tsx
+  Componente de dropdown (desplegable) para mostrar un menú de opciones.
+*/
 
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { twMerge } from 'tailwind-merge';
 import Button from './Button';
-import type { TooltipPosition } from './Tooltip';
-
-/* DropdownItem: forma de cada opcion del menu, se comparte entre Dropdown y DropdownMenu */
-interface DropdownItem {
-  label: string;
-  onClick?: () => void;
-}
-
-// ============================================================
-// DropdownMenu: panel flotante con la lista de opciones
-// ============================================================
 
 /* DropdownMenuProps: props que recibe DropdownMenu */
 interface DropdownMenuProps {
-  items: DropdownItem[];
-  onClose: () => void;
+  items: ReactNode[];
+  position: { top: number; left: number };
 }
 
-/* DropdownClasses*/
+/* DropdownClasses: contenedor raíz, solo posiciona */
 const DropdownClasses = {
-  required: 'relative inline-flex justify-center',
-  style: '',
+  required: 'relative',
 };
 
-/* DropdownMenuClasses*/
+/* DropdownMenuClasses */
 const DropdownMenuClasses = {
-  required: 'absolute right-0 top-full z-110 mt-(--size-xs) min-w-(--size-2xl) w-max',
-  style: 'bg-white shadow-lg border border-black/10',
-};
-
-/* DropdownItemClasses*/
-const DropdownItemClasses = {
-  required: 'block text-left whitespace-nowrap px-(--size-m) py-(--size-s)',
-  style: 'hover:bg-black/5',
+  required: 'fixed z-[9999] p-(--size-s) overflow-hidden',
+  style: 'bg-stone-950 shadow-2xl rounded-2xl',
 };
 
 /* DropdownMenu: es el panel del dropdown */
-function DropdownMenu({ items, onClose }: DropdownMenuProps) {
-  return (
+function DropdownMenu({ items, position }: DropdownMenuProps) {
+  return createPortal(
     <div
       role="menu"
       className={twMerge(DropdownMenuClasses.required, DropdownMenuClasses.style)}
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+      }}
     >
-      {items.map((item) => (
-        <Button
-          key={item.label}
-          role="menuitem"
-          className={twMerge(DropdownItemClasses.required, DropdownItemClasses.style)}
-          onClick={() => {
-            item.onClick?.();
-            onClose();
-          }}
-        >
-          {item.label}
-        </Button>
+      {items.map((item, index) => (
+        <div key={index}>{item}</div>
       ))}
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -69,17 +50,27 @@ function DropdownMenu({ items, onClose }: DropdownMenuProps) {
 
 /* DropdownProps: props que recibe Dropdown */
 interface DropdownProps {
-  items: DropdownItem[];
+  items: ReactNode[];
   content: ReactNode;
-  iconOnly?: TooltipPosition;
+  icon?: ReactNode;
   className?: string;
+  openClassName?: string;
   disabled?: boolean;
-  onClick?: (event: ReactMouseEvent<HTMLDivElement>) => void;
+  onClick?: (event: ReactMouseEvent<HTMLElement>) => void;
 }
 
 /* Dropdown: arma el boton trigger, controla el estado abierto/cerrado y renderiza DropdownMenu */
-export default function Dropdown({ items, content, iconOnly, className, disabled, onClick }: DropdownProps) {
+export default function Dropdown({
+  items,
+  content,
+  icon,
+  className,
+  openClassName,
+  disabled,
+  onClick,
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   /* handleClickOutside: cierra el dropdown si se hace click fuera del area */
@@ -97,38 +88,41 @@ export default function Dropdown({ items, content, iconOnly, className, disabled
     };
   }, []);
 
-  const handleRootClick = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (disabled) return;
+  useEffect(() => {
+    if (!isOpen) return;
 
-    const target = event.target as HTMLElement | null;
-    if (target?.closest('[role="menu"]')) return;
+    const trigger = dropdownRef.current?.querySelector('button');
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + 8,
+      left: rect.right - 220,
+    });
+  }, [isOpen]);
+
+  const handleToggle = (event: ReactMouseEvent<HTMLElement>) => {
+    event.stopPropagation();
+    if (disabled) return;
 
     onClick?.(event);
     setIsOpen((currentValue) => !currentValue);
   };
 
-  const handleTriggerClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    if (disabled) return;
-    setIsOpen((currentValue) => !currentValue);
-  };
-
   return (
-    <div ref={dropdownRef} className={twMerge(DropdownClasses.required, className || DropdownClasses.style)} onClick={handleRootClick}>
+    <div ref={dropdownRef} className={DropdownClasses.required}>
       <Button
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        onClick={handleTriggerClick}
-        iconOnly={iconOnly}
-        className={className}
+        onClick={handleToggle}
+        icon={icon}
+        className={twMerge(className, isOpen && openClassName)}
         disabled={disabled}
       >
         {content}
       </Button>
 
-      {isOpen && (
-        <DropdownMenu items={items} onClose={() => setIsOpen(false)} />
-      )}
+      {isOpen && <DropdownMenu items={items} position={menuPosition} />}
     </div>
   );
 }

@@ -3,12 +3,12 @@
   Vista mensual de la agenda, utilizando el componente Table genérico para la estructura.
 */
 
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Button from '../interface/Button';
 import Table, { type TableColumn } from '../interface/Table';
 import ContentHeader from './ContentHeader';
+import CalendarNavigationButtons from '../buttons/CalendarNavigationButtons';
+import SummaryButton from '../buttons/SummaryButton';
 import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../functions/dateName';
 import { useFiltersGroup } from '../../functions/filtersGroupContext';
 
@@ -30,11 +30,6 @@ const CalendarClasses = {
 /* CalendarActionsClasses: wrapper de los botones de navegación*/
 const CalendarActionsClasses = {
   required: 'flex gap-(--size-s)',
-  style: '',
-};
-
-const CalendarActionButtonClasses = {
-  required: 'h-(--size-xl)',
   style: '',
 };
 
@@ -232,24 +227,12 @@ export default function Calendar({
           action={
             <div className={twMerge(CalendarActionsClasses.required, CalendarActionsClasses.style)}>
               {/* Controles de navegación: sólo visibles cuando está abierto */}
-              <div className="hidden group-open:flex gap-(--size-s)">
-                <Button
-                  onClick={prevMonth}
-                  iconOnly="bottom"
-                  className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
-                >
-                  <ChevronLeft size={18} />
-                </Button>
-                <Button
-                  onClick={nextMonth}
-                  iconOnly="bottom"
-                  className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style)}
-                >
-                  <ChevronRight size={18} />
-                </Button>
-              </div>
+              <CalendarNavigationButtons
+                onPrevMonth={prevMonth}
+                onNextMonth={nextMonth}
+              />
               {/* Flecha de expandir: sólo visible cuando está colapsado */}
-              <ChevronDown className="block group-open:hidden text-white" size={20} />
+              <SummaryButton className="block group-open:hidden" />
             </div>
           }
         />

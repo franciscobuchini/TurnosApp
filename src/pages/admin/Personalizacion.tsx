@@ -16,7 +16,7 @@ function Personalizacion() {
       <Sidebar>
         <MainHeader
           title="Personalizacion"
-          action={<Button iconOnly="bottom" text="Visitar sitio" icon={<Eye size={20} />} />}
+          action={<Button text="Visitar sitio" icon={<Eye size={20} />} />}
         />
       </Sidebar>
       <MainContent />

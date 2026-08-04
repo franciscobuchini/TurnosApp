@@ -22,6 +22,7 @@ interface TableProps<T> {
   rows: T[];
   rowHeightClassName: string;
   className?: string;
+  footer?: ReactNode;
 }
 
 /* TableClasses:
@@ -64,6 +65,7 @@ export default function Table<T>({
   rows,
   rowHeightClassName,
   className = '',
+  footer,
 }: TableProps<T>) {
   return (
     <table className={twMerge(TableClasses.required, TableClasses.style, className)}>
@@ -122,6 +124,16 @@ export default function Table<T>({
           </tr>
         ))}
       </tbody>
+
+      {footer && (
+        <tfoot>
+          <tr>
+            <td colSpan={columns.length} className={twMerge(BodyCellClasses.required, BodyCellClasses.style, 'p-0')}>
+              {footer}
+            </td>
+          </tr>
+        </tfoot>
+      )}
     </table>
   );
 }

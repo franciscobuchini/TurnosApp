@@ -6,7 +6,6 @@
 import { useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import Sidebar from '../../components/layout/Sidebar';
-import MainHeader from '../../components/widgets/MainHeader';
 import MainContent from '../../components/layout/MainContent';
 import Calendar from '../../components/widgets/Calendar';
 import DetailsPanel from '../../components/widgets/DetailsPanel';
@@ -14,6 +13,8 @@ import { getTeamFilters, getServiceFilters, getClientFilters } from '../../varia
 import { getSelectedMembers } from '../../functions/teamFilters';
 import Schedule from '../../components/widgets/Schedule';
 import WeekSelector from '../../components/widgets/WeekSelector';
+import HideButton from '../../components/buttons/HideButton';
+import DetailsButton from '../../components/buttons/DetailsButton';
 
 /* getWeekDays: dado un día, devuelve 7 fechas centradas en él (3 antes, el día, 3 después) */
 const getWeekDays = (date: Date): Date[] => {
@@ -29,9 +30,9 @@ const getWeekDays = (date: Date): Date[] => {
 function Agenda() {
   const [viewDate, setViewDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [teamFilters, setTeamFilters] = useState(getTeamFilters);
-  const [serviceFilters, setServiceFilters] = useState(getServiceFilters);
-  const [clientFilters, setClientFilters] = useState(getClientFilters);
+  const [teamFilters] = useState(getTeamFilters);
+  const [serviceFilters] = useState(getServiceFilters);
+  const [clientFilters] = useState(getClientFilters);
 
   const weekDays = getWeekDays(viewDate);
   const selectedMembers = getSelectedMembers(teamFilters);
@@ -53,51 +54,36 @@ function Agenda() {
     setSelectedDate(date);
   };
 
-  const toggleTeamFilter = (id: string, checked: boolean) => {
-    setTeamFilters((filters) =>
-      filters.map((filter) => (filter.id === id ? { ...filter, checked } : filter)),
-    );
-  };
-
-  const toggleServiceFilter = (id: string, checked: boolean) => {
-    setServiceFilters((filters) =>
-      filters.map((filter) => (filter.id === id ? { ...filter, checked } : filter)),
-    );
-  };
-
-  const toggleClientFilter = (id: string, checked: boolean) => {
-    setClientFilters((filters) =>
-      filters.map((filter) => (filter.id === id ? { ...filter, checked } : filter)),
-    );
-  };
-
   return (
     <Layout>
       <Sidebar>
-        <MainHeader
-          title="minube.site"
-        />
         <Calendar selectedDate={selectedDate} onSelectDate={selectDate} />
         <DetailsPanel
           title="Equipo"
           options={teamFilters}
-          onToggleOption={toggleTeamFilter}
-          actionLabel="+ Agregar miembro"
-          onActionClick={() => console.log('Agregar miembro clicked')}
+          renderDropdownItems={() => [
+            <HideButton key="team-toggle" className="w-full justify-between" />,
+            <DetailsButton key="team-details" text="Ver perfil" className="w-full justify-between" />,
+          ]}
+          actionLabel="Agregar miembro"
         />
         <DetailsPanel
           title="Servicios"
           options={serviceFilters}
-          onToggleOption={toggleServiceFilter}
-          actionLabel="+ Agregar producto"
-          onActionClick={() => console.log('Agregar producto clicked')}
+          renderDropdownItems={() => [
+            <HideButton key="service-toggle" className="w-full justify-between" />,
+            <DetailsButton key="service-details" text="Detalles" className="w-full justify-between" />,
+          ]}
+          actionLabel="Agregar producto"
         />
         <DetailsPanel
           title="Clientes"
           options={clientFilters}
-          onToggleOption={toggleClientFilter}
-          actionLabel="+ Agregar cliente"
-          onActionClick={() => console.log('Agregar cliente clicked')}
+          renderDropdownItems={() => [
+            <HideButton key="client-toggle" className="w-full justify-between" />,
+            <DetailsButton key="client-details" text="Detalles" className="w-full justify-between" />,
+          ]}
+          actionLabel="Agregar cliente"
         />
       </Sidebar>
       <MainContent>
