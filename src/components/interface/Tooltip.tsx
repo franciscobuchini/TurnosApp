@@ -17,14 +17,14 @@ interface TooltipProps {
 const TooltipClasses = {
   required:
     'pointer-events-none absolute whitespace-nowrap rounded-lg px-(--size-s) py-(--size-xs) text-sm opacity-0 group-hover:opacity-100 z-10',
-  style: 'bg-stone-900 text-white',
+  style: 'bg-gray-900 text-white',
 };
 
 const TooltipPositionClasses: Record<TooltipPosition, string> = {
-  top: 'bottom-full left-1/2 mb-(--size-2xs) -translate-x-1/2',
-  bottom: 'top-full left-1/2 mt-(--size-2xs) -translate-x-1/2',
-  left: 'right-full top-1/2 mr-(--size-2xs) -translate-y-1/2',
-  right: 'left-full top-1/2 ml-(--size-2xs) -translate-y-1/2',
+  top: 'bottom-full left-1/2 mb-(--size-2xs) -trangray-x-1/2',
+  bottom: 'top-full left-1/2 mt-(--size-2xs) -trangray-x-1/2',
+  left: 'right-full top-1/2 mr-(--size-2xs) -trangray-y-1/2',
+  right: 'left-full top-1/2 ml-(--size-2xs) -trangray-y-1/2',
 };
 
 export function getTooltipPositionClass(position: TooltipPosition) {

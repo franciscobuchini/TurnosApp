@@ -20,7 +20,7 @@ const IDLE_RETURN_DELAY = 5 * 60 * 1000;
    scroll-mt-(--size-m): margen que respeta scrollIntoView, para que la línea no quede pegada al borde. */
 const CurrentTimeLineClasses = {
   required: 'absolute left-(--size-4xl) right-0 h-0.5 scroll-mt-(--size-m) pointer-events-none',
-  style: 'bg-red-500',
+  style: 'bg-gray-900 rounded-full',
 };
 
 export default function CurrentTimeLine({
@@ -32,6 +32,7 @@ export default function CurrentTimeLine({
   const [lineTop, setLineTop] = useState<number | null>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const returnTimeoutRef = useRef<number | null>(null);
+  const previousNowRef = useRef(new Date());
   const autoScrollTimeoutRef = useRef<number | null>(null);
   const isAutoScrollingRef = useRef(false);
   const isFollowingLineRef = useRef(true);
@@ -59,9 +60,25 @@ export default function CurrentTimeLine({
   };
 
   useEffect(() => {
-    const interval = window.setInterval(() => setNow(new Date()), 60 * 1000);
+    const interval = window.setInterval(() => {
+      const nextNow = new Date();
+      const isMidnightCrossing =
+        previousNowRef.current.getDate() !== nextNow.getDate() ||
+        previousNowRef.current.getMonth() !== nextNow.getMonth() ||
+        previousNowRef.current.getFullYear() !== nextNow.getFullYear();
+
+      previousNowRef.current = nextNow;
+      setNow(nextNow);
+
+      if (isMidnightCrossing && selectedDate && isSameDay(selectedDate, nextNow)) {
+        const scrollable = lineRef.current?.closest<HTMLElement>('[data-schedule-scroll]');
+        scrollable?.scrollTo({ top: 0, behavior: 'smooth' });
+        onReturnToToday?.(nextNow);
+      }
+    }, 60 * 1000);
+
     return () => window.clearInterval(interval);
-  }, []);
+  }, [onReturnToToday, selectedDate]);
 
   useEffect(() => {
     shouldScrollToLineRef.current = true;

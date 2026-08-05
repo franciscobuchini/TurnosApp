@@ -10,17 +10,17 @@ interface DaySelectorButtonsProps {
 
 const WeekSelectorDayButtonClasses = {
   required: 'h-(--size-6xl) flex-1 p-(--size-s) shrink-0 justify-center items-center',
-  style: '',
+  style: 'bg-transparent',
 };
 
 const WeekSelectorDaySelectedClasses = {
   required: '',
-  style: 'bg-stone-900 text-white',
+  style: 'bg-gray-900 text-white',
 };
 
 const WeekSelectorDayTodayClasses = {
   required: '',
-  style: 'ring-2 ring-stone-900',
+  style: 'bg-white',
 };
 
 const WeekSelectorDayVisibilityClasses: Record<number, { required: string; style: string }> = {

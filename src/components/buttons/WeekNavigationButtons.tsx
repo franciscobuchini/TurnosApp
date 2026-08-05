@@ -10,12 +10,12 @@ interface WeekNavigationButtonProps {
 
 const WeekSelectorNavButtonClasses = {
   required: 'h-(--size-6xl) w-(--size-4xl) shrink-0 justify-center items-center',
-  style: 'rounded-2xl',
+  style: 'rounded-2xl bg-transparent',
 };
 
 const WeekSelectorNavButtonSelectedClasses = {
   required: '',
-  style: 'bg-stone-900 text-white',
+  style: 'bg-gray-900 text-white',
 };
 
 export function PrevWeekButton({ onClick, className, isSelected = false }: WeekNavigationButtonProps) {

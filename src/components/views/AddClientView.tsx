@@ -1,6 +1,8 @@
-import { ArrowLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import Button from '../interface/Button';
 import MainHeader from '../widgets/MainHeader';
+
+export const ADD_CLIENT_VIEW_TITLE = 'Agregar nuevo cliente';
 
 interface AddClientViewProps {
   open?: boolean;
@@ -10,31 +12,44 @@ interface AddClientViewProps {
   onBack?: () => void;
 }
 
+const AddClientViewClasses = {
+  required: 'flex h-full w-full flex-col gap-(--size-m) text-white',
+  style: '',
+};
+
+const AddClientContentClasses = {
+  required: 'flex flex-1 items-center justify-center rounded-[1.5rem] bg-gray-50 p-(--size-m)',
+  style: '',
+};
+
+const AddClientBackButtonClasses = {
+  required: 'h-(--size-xl) w-(--size-xl) rounded-full bg-gray-900 p-0 text-white hover:bg-gray-900',
+  style: '',
+};
+
 export default function AddClientView({
   open = true,
   onClose,
-  title = 'Agregar cliente',
-  description = 'Aquí iría el formulario para agregar un cliente.',
+  title = ADD_CLIENT_VIEW_TITLE,
   onBack,
 }: AddClientViewProps) {
   if (!open) return null;
 
   const handleBack = onBack ?? onClose;
   return (
-    <div className="flex h-full w-full flex-col gap-(--size-m) text-white">
+    <div className={AddClientViewClasses.required}>
       <MainHeader
         title={title}
         action={
           <Button
-            className="h-(--size-xl) w-(--size-xl) rounded-full bg-stone-800 p-0 text-white hover:bg-stone-700"
+            className={AddClientBackButtonClasses.required}
             onClick={handleBack}
-            icon={<ArrowLeft size="var(--size-m)" />}
+            icon={<ChevronLeft size="var(--size-m)" />}
             aria-label="Volver"
           />
         }
       />
-      <div className="flex flex-1 items-center justify-center rounded-[1.5rem] bg-stone-800/70 p-(--size-m)">
-        <p className="text-lg text-stone-300">{description}</p>
+      <div className={AddClientContentClasses.required}>
       </div>
     </div>
   );

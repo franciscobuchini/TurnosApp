@@ -33,9 +33,9 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
 /* FilterPanelClasses: contenedor nativo del panel */
 const FilterPanelClasses = {
   required: 'group w-full cursor-pointer p-(--size-xs) shrink-0',
-  style: 'bg-stone-900 rounded-3xl text-white',
+  style: 'bg-gray-900 rounded-3xl text-white',
   animations:
-    '[interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-translate-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:translate-y-0',
+    '[interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-trangray-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:trangray-y-0',
 };
 
 /* FilterPanelBodyClasses: wrapper de la lista de opciones + botón de acción, dentro del details abierto */
@@ -69,13 +69,13 @@ const DetailsPanelLabelClasses = {
 /* el trigger completo (Dropdown) de cada fila. */
 const DetailsPanelTriggerClasses = {
   required: 'w-full justify-start px-(--size-xs)',
-  style: 'bg-transparent hover:bg-stone-950',
+  style: 'bg-transparent hover:bg-gray-950',
   animations:
-    'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-avatar]]:scale-105 hover:[&_[data-details-panel-content]]:translate-x-0.5',
+    'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-avatar]]:scale-105 hover:[&_[data-details-panel-content]]:trangray-x-0.5',
 };
 /* estilo que se aplica al trigger cuando el dropdown está abierto */
 const DetailsPanelTriggerOpenClasses = {
-  style: 'bg-stone-950',
+  style: 'bg-gray-950',
 };
 
 export default function DetailsPanel({

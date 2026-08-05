@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AddButton from './AddButton';
-import AddClientView from '../views/AddClientView';
+import AddClientView, { ADD_CLIENT_VIEW_TITLE } from '../views/AddClientView';
 
 interface AddClientButtonProps {
   onOpen?: () => void;
@@ -20,13 +20,13 @@ export default function AddClientButton({ onOpen }: AddClientButtonProps) {
 
   return (
     <>
-      <AddButton text="Agregar cliente" onClick={handleOpen} />
+      <AddButton text={ADD_CLIENT_VIEW_TITLE} onClick={handleOpen} />
 
       {!onOpen && (
         <AddClientView
           open={isOpen}
           onClose={() => setIsOpen(false)}
-          title="Agregar cliente"
+          title={ADD_CLIENT_VIEW_TITLE}
         />
       )}
     </>

@@ -10,18 +10,20 @@ interface ServiceFilterButtonProps {
     checked?: boolean;
     disabled?: boolean;
   };
+  onToggle?: (id: string, checked: boolean) => void;
   onOpenDetails?: () => void;
   className?: string;
 }
 
-export default function ServiceFilterButton({ option, onOpenDetails, className }: ServiceFilterButtonProps): ReactNode {
+export default function ServiceFilterButton({ option, onToggle, onOpenDetails, className }: ServiceFilterButtonProps): ReactNode {
   return (
     <>
       <HideButton
         visible={option.checked ?? true}
+        onToggle={(visible) => onToggle?.(option.id, visible)}
         activeText="Desactivar"
         inactiveText="Activar"
-        icon={option.checked === false ? <PowerOff size="var(--size-m)" /> : <Power size="var(--size-m)" />}
+        icon={option.checked === false ? <Power size="var(--size-m)" /> : <PowerOff size="var(--size-m)" />}
         className={className ?? 'w-full justify-between'}
       />
       <ViewServiceButton

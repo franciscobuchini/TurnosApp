@@ -12,7 +12,7 @@ interface DetailsButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'ch
 
 const DetailsButtonClasses = {
   required: 'justify-between w-full h-(--size-xl) p-(--size-s) gap-(--size-l)',
-  style: 'bg-transparent text-stone-400 hover:text-white',
+  style: 'bg-transparent text-gray-400 hover:text-white',
 };
 
 export default function DetailsButton({

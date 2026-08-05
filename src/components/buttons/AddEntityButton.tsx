@@ -2,11 +2,11 @@ import { useState } from 'react';
 import AddButton from './AddButton';
 import AddEntityView from '../views/AddEntityView';
 
-interface AddMemberButtonProps {
+interface AddEntityButtonProps {
   onOpen?: () => void;
 }
 
-export default function AddMemberButton({ onOpen }: AddMemberButtonProps) {
+export default function AddEntityButton({ onOpen }: AddEntityButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => {

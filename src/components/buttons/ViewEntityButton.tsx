@@ -2,13 +2,13 @@ import { useState } from 'react';
 import DetailsButton from './DetailsButton';
 import ViewEntityView from '../views/ViewEntityView';
 
-interface ViewMemberButtonProps {
+interface ViewEntityButtonProps {
   label: string;
   className?: string;
   onOpen?: () => void;
 }
 
-export default function ViewMemberButton({ label, className, onOpen }: ViewMemberButtonProps) {
+export default function ViewEntityButton({ label, className, onOpen }: ViewEntityButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleOpen = () => {

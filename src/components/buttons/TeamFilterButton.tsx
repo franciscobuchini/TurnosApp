@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import HideButton from './HideButton';
-import ViewMemberButton from './ViewMemberButton';
+import ViewEntityButton from './ViewEntityButton';
 
 interface TeamFilterButtonProps {
   option: {
@@ -22,7 +22,7 @@ export default function TeamFilterButton({ option, onToggle, onOpenDetails, clas
         onToggle={(visible) => onToggle?.(option.id, visible)}
         className={className}
       />
-      <ViewMemberButton
+      <ViewEntityButton
         label={option.label}
         className="w-full justify-between"
         onOpen={onOpenDetails}

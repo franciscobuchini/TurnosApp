@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import Button from '../interface/Button';
 import MainHeader from '../widgets/MainHeader';
 
@@ -10,31 +10,44 @@ interface ViewClientViewProps {
   onBack?: () => void;
 }
 
+const ViewClientViewClasses = {
+  required: 'flex h-full w-full flex-col gap-(--size-m) text-white',
+  style: '',
+};
+
+const ViewClientContentClasses = {
+  required: 'flex flex-1 items-center justify-center rounded-[1.5rem] bg-gray-50 p-(--size-m)',
+  style: '',
+};
+
+const ViewClientBackButtonClasses = {
+  required: 'h-(--size-xl) w-(--size-xl) rounded-full bg-gray-900 p-0 text-white hover:bg-gray-900',
+  style: '',
+};
+
 export default function ViewClientView({
   open = true,
   onClose,
-  title = 'Detalles de cliente',
-  description = 'Aquí se mostraría la vista detallada del elemento seleccionado.',
+  title = 'Detalles',
   onBack,
 }: ViewClientViewProps) {
   if (!open) return null;
 
   const handleBack = onBack ?? onClose;
   return (
-    <div className="flex h-full w-full flex-col gap-(--size-m) text-white">
+    <div className={ViewClientViewClasses.required}>
       <MainHeader
         title={title}
         action={
           <Button
-            className="h-(--size-xl) w-(--size-xl) rounded-full bg-stone-800 p-0 text-white hover:bg-stone-700"
+            className={ViewClientBackButtonClasses.required}
             onClick={handleBack}
-            icon={<ArrowLeft size="var(--size-m)" />}
+            icon={<ChevronLeft size="var(--size-m)" />}
             aria-label="Volver"
           />
         }
       />
-      <div className="flex flex-1 items-center justify-center rounded-[1.5rem] bg-stone-800/70 p-(--size-m)">
-        <p className="text-lg text-stone-300">{description}</p>
+      <div className={ViewClientContentClasses.required}>
       </div>
     </div>
   );

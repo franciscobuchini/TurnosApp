@@ -14,7 +14,6 @@ export default function AddServiceView({
   open = true,
   onClose,
   title = 'Agregar servicio',
-  description = 'Aquí iría el formulario para agregar un servicio.',
   onBack,
 }: AddServiceViewProps) {
   if (!open) return null;
@@ -26,15 +25,14 @@ export default function AddServiceView({
         title={title}
         action={
           <Button
-            className="h-(--size-xl) w-(--size-xl) rounded-full bg-stone-800 p-0 text-white hover:bg-stone-700"
+            className="h-(--size-xl) w-(--size-xl) rounded-full bg-gray-900 p-0 text-white hover:bg-gray-900"
             onClick={handleBack}
             icon={<ChevronLeft size="var(--size-m)" />}
             aria-label="Volver"
           />
         }
       />
-      <div className="flex flex-1 items-center justify-center rounded-[1.5rem] bg-stone-800/70 p-(--size-m)">
-        <p className="text-lg text-stone-300">{description}</p>
+      <div className="flex flex-1 items-center justify-center rounded-[1.5rem] bg-gray-50 p-(--size-m)">
       </div>
     </div>
   );

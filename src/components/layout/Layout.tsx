@@ -11,7 +11,7 @@ interface LayoutProps {
 
 const LayoutClasses = {
   required: 'h-dvh w-dvw overflow-hidden flex flex-col',
-  style: 'bg-stone-950',
+  style: 'bg-gray-950',
 };
 
 const LayoutContentClasses = {

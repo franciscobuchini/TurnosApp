@@ -20,7 +20,7 @@ interface ImageProps {
    - style: color. Esto sí se puede modificar. */
 const ImageClasses = {
   required: 'flex items-center justify-center select-none w-(--size-5xl) h-(--size-5xl) rounded-full',
-  style: 'bg-stone-700',
+  style: 'bg-gray-700',
 };
 
 /* ImageInitialsClasses: estilo del texto de iniciales */

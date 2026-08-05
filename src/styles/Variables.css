@@ -26,3 +26,12 @@
   --size-7xl: 256px; /* Sidebar Desktop */
   --size-8xl: 420px; /* Sidebar 2 */
 }
+
+/*
+  Dark Mode: Colores del tema oscuro 
+*/
+:root {
+  --primary-01: #E7FC6F;
+  --primary-02: #C5BDF6;
+  --primary-03: #C4DEEB;
+}

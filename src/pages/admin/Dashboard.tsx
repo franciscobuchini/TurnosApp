@@ -11,7 +11,7 @@ import Calendar from '../../components/widgets/Calendar';
 import DetailsPanel from '../../components/widgets/DetailsPanel';
 import { getTeamFilters, getServiceFilters, getClientFilters } from '../../variables/data';
 import { useTeamFilters } from '../../functions/teamFilters';
-import AddMemberButton from '../../components/buttons/AddMemberButton';
+import AddEntityButton from '../../components/buttons/AddEntityButton';
 import AddServiceButton from '../../components/buttons/AddServiceButton';
 import AddClientButton from '../../components/buttons/AddClientButton';
 import TeamFilterButton from '../../components/buttons/TeamFilterButton';
@@ -27,7 +27,13 @@ import ViewClientView from '../../components/views/ViewClientView';
 
 function Dashboard() {
   const { teamFilters, selectedMembers, toggleTeamFilter } = useTeamFilters(getTeamFilters);
-  const [serviceFilters] = useState(getServiceFilters);
+  const [serviceFilters, setServiceFilters] = useState(getServiceFilters);
+
+  const toggleServiceFilter = (id: string, checked: boolean) => {
+    setServiceFilters((current) =>
+      current.map((f) => (f.id === id ? { ...f, checked } : f)),
+    );
+  };
   const { viewDate, selectedDate, setViewDate, setSelectedDate, selectDate } = useAgendaDate();
   const [clientFilters] = useState(getClientFilters);
   const [activeView, setActiveView] = useState<
@@ -55,7 +61,7 @@ function Dashboard() {
               onOpenDetails={() => setActiveView({ type: 'view-member', name: option.label })}
             />,
           ]}
-          action={<AddMemberButton onOpen={() => setActiveView({ type: 'add-member' })} />}
+          action={<AddEntityButton onOpen={() => setActiveView({ type: 'add-member' })} />}
         />
         <DetailsPanel
           title="Servicios"
@@ -64,6 +70,7 @@ function Dashboard() {
             <ServiceFilterButton
               key={`${option.id}-toggle`}
               option={option}
+              onToggle={toggleServiceFilter}
               onOpenDetails={() => setActiveView({ type: 'view-service', name: option.label })}
             />,
           ]}
@@ -105,7 +112,7 @@ function Dashboard() {
           <ViewClientView
             open={true}
             onClose={() => setActiveView({ type: 'schedule' })}
-            title={`Detalles de ${activeView.name}`}
+            title={`Acerca de ${activeView.name}`}
           />
         ) : (
           <ScheduleView

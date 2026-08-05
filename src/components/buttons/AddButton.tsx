@@ -12,7 +12,7 @@ interface AddButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClic
 
 const AddButtonClasses = {
   required: 'w-full h-(--size-2xl) gap-(--size-m) shrink-0 justify-center',
-  style: 'bg-transparent text-stone-400 hover:text-white',
+  style: 'bg-transparent text-gray-400 hover:text-white',
 };
 
 export default function AddButton({

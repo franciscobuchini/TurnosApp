@@ -23,7 +23,7 @@ const DropdownClasses = {
 /* DropdownMenuClasses */
 const DropdownMenuClasses = {
   required: 'fixed z-[9999] p-(--size-s) overflow-hidden',
-  style: 'bg-stone-950 shadow-2xl rounded-2xl',
+  style: 'bg-gray-950 shadow-2xl rounded-2xl',
 };
 
 /* DropdownMenu: es el panel del dropdown */
@@ -97,27 +97,36 @@ export default function Dropdown({
 
   /* calculatePosition: mide el trigger y devuelve dónde debería ir el menú.
      Se calcula inicialmente con un ancho estimado, luego se ajusta con useLayoutEffect. */
-  const calculatePosition = (estimatedWidth = 120) => {
+  const calculatePosition = (menuWidth = 120, menuHeight = 0) => {
     const trigger = dropdownRef.current?.querySelector('button');
     if (!trigger) return null;
 
     const rect = trigger.getBoundingClientRect();
-    return {
-      top: rect.top - 92,
-      left: rect.right - estimatedWidth,
-    };
+    const gap = 4;
+
+    // Por defecto, posicionar debajo del trigger
+    let top = rect.bottom + gap;
+    let left = rect.right - menuWidth;
+
+    // Si no hay espacio abajo, posicionar arriba
+    if (top + menuHeight > window.innerHeight) {
+      top = rect.top - menuHeight - gap;
+    }
+
+    // Clampar para que no se salga de la pantalla
+    top = Math.max(gap, Math.min(top, window.innerHeight - menuHeight - gap));
+    left = Math.max(gap, Math.min(left, window.innerWidth - menuWidth - gap));
+
+    return { top, left };
   };
 
   useLayoutEffect(() => {
     if (isOpen && dropdownRef.current && menuRef.current) {
       const trigger = dropdownRef.current.querySelector('button');
       if (trigger) {
-        const triggerRect = trigger.getBoundingClientRect();
         const menuRect = menuRef.current.getBoundingClientRect();
-        setMenuPosition({
-          top: triggerRect.top - 92,
-          left: triggerRect.right - menuRect.width,
-        });
+        const pos = calculatePosition(menuRect.width, menuRect.height);
+        if (pos) setMenuPosition(pos);
       }
     }
   }, [isOpen]);
