@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AddButton from './AddButton';
-import AddEntityView from '../views/AddEntityView';
+import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../views/entityViews/AddEntityView';
 
 interface AddEntityButtonProps {
   onOpen?: () => void;
@@ -20,13 +20,13 @@ export default function AddEntityButton({ onOpen }: AddEntityButtonProps) {
 
   return (
     <>
-      <AddButton text="Agregar miembro" onClick={handleOpen} />
+      <AddButton text={ADD_ENTITY_VIEW_TITLE} onClick={handleOpen} />
 
       {!onOpen && (
         <AddEntityView
           open={isOpen}
           onClose={() => setIsOpen(false)}
-          title="Agregar miembro"
+          title={ADD_ENTITY_VIEW_TITLE}
         />
       )}
     </>

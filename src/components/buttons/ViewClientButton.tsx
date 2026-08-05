@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DetailsButton from './DetailsButton';
-import ViewClientView from '../views/ViewClientView';
+import ViewClientView from '../views/clientViews/DetailsClientView';
 
 interface ViewClientButtonProps {
   label: string;

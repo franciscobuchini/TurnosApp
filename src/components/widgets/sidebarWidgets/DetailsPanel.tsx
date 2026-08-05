@@ -6,13 +6,13 @@
 import { useRef } from 'react';
 import type { DetailsHTMLAttributes, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Dropdown from '../interface/Dropdown';
-import Image from '../interface/Image';
-import Table, { type TableColumn } from '../interface/Table';
-import ContentHeader from './ContentHeader';
-import { useFiltersGroup } from '../../functions/filtersGroupContext';
-import AddButton from '../buttons/AddButton';
-import SummaryButton from '../buttons/SummaryButton';
+import Dropdown from '../../interface/Dropdown';
+import Image from '../../interface/Image';
+import Table, { type TableColumn } from '../../interface/Table';
+import ContentHeader from '../../interface/ContentHeader';
+import { useFiltersGroup } from '../../../functions/filtersGroupContext';
+import AddButton from '../../buttons/AddButton';
+import SummaryButton from '../../buttons/SummaryButton';
 
 export interface DetailsPanelOption {
   id: string;
@@ -49,14 +49,14 @@ const FilterPanelBodyClasses = {
 const DetailsPanelContentClasses = {
   required: 'flex items-center gap-(--size-s) w-full h-(--size-2xl) text-left',
   style: '',
-  animations: 'motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out',
+  animations: '',
 };
 
 /* DetailsPanelAvatarClasses: forma y tamaño de la imagen del trigger. */
 const DetailsPanelAvatarClasses = {
   required: 'h-(--size-xl) w-(--size-xl) shrink-0',
   style: '',
-  animations: 'motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out',
+  animations: '',
 };
 
 /* DetailsPanelLabelClasses: texto del nombre en el trigger. */
@@ -71,7 +71,7 @@ const DetailsPanelTriggerClasses = {
   required: 'w-full justify-start px-(--size-xs)',
   style: 'bg-transparent hover:bg-gray-950',
   animations:
-    'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-avatar]]:scale-105 hover:[&_[data-details-panel-content]]:trangray-x-0.5',
+    'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-content]]:trangray-x-0.5',
 };
 /* estilo que se aplica al trigger cuando el dropdown está abierto */
 const DetailsPanelTriggerOpenClasses = {

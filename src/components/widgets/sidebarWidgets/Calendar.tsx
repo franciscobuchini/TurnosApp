@@ -5,12 +5,12 @@
 
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Table, { type TableColumn } from '../interface/Table';
-import ContentHeader from './ContentHeader';
-import CalendarNavigationButtons from '../buttons/CalendarNavigationButtons';
-import SummaryButton from '../buttons/SummaryButton';
-import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../functions/dateName';
-import { useFiltersGroup } from '../../functions/filtersGroupContext';
+import Table, { type TableColumn } from '../../interface/Table';
+import ContentHeader from '../../interface/ContentHeader';
+import CalendarNavigationButtons from '../../buttons/CalendarNavigationButtons';
+import SummaryButton from '../../buttons/SummaryButton';
+import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../../functions/dateName';
+import { useFiltersGroup } from '../../../functions/filtersGroupContext';
 
 interface CalendarProps {
   weekDaysNames?: string[];

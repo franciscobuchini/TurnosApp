@@ -6,9 +6,9 @@
 */
 
 import { twMerge } from 'tailwind-merge';
-import Box from '../../components/interface/Box';
-import Table, { type TableColumn } from '../../components/interface/Table';
-import CurrentTimeLine from '../interface/CurrentTimeLine';
+import Box from '../../interface/Box';
+import Table, { type TableColumn } from '../../interface/Table';
+import CurrentTimeLine from '../../interface/CurrentTimeLine';
 
 interface ScheduleProps {
   selectedDate: Date;
@@ -19,8 +19,8 @@ interface ScheduleProps {
 
 /* ScheduleClasses: contenedor (Box)*/
 const ScheduleClasses = {
-  required: 'relative flex flex-col flex-1 p-0',
-  style: 'rounded-3xl bg-white overflow-hidden',
+  required: 'relative flex flex-col flex-1 p-0 overflow-hidden',
+  style: 'rounded-3xl bg-white ',
 };
 
 /* ScheduleScrollClasses: wrapper que scrollea, altura fija por flex-1 */

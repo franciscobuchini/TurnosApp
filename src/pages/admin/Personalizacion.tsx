@@ -5,7 +5,7 @@
 
 import Layout from '../../components/layout/Layout';
 import Sidebar from '../../components/layout/Sidebar';
-import MainHeader from '../../components/widgets/MainHeader';
+import MainHeader from '../../components/interface/MainHeader';
 import MainContent from '../../components/layout/MainContent';
 import Button from '../../components/interface/Button';
 import { Eye } from 'lucide-react';

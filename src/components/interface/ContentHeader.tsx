@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Box from '../interface/Box';
+import Box from './Box';
 
 interface ContentHeaderProps {
   title: ReactNode;

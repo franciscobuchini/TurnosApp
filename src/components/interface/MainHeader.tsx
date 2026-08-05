@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Box from '../interface/Box';
+import Box from './Box';
 
 interface MainHeaderProps {
   title: string;
@@ -11,7 +11,7 @@ interface MainHeaderProps {
 /* MainHeaderClasses: contenedor (Box). shrink-0: nunca se comprime, sin importar
    qué otro hermano (como un FilterPanel abierto) necesite espacio. */
 const MainHeaderClasses = {
-  required: 'flex shrink-0 items-center gap-(--size-m)',
+  required: 'flex shrink-0 items-center gap-(--size-xl) h-(--size-6xl)',
   style: '',
 };
 
@@ -24,12 +24,12 @@ const MainHeaderTitleColumnClasses = {
 /* MainHeaderTitleClasses */
 const MainHeaderTitleClasses = {
   required: '',
-  style: 'text-4xl font-semibold tracking-tight text-gray-900',
+  style: 'text-4xl font-semibold tracking-tight text-gray-900 leading-none',
 };
 
 /* MainHeaderActionClasses: contenedor de la acción */
 const MainHeaderActionClasses = {
-  required: 'flex shrink-0 items-center',
+  required: 'flex shrink-0 items-center self-center',
   style: '',
 };
 

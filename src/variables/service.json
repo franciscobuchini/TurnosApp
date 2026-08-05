@@ -52,53 +52,5 @@
     "description": "Baño de crema hidratante y sellado de puntas.",
     "price": 6500,
     "duration": "40 min"
-  },
-  {
-    "name": "Balayage",
-    "description": "Técnica de aclarado degradado natural en puntas.",
-    "price": 18000,
-    "duration": "120 min"
-  },
-  {
-    "name": "Corte Infantil",
-    "description": "Corte divertido para niños menores de 12 años.",
-    "price": 5500,
-    "duration": "30 min"
-  },
-  {
-    "name": "Manicura Rusa",
-    "description": "Limpieza profunda de cutículas y esmaltado semipermanente.",
-    "price": 7500,
-    "duration": "60 min"
-  },
-  {
-    "name": "Pedicura Completa",
-    "description": "Tratamiento de pies con exfoliación y esmaltado.",
-    "price": 9000,
-    "duration": "75 min"
-  },
-  {
-    "name": "Nail Art Complejo",
-    "description": "Diseños a mano alzada en cada uña.",
-    "price": 4000,
-    "duration": "30 min"
-  },
-  {
-    "name": "Masaje Descontracturante",
-    "description": "Masaje corporal intenso de espalda y cuello para liberar tensiones.",
-    "price": 12000,
-    "duration": "50 min"
-  },
-  {
-    "name": "Laminado de Cejas",
-    "description": "Tratamiento para alinear y fijar las cejas, logrando un aspecto más definido y natural.",
-    "price": 7000,
-    "duration": "45 min"
-  },
-  {
-    "name": "Lifting de Pestañas",
-    "description": "Curvado y realce de pestañas naturales con efecto duradero, incluye nutrición con keratina.",
-    "price": 9500,
-    "duration": "60 min"
   }
 ]

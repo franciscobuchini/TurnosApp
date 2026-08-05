@@ -3,8 +3,8 @@
 */
 
 import { twMerge } from 'tailwind-merge';
-import { NextWeekButton, PrevWeekButton } from '../buttons/WeekNavigationButtons';
-import DaySelectorButtons from '../buttons/DaySelectorButtons';
+import { NextWeekButton, PrevWeekButton } from '../../buttons/WeekNavigationButtons';
+import DaySelectorButtons from '../../buttons/DaySelectorButtons';
 
 interface WeekSelectorProps {
   viewDate: Date;

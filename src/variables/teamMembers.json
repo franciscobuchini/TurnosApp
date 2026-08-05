@@ -4,7 +4,12 @@
     "role": "Peluquero",
     "email": "carlos@mail.com",
     "phone": "+54 9 11 5678-1234",
-    "services": ["Corte", "Barba", "Coloración"],
+    "services": [
+      "Corte de Pelo Masculino",
+      "Recorte de Barba + Spa",
+      "Coloración y Reflejos",
+      "Tratamiento de Nutrición Capilar"
+    ],
     "schedule": [
       { "day": "L", "hours": ["9:00 - 18:00"] },
       { "day": "M", "hours": ["9:00 - 18:00"] },
@@ -18,7 +23,11 @@
     "role": "Estilista",
     "email": "mariana@mail.com",
     "phone": "+54 9 11 6789-2345",
-    "services": ["Coloración", "Reflejos", "Lavado"],
+    "services": [
+      "Coloración y Reflejos",
+      "Tratamiento de Nutrición Capilar",
+      "Corte de Pelo Masculino"
+    ],
     "schedule": [
       { "day": "M", "hours": ["10:00 - 19:00"] },
       { "day": "X", "hours": ["10:00 - 19:00"] },
@@ -32,7 +41,10 @@
     "role": "Barbero",
     "email": "diego@mail.com",
     "phone": "+54 9 11 7890-3456",
-    "services": ["Corte", "Barba"],
+    "services": [
+      "Corte de Pelo Masculino",
+      "Recorte de Barba + Spa"
+    ],
     "schedule": [
       { "day": "L", "hours": ["8:00 - 12:00", "14:00 - 18:00"] },
       { "day": "M", "hours": ["8:00 - 16:00"] },
@@ -47,7 +59,11 @@
     "role": "Manicurista",
     "email": "lucia@mail.com",
     "phone": "+54 9 11 8901-4567",
-    "services": ["Manicura", "Pedicura", "Nail Art"],
+    "services": [
+      "Manicura Rusa",
+      "Pedicura Completa",
+      "Nail Art Complejo"
+    ],
     "schedule": [
       { "day": "L", "hours": ["9:00 - 17:00"] },
       { "day": "M", "hours": ["9:00 - 17:00"] },
@@ -60,7 +76,10 @@
     "role": "Masajista",
     "email": "martin@mail.com",
     "phone": "+54 9 11 9012-5678",
-    "services": ["Masaje Descontracturante", "Masaje Relajante"],
+    "services": [
+      "Masaje Descontracturante",
+      "Masaje Relajante"
+    ],
     "schedule": [
       { "day": "X", "hours": ["14:00 - 20:00"] },
       { "day": "V", "hours": ["14:00 - 20:00"] },
@@ -72,7 +91,10 @@
     "role": "Colorista",
     "email": "sofia@mail.com",
     "phone": "+54 9 11 0123-6789",
-    "services": ["Coloración", "Balayage", "Nutrición"],
+    "services": [
+      "Coloración y Reflejos",
+      "Tratamiento de Nutrición Capilar"
+    ],
     "schedule": [
       { "day": "M", "hours": ["9:00 - 18:00"] },
       { "day": "X", "hours": ["9:00 - 18:00"] },
@@ -85,7 +107,9 @@
     "role": "Peluquero Infantil",
     "email": "javier@mail.com",
     "phone": "+54 9 11 1234-7890",
-    "services": ["Corte Infantil", "Peinado"],
+    "services": [
+      "Corte de Pelo Masculino"
+    ],
     "schedule": [
       { "day": "J", "hours": ["11:00 - 19:00"] },
       { "day": "V", "hours": ["11:00 - 19:00"] },

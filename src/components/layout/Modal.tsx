@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { twMerge } from 'tailwind-merge';
 import Box from '../interface/Box';
 import Button from '../interface/Button';
-import MainHeader from '../widgets/MainHeader';
+import MainHeader from '../interface/MainHeader';
 
 interface ModalProps {
   open?: boolean;

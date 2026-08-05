@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DetailsButton from './DetailsButton';
-import ViewServiceView from '../views/ViewServiceView';
+import ViewServiceView from '../views/serviceViews/DetailsServiceView';
 
 interface ViewServiceButtonProps {
   label: string;

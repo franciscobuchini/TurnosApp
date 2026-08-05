@@ -23,8 +23,9 @@
   --size-4xl: 64px; /* Image */
   --size-5xl: 80px; /* Sidebar Tablet */
   --size-6xl: 96px; /* Sidebar Tablet */
-  --size-7xl: 256px; /* Sidebar Desktop */
-  --size-8xl: 420px; /* Sidebar 2 */
+  --size-7xl: 256px;
+  --size-8xl: 420px; /* Sidebar*/
+  --size-9xl: 512px; /* Sidebar Desktop */
 }
 
 /*

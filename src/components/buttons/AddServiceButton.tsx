@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AddButton from './AddButton';
-import AddServiceView from '../views/AddServiceView';
+import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../views/serviceViews/AddServiceView';
 
 interface AddServiceButtonProps {
   onOpen?: () => void;
@@ -20,13 +20,13 @@ export default function AddServiceButton({ onOpen }: AddServiceButtonProps) {
 
   return (
     <>
-      <AddButton text="Agregar servicio" onClick={handleOpen} />
+      <AddButton text={ADD_SERVICE_VIEW_TITLE} onClick={handleOpen} />
 
       {!onOpen && (
         <AddServiceView
           open={isOpen}
           onClose={() => setIsOpen(false)}
-          title="Agregar servicio"
+          title={ADD_SERVICE_VIEW_TITLE}
         />
       )}
     </>

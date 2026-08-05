@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import WeekSelector from '../widgets/WeekSelector';
-import Schedule from '../widgets/Schedule';
+import WeekSelector from '../../widgets/mainWidgets/WeekSelector';
+import Schedule from '../../widgets/mainWidgets/Schedule';
 
 interface ScheduleViewProps {
   selectedMembers: string[];
