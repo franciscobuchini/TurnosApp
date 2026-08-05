@@ -7,11 +7,10 @@ import { NextWeekButton, PrevWeekButton } from '../buttons/WeekNavigationButtons
 import DaySelectorButtons from '../buttons/DaySelectorButtons';
 
 interface WeekSelectorProps {
-  weekDays: Date[];
+  viewDate: Date;
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
-  onPrevWeek: () => void;
-  onNextWeek: () => void;
+  onViewDateChange: (date: Date) => void;
   className?: string;
   prevButtonClassName?: string;
   nextButtonClassName?: string;
@@ -29,25 +28,47 @@ const WeekSelectorDaysClasses = {
   style: '',
 };
 
+/* getWeekDays: dado un día, devuelve 7 fechas centradas en él (3 antes, el día, 3 después) */
+const getWeekDays = (date: Date): Date[] => {
+  const week: Date[] = [];
+  for (let offset = -3; offset <= 3; offset++) {
+    const next = new Date(date);
+    next.setDate(date.getDate() + offset);
+    week.push(next);
+  }
+  return week;
+};
 
 export default function WeekSelector({
-  weekDays,
+  viewDate,
   selectedDate,
   onSelectDate,
-  onPrevWeek,
-  onNextWeek,
+  onViewDateChange,
   className,
 }: WeekSelectorProps) {
+  const weekDays = getWeekDays(viewDate);
   const normalizedSelectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
   const firstWeekDay = new Date(weekDays[0].getFullYear(), weekDays[0].getMonth(), weekDays[0].getDate());
   const lastWeekDay = new Date(weekDays[weekDays.length - 1].getFullYear(), weekDays[weekDays.length - 1].getMonth(), weekDays[weekDays.length - 1].getDate());
   const isSelectedBeforeWeek = normalizedSelectedDate < firstWeekDay;
   const isSelectedAfterWeek = normalizedSelectedDate > lastWeekDay;
 
+  const prevWeek = () => {
+    const next = new Date(viewDate);
+    next.setDate(viewDate.getDate() - 7);
+    onViewDateChange(next);
+  };
+
+  const nextWeek = () => {
+    const next = new Date(viewDate);
+    next.setDate(viewDate.getDate() + 7);
+    onViewDateChange(next);
+  };
+
   return (
     <div className={twMerge(WeekSelectorClasses.required, WeekSelectorClasses.style, className)}>
       <PrevWeekButton
-        onClick={onPrevWeek}
+        onClick={prevWeek}
         isSelected={isSelectedBeforeWeek}
       />
 
@@ -60,7 +81,7 @@ export default function WeekSelector({
       </div>
 
       <NextWeekButton
-        onClick={onNextWeek}
+        onClick={nextWeek}
         isSelected={isSelectedAfterWeek}
       />
     </div>

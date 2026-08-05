@@ -19,7 +19,7 @@ export type TeamMember = {
   schedule: DaySchedule[] | string;
 };
 
-export type Product = {
+export type service = {
   name: string;
   photo?: string;
   description: string;

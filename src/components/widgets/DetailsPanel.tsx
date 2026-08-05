@@ -3,7 +3,7 @@
   Panel colapsable reutilizable con details/summary.
 */
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import type { DetailsHTMLAttributes, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Dropdown from '../interface/Dropdown';
@@ -25,44 +25,53 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   title: string;
   options: DetailsPanelOption[];
   renderDropdownItems?: (option: DetailsPanelOption) => ReactNode[];
+  action?: ReactNode;
   actionLabel?: string;
+  onActionClick?: () => void;
 }
 
 /* FilterPanelClasses: contenedor nativo del panel */
 const FilterPanelClasses = {
   required: 'group w-full cursor-pointer p-(--size-xs) shrink-0',
   style: 'bg-stone-900 rounded-3xl text-white',
+  animations:
+    '[interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-translate-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:translate-y-0',
 };
 
 /* FilterPanelBodyClasses: wrapper de la lista de opciones + botón de acción, dentro del details abierto */
 const FilterPanelBodyClasses = {
   required: 'flex flex-col gap-(--size-s) flex-1 min-h-0 overflow-y-auto',
   style: '',
-  scrollbar: '[scrollbar-width:thin] [scrollbar-color:var(--color-stone-600)_transparent] [scrollbar-gutter:stable] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-stone-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-corner]:bg-transparent'
+  animations: 'motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out',
 };
 
 /* DetailsPanelContentClasses: wrapper del contenido del trigger (imagen + label). */
 const DetailsPanelContentClasses = {
   required: 'flex items-center gap-(--size-s) w-full h-(--size-2xl) text-left',
   style: '',
+  animations: 'motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out',
 };
 
 /* DetailsPanelAvatarClasses: forma y tamaño de la imagen del trigger. */
 const DetailsPanelAvatarClasses = {
-  required: 'h-(--size-xl) w-(--size-xl) rounded-full shrink-0',
+  required: 'h-(--size-xl) w-(--size-xl) shrink-0',
   style: '',
+  animations: 'motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out',
 };
 
 /* DetailsPanelLabelClasses: texto del nombre en el trigger. */
 const DetailsPanelLabelClasses = {
   required: '',
-  style: '',
+  style: 'transition-opacity',
+  animations: 'motion-safe:duration-150 motion-safe:ease-out',
 };
 
 /* el trigger completo (Dropdown) de cada fila. */
 const DetailsPanelTriggerClasses = {
   required: 'w-full justify-start px-(--size-xs)',
   style: 'bg-transparent hover:bg-stone-950',
+  animations:
+    'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-avatar]]:scale-105 hover:[&_[data-details-panel-content]]:translate-x-0.5',
 };
 /* estilo que se aplica al trigger cuando el dropdown está abierto */
 const DetailsPanelTriggerOpenClasses = {
@@ -73,7 +82,9 @@ export default function DetailsPanel({
   title,
   options,
   renderDropdownItems,
+  action,
   actionLabel,
+  onActionClick,
   className,
   name,
   ...props
@@ -82,61 +93,6 @@ export default function DetailsPanel({
      para que abrir este panel cierre a los demás del mismo contenedor. */
   const groupName = useFiltersGroup();
   const detailsRef = useRef<HTMLDetailsElement>(null);
-  const [bodyMaxHeight, setBodyMaxHeight] = useState<number | undefined>();
-
-  useEffect(() => {
-    const details = detailsRef.current;
-    if (!details) return;
-
-    const updateBodyMaxHeight = () => {
-      if (!details.open) {
-        setBodyMaxHeight(undefined);
-        return;
-      }
-
-      const parent = details.parentElement;
-      const summary = details.querySelector('summary');
-      const body = details.querySelector<HTMLElement>('[data-filter-panel-body]');
-
-      if (!parent || !summary || !body) return;
-
-      const parentStyles = getComputedStyle(parent);
-      const detailsStyles = getComputedStyle(details);
-      const parentRect = parent.getBoundingClientRect();
-      const detailsRect = details.getBoundingClientRect();
-      const summaryRect = summary.getBoundingClientRect();
-
-      const parentPaddingBottom = Number.parseFloat(parentStyles.paddingBottom) || 0;
-      const detailsPaddingTop = Number.parseFloat(detailsStyles.paddingTop) || 0;
-      const detailsPaddingBottom = Number.parseFloat(detailsStyles.paddingBottom) || 0;
-      const detailsGap = Number.parseFloat(detailsStyles.rowGap) || Number.parseFloat(detailsStyles.gap) || 0;
-
-      const availablePanelHeight = parentRect.bottom
-        - parentPaddingBottom
-        - detailsRect.top
-        - detailsPaddingTop
-        - detailsPaddingBottom;
-
-      const nextBodyMaxHeight = Math.max(0, availablePanelHeight - summaryRect.height - detailsGap);
-
-      setBodyMaxHeight(nextBodyMaxHeight);
-    };
-
-    updateBodyMaxHeight();
-
-    const resizeObserver = new ResizeObserver(updateBodyMaxHeight);
-    resizeObserver.observe(details);
-    resizeObserver.observe(document.body);
-
-    details.addEventListener('resize-filter-panel', updateBodyMaxHeight);
-    window.addEventListener('resize', updateBodyMaxHeight);
-
-    return () => {
-      resizeObserver.disconnect();
-      details.removeEventListener('resize-filter-panel', updateBodyMaxHeight);
-      window.removeEventListener('resize', updateBodyMaxHeight);
-    };
-  }, []);
 
   const columns: TableColumn<DetailsPanelOption>[] = [
     {
@@ -147,17 +103,44 @@ export default function DetailsPanel({
         <Dropdown
           items={renderDropdownItems ? renderDropdownItems(option) : []}
           content={
-            <div className={twMerge(DetailsPanelContentClasses.required, DetailsPanelContentClasses.style)}>
-              <Image
-                name={option.label}
-                className={twMerge(DetailsPanelAvatarClasses.required, DetailsPanelAvatarClasses.style)}
-              />
-              <span className={twMerge(DetailsPanelLabelClasses.required, DetailsPanelLabelClasses.style)}>
+            <div
+              data-details-panel-content
+              className={twMerge(
+                DetailsPanelContentClasses.required,
+                DetailsPanelContentClasses.style,
+                DetailsPanelContentClasses.animations,
+                option.checked === false && 'opacity-40',
+              )}
+            >
+              <span
+                data-details-panel-avatar
+                className={twMerge(
+                  DetailsPanelAvatarClasses.required,
+                  DetailsPanelAvatarClasses.style,
+                  DetailsPanelAvatarClasses.animations,
+                )}
+              >
+                <Image
+                  name={option.label}
+                  className="h-full w-full"
+                />
+              </span>
+              <span
+                className={twMerge(
+                  DetailsPanelLabelClasses.required,
+                  DetailsPanelLabelClasses.style,
+                  DetailsPanelLabelClasses.animations,
+                )}
+              >
                 {option.label}
               </span>
             </div>
           }
-          className={twMerge(DetailsPanelTriggerClasses.required, DetailsPanelTriggerClasses.style)}
+          className={twMerge(
+            DetailsPanelTriggerClasses.required,
+            DetailsPanelTriggerClasses.style,
+            DetailsPanelTriggerClasses.animations,
+          )}
           openClassName={twMerge(DetailsPanelTriggerOpenClasses.style)}
         />
       ),
@@ -195,7 +178,7 @@ export default function DetailsPanel({
           }
         }
       }}
-      className={twMerge(FilterPanelClasses.required, FilterPanelClasses.style, className)}
+      className={twMerge(FilterPanelClasses.required, FilterPanelClasses.style, FilterPanelClasses.animations, className)}
     >
       <summary>
         <ContentHeader
@@ -206,17 +189,24 @@ export default function DetailsPanel({
 
       <div
         data-filter-panel-body
-        className={twMerge(FilterPanelBodyClasses.required, FilterPanelBodyClasses.style, FilterPanelBodyClasses.scrollbar)}
-        style={bodyMaxHeight === undefined ? undefined : { maxHeight: bodyMaxHeight }}
+        className={twMerge(
+          FilterPanelBodyClasses.required,
+          FilterPanelBodyClasses.style,
+          FilterPanelBodyClasses.animations,
+        )}
       >
         <Table
           columns={columns}
           rows={options}
           rowHeightClassName=""
           footer={
-            actionLabel ? (
-              <AddButton text={actionLabel} />
-            ) : undefined
+            action ??
+            (actionLabel ? (
+              <AddButton
+                text={actionLabel}
+                onClick={onActionClick}
+              />
+            ) : undefined)
           }
         />
       </div>

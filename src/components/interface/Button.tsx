@@ -19,7 +19,7 @@ interface ButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
 
 /* ButtonClasses: el botón/link en sí */
 const ButtonClasses = {
-  required: 'relative flex items-center group cursor-pointer select-none',
+  required: 'relative flex items-center group cursor-pointer select-none justify-center',
   style: 'bg-red-500 rounded-2xl',
   disabled: 'pointer-events-none opacity-50',
 };

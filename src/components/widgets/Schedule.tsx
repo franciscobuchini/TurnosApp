@@ -13,6 +13,7 @@ import CurrentTimeLine from '../interface/CurrentTimeLine';
 interface ScheduleProps {
   selectedDate: Date;
   members: string[];
+  onSelectDate?: (date: Date) => void;
   className?: string;
 }
 
@@ -38,6 +39,12 @@ const ScheduleContentClasses = {
 const ScheduleTableClasses = {
   required: '',
   style: '',
+};
+
+/* ScheduleTableHeaderClasses: clases globales para el header de la tabla de turnos */
+const ScheduleTableHeaderClasses = {
+  required: '',
+  style: 'bg-white',
 };
 
 /* ScheduleRowHeightClasses*/
@@ -82,7 +89,12 @@ const ScheduleEmptyClasses = {
   style: 'text-stone-400 text-sm',
 };
 
-export default function Schedule({ selectedDate, members, className }: ScheduleProps) {
+export default function Schedule({
+  selectedDate,
+  members,
+  onSelectDate,
+  className,
+}: ScheduleProps) {
   const slots = Array.from({ length: 24 * 4 }, (_, index) => {
     const totalMinutes = index * 15;
     const hour = Math.floor(totalMinutes / 60);
@@ -127,8 +139,16 @@ export default function Schedule({ selectedDate, members, className }: ScheduleP
             rows={slots}
             rowHeightClassName={twMerge(ScheduleRowHeightClasses.required, ScheduleRowHeightClasses.style)}
             className={twMerge(ScheduleTableClasses.required, ScheduleTableClasses.style)}
+            headerClassName={twMerge(ScheduleTableHeaderClasses.required, ScheduleTableHeaderClasses.style)}
+            showHeader
+            stickyHeader
           />
-          {!isEmpty && <CurrentTimeLine selectedDate={selectedDate} />}
+          {!isEmpty && (
+            <CurrentTimeLine
+              selectedDate={selectedDate}
+              onReturnToToday={onSelectDate}
+            />
+          )}
         </div>
       </div>
       {isEmpty && (

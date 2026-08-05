@@ -5,10 +5,10 @@
   la implementación interna de cada getter sin tocar los componentes.
 */
 
-import type { TeamMember, Product, Client, FiltersOption } from './types.ts';
+import type { TeamMember, service, Client, FiltersOption } from './types.ts';
 import teamMembersJson from './teamMembers.json';
-import productsJson from './products.json';
-import clientsJson from './clients.json';
+import servicesJson from './service.json';
+import clientsJson from './client.json';
 
 /* ── Getters de entidades ─────────────────────────────────── */
 
@@ -16,8 +16,8 @@ export function getTeamMembers(): TeamMember[] {
   return teamMembersJson as TeamMember[];
 }
 
-export function getProducts(): Product[] {
-  return productsJson as Product[];
+export function getservices(): service[] {
+  return servicesJson as service[];
 }
 
 export function getClients(): Client[] {

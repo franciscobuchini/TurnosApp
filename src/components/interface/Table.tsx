@@ -22,7 +22,10 @@ interface TableProps<T> {
   rows: T[];
   rowHeightClassName: string;
   className?: string;
+  headerClassName?: string;
   footer?: ReactNode;
+  showHeader?: boolean;
+  stickyHeader?: boolean;
 }
 
 /* TableClasses:
@@ -51,7 +54,12 @@ const BodyRowClasses = {
 };
 
 const HeaderCellClasses = {
-  required: 'px-(--size-s)',
+  required: 'px-(--size-s) text-center',
+  style: 'bg-white',
+};
+
+const StickyHeaderCellClasses = {
+  required: 'sticky top-0 z-20',
   style: '',
 };
 
@@ -65,8 +73,13 @@ export default function Table<T>({
   rows,
   rowHeightClassName,
   className = '',
+  headerClassName = '',
   footer,
+  showHeader,
+  stickyHeader = false,
 }: TableProps<T>) {
+  const shouldShowHeader = showHeader ?? columns.some((column) => column.header);
+
   return (
     <table className={twMerge(TableClasses.required, TableClasses.style, className)}>
       <colgroup>
@@ -74,7 +87,7 @@ export default function Table<T>({
           <col key={column.key} style={column.width ? { width: column.width } : undefined} />
         ))}
       </colgroup>
-      {columns.some((column) => column.header) && (
+      {shouldShowHeader && (
         <thead>
           <tr className={twMerge(rowHeightClassName, HeaderRowClasses.required, HeaderRowClasses.style)}>
             {columns.map((column) => (
@@ -85,8 +98,11 @@ export default function Table<T>({
                   DefaultCellClasses.style,
                   HeaderCellClasses.required,
                   HeaderCellClasses.style,
+                  stickyHeader && StickyHeaderCellClasses.required,
+                  stickyHeader && StickyHeaderCellClasses.style,
                   column.alignClassName,
                   column.className,
+                  headerClassName,
                   column.headerClassName,
                 )}
               >

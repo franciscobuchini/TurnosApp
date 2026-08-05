@@ -11,7 +11,7 @@ interface MainHeaderProps {
 /* MainHeaderClasses: contenedor (Box). shrink-0: nunca se comprime, sin importar
    qué otro hermano (como un FilterPanel abierto) necesite espacio. */
 const MainHeaderClasses = {
-  required: 'flex shrink-0 items-center justify-between',
+  required: 'flex shrink-0 items-center gap-(--size-m)',
   style: '',
 };
 
@@ -36,14 +36,14 @@ const MainHeaderActionClasses = {
 export default function MainHeader({ title, action, className }: MainHeaderProps) {
   return (
     <Box className={twMerge(MainHeaderClasses.required, MainHeaderClasses.style, className)}>
-      <div className={twMerge(MainHeaderTitleColumnClasses.required, MainHeaderTitleColumnClasses.style)}>
-        <h1 className={twMerge(MainHeaderTitleClasses.required, MainHeaderTitleClasses.style)}>{title}</h1>
-      </div>
       {action && (
         <div className={twMerge(MainHeaderActionClasses.required, MainHeaderActionClasses.style)}>
           {action}
         </div>
       )}
+      <div className={twMerge(MainHeaderTitleColumnClasses.required, MainHeaderTitleColumnClasses.style)}>
+        <h1 className={twMerge(MainHeaderTitleClasses.required, MainHeaderTitleClasses.style)}>{title}</h1>
+      </div>
     </Box>
   );
 }

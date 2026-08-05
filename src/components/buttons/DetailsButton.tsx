@@ -3,10 +3,11 @@ import { ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import Button from '../interface/Button';
 
-interface DetailsButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClick' | 'children'> {
+interface DetailsButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'children'> {
   text?: ReactNode;
   icon?: ReactNode;
   disabled?: boolean;
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
 const DetailsButtonClasses = {
@@ -14,10 +15,17 @@ const DetailsButtonClasses = {
   style: 'bg-transparent text-stone-400 hover:text-white',
 };
 
-export default function DetailsButton({ text, icon, className, ...props }: DetailsButtonProps) {
+export default function DetailsButton({
+  text,
+  icon,
+  className,
+  onClick,
+  ...props
+}: DetailsButtonProps) {
   return (
     <Button
       {...props}
+      onClick={onClick}
       text={text}
       icon={icon ?? <ChevronRight size={"var(--size-m)"} />}
       className={twMerge(DetailsButtonClasses.required, DetailsButtonClasses.style, className)}

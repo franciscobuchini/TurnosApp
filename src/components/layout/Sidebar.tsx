@@ -15,7 +15,7 @@ interface SidebarProps {
 /* SidebarClasses: envuelve SidebarNav y SidebarContent para que ambos
    se comporten como un solo item flex dentro de Layout. */
 const SidebarClasses = {
-  required: 'flex flex-col h-full min-w-0 shrink-0 gap-(--size-m) p-(--size-m) w-(--size-8xl) overflow-hidden',
+  required: 'flex flex-col h-full min-w-0 shrink-0 gap-(--size-m) p-(--size-m) w-(--size-8xl) overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
   style: '',
 };
 

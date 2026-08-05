@@ -3,7 +3,7 @@ import { twMerge } from 'tailwind-merge';
 import Box from '../interface/Box';
 
 interface ContentHeaderProps {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   action?: ReactNode;
   className?: string;

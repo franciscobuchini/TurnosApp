@@ -3,7 +3,7 @@
   Componente de dropdown (desplegable) para mostrar un menú de opciones.
 */
 
-import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { twMerge } from 'tailwind-merge';
 import Button from './Button';
@@ -12,6 +12,7 @@ import Button from './Button';
 interface DropdownMenuProps {
   items: ReactNode[];
   position: { top: number; left: number };
+  menuRef: RefObject<HTMLDivElement | null>;
 }
 
 /* DropdownClasses: contenedor raíz, solo posiciona */
@@ -26,9 +27,10 @@ const DropdownMenuClasses = {
 };
 
 /* DropdownMenu: es el panel del dropdown */
-function DropdownMenu({ items, position }: DropdownMenuProps) {
+function DropdownMenu({ items, position, menuRef }: DropdownMenuProps) {
   return createPortal(
     <div
+      ref={menuRef}
       role="menu"
       className={twMerge(DropdownMenuClasses.required, DropdownMenuClasses.style)}
       style={{
@@ -72,13 +74,18 @@ export default function Dropdown({
   const [isOpen, setIsOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   /* handleClickOutside: cierra el dropdown si se hace click fuera del area */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!dropdownRef.current?.contains(event.target as Node)) {
-        setIsOpen(false);
+      const target = event.target as Node;
+
+      if (dropdownRef.current?.contains(target) || menuRef.current?.contains(target)) {
+        return;
       }
+
+      setIsOpen(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -88,17 +95,31 @@ export default function Dropdown({
     };
   }, []);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
+  /* calculatePosition: mide el trigger y devuelve dónde debería ir el menú.
+     Se calcula inicialmente con un ancho estimado, luego se ajusta con useLayoutEffect. */
+  const calculatePosition = (estimatedWidth = 120) => {
     const trigger = dropdownRef.current?.querySelector('button');
-    if (!trigger) return;
+    if (!trigger) return null;
 
     const rect = trigger.getBoundingClientRect();
-    setMenuPosition({
-      top: rect.bottom + 8,
-      left: rect.right - 220,
-    });
+    return {
+      top: rect.top - 92,
+      left: rect.right - estimatedWidth,
+    };
+  };
+
+  useLayoutEffect(() => {
+    if (isOpen && dropdownRef.current && menuRef.current) {
+      const trigger = dropdownRef.current.querySelector('button');
+      if (trigger) {
+        const triggerRect = trigger.getBoundingClientRect();
+        const menuRect = menuRef.current.getBoundingClientRect();
+        setMenuPosition({
+          top: triggerRect.top - 92,
+          left: triggerRect.right - menuRect.width,
+        });
+      }
+    }
   }, [isOpen]);
 
   const handleToggle = (event: ReactMouseEvent<HTMLElement>) => {
@@ -106,7 +127,17 @@ export default function Dropdown({
     if (disabled) return;
 
     onClick?.(event);
-    setIsOpen((currentValue) => !currentValue);
+
+    setIsOpen((currentValue) => {
+      const next = !currentValue;
+
+      if (next) {
+        const position = calculatePosition();
+        if (position) setMenuPosition(position);
+      }
+
+      return next;
+    });
   };
 
   return (
@@ -122,7 +153,7 @@ export default function Dropdown({
         {content}
       </Button>
 
-      {isOpen && <DropdownMenu items={items} position={menuPosition} />}
+      {isOpen && <DropdownMenu items={items} position={menuPosition} menuRef={menuRef} />}
     </div>
   );
 }

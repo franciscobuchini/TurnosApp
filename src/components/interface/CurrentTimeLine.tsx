@@ -10,8 +10,11 @@ import { isSameDay } from '../../functions/dateName';
 
 interface CurrentTimeLineProps {
   selectedDate: Date;
+  onReturnToToday?: (date: Date) => void;
   className?: string;
 }
+
+const IDLE_RETURN_DELAY = 5 * 60 * 1000;
 
 /* CurrentTimeLineClasses: línea horizontal, arranca después de la columna de horas y llega hasta el borde derecho.
    scroll-mt-(--size-m): margen que respeta scrollIntoView, para que la línea no quede pegada al borde. */
@@ -20,16 +23,102 @@ const CurrentTimeLineClasses = {
   style: 'bg-red-500',
 };
 
-export default function CurrentTimeLine({ selectedDate, className }: CurrentTimeLineProps) {
+export default function CurrentTimeLine({
+  selectedDate,
+  onReturnToToday,
+  className,
+}: CurrentTimeLineProps) {
   const [now, setNow] = useState(new Date());
   const [lineTop, setLineTop] = useState<number | null>(null);
   const lineRef = useRef<HTMLDivElement>(null);
+  const returnTimeoutRef = useRef<number | null>(null);
+  const autoScrollTimeoutRef = useRef<number | null>(null);
+  const isAutoScrollingRef = useRef(false);
+  const isFollowingLineRef = useRef(true);
+  const shouldScrollToLineRef = useRef(true);
   const isToday = isSameDay(selectedDate, now);
+
+  const scrollToCurrentLine = () => {
+    const line = lineRef.current;
+    const scrollable = line?.closest<HTMLElement>('[data-schedule-scroll]');
+
+    if (!line || !scrollable || scrollable.scrollHeight <= scrollable.clientHeight) return;
+
+    const topMargin = scrollable.clientHeight * 0.1;
+    const targetScroll = line.offsetTop - topMargin;
+    isAutoScrollingRef.current = true;
+    scrollable.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+
+    if (autoScrollTimeoutRef.current !== null) {
+      window.clearTimeout(autoScrollTimeoutRef.current);
+    }
+
+    autoScrollTimeoutRef.current = window.setTimeout(() => {
+      isAutoScrollingRef.current = false;
+    }, 600);
+  };
 
   useEffect(() => {
     const interval = window.setInterval(() => setNow(new Date()), 60 * 1000);
     return () => window.clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    shouldScrollToLineRef.current = true;
+  }, [selectedDate]);
+
+  useEffect(() => {
+    const clearReturnTimeout = () => {
+      if (returnTimeoutRef.current === null) return;
+      window.clearTimeout(returnTimeoutRef.current);
+      returnTimeoutRef.current = null;
+    };
+
+    const scheduleReturnToToday = (isUserActivity = true) => {
+      clearReturnTimeout();
+      if (isUserActivity) {
+        isFollowingLineRef.current = false;
+      }
+
+      returnTimeoutRef.current = window.setTimeout(() => {
+        const today = new Date();
+        isFollowingLineRef.current = true;
+        shouldScrollToLineRef.current = true;
+        onReturnToToday?.(today);
+
+        window.requestAnimationFrame(scrollToCurrentLine);
+      }, IDLE_RETURN_DELAY);
+    };
+
+    const handleUserScroll = () => {
+      if (isAutoScrollingRef.current) return;
+      scheduleReturnToToday();
+    };
+
+    const handleUserActivity = () => {
+      scheduleReturnToToday();
+    };
+
+    const scrollable =
+      lineRef.current?.closest<HTMLElement>('[data-schedule-scroll]') ??
+      document.querySelector<HTMLElement>('[data-schedule-scroll]');
+
+    scrollable?.addEventListener('scroll', handleUserScroll, { passive: true });
+    window.addEventListener('pointerdown', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+
+    scheduleReturnToToday(false);
+
+    return () => {
+      clearReturnTimeout();
+      if (autoScrollTimeoutRef.current !== null) {
+        window.clearTimeout(autoScrollTimeoutRef.current);
+      }
+      scrollable?.removeEventListener('scroll', handleUserScroll);
+      window.removeEventListener('pointerdown', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+    };
+  }, [onReturnToToday, selectedDate]);
 
   useLayoutEffect(() => {
     if (!isToday || !lineRef.current) return;
@@ -52,14 +141,9 @@ export default function CurrentTimeLine({ selectedDate, className }: CurrentTime
 
     setLineTop(nextTop);
 
-    /* Scroll del contenedor scrollable para que la línea quede casi arriba,
-       con un pequeño margen superior (~10% del viewport) para dar contexto. */
-    const scrollable = lineRef.current.closest<HTMLElement>('[data-schedule-scroll]');
-
-    if (scrollable && scrollable.scrollHeight > scrollable.clientHeight) {
-      const topMargin = scrollable.clientHeight * 0.1;
-      const targetScroll = nextTop - topMargin;
-      scrollable.scrollTo({ top: Math.max(0, targetScroll), behavior: 'smooth' });
+    if (isFollowingLineRef.current || shouldScrollToLineRef.current) {
+      shouldScrollToLineRef.current = false;
+      window.requestAnimationFrame(scrollToCurrentLine);
     }
   }, [isToday, now]);
 
@@ -68,6 +152,7 @@ export default function CurrentTimeLine({ selectedDate, className }: CurrentTime
   return (
     <div
       ref={lineRef}
+      data-current-time-line
       className={twMerge(CurrentTimeLineClasses.required, CurrentTimeLineClasses.style, className)}
       style={lineTop !== null ? { top: `${lineTop}px` } : undefined}
     />

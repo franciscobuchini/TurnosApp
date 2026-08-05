@@ -25,24 +25,36 @@ interface CalendarProps {
 const CalendarClasses = {
   required: 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-(--size-xs) p-(--size-xs)',
   style: 'bg-stone-900 rounded-3xl',
+  animations:
+    '[interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-translate-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:translate-y-0',
 };
 
 /* CalendarActionsClasses: wrapper de los botones de navegación*/
 const CalendarActionsClasses = {
   required: 'flex gap-(--size-s)',
   style: '',
+  animations: 'motion-safe:transition-opacity motion-safe:duration-150 motion-safe:ease-out',
 };
 
 /* CalendarTableClasses: clase pasada al componente Table*/
 const CalendarTableClasses = {
   required: '',
   style: 'text-white',
+  animations: 'motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out',
+};
+
+/* CalendarTableHeaderClasses: clases globales para el header de la tabla del calendario */
+const CalendarTableHeaderClasses = {
+  required: '',
+  style: 'bg-transparent',
 };
 
 /* CalendarDayCircleClasses: el círculo con el número del día, ahora es todo el contenido de la celda */
 const CalendarDayCircleClasses = {
   required: 'flex items-center justify-center w-(--size-xl) h-(--size-xl) mx-auto text-sm cursor-pointer',
   style: 'rounded-full',
+  animations:
+    'motion-safe:transition-[background-color,color,box-shadow,opacity,transform] motion-safe:duration-150 motion-safe:ease-out hover:scale-105 active:scale-95',
 };
 const CalendarDayCircleOtherMonthRequired = 'opacity-30';
 
@@ -50,12 +62,14 @@ const CalendarDayCircleOtherMonthRequired = 'opacity-30';
 const CalendarTodayCircleClasses = {
   required: '',
   style: 'ring-2 ring-white rounded-full',
+  animations: 'motion-safe:transition-shadow motion-safe:duration-150 motion-safe:ease-out',
 };
 
 /* CalendarSelectedCircleClasses: resalte del círculo del día seleccionado (prioridad sobre el de hoy) */
 const CalendarSelectedCircleClasses = {
   required: '',
   style: 'bg-white text-stone-800 rounded-full',
+  animations: 'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out',
 };
 
 /* CalendarColumnAlignClasses: alineación y padding de cada columna de la tabla*/
@@ -179,10 +193,19 @@ export default function Calendar({
           onClick={() => onSelectDate?.(cell.date)}
           className={twMerge(
             CalendarDayCircleClasses.required,
+            CalendarDayCircleClasses.animations,
             isSelected
-              ? twMerge(CalendarSelectedCircleClasses.required, CalendarSelectedCircleClasses.style)
+              ? twMerge(
+                  CalendarSelectedCircleClasses.required,
+                  CalendarSelectedCircleClasses.style,
+                  CalendarSelectedCircleClasses.animations,
+                )
               : isToday
-                ? twMerge(CalendarTodayCircleClasses.required, CalendarTodayCircleClasses.style)
+                ? twMerge(
+                    CalendarTodayCircleClasses.required,
+                    CalendarTodayCircleClasses.style,
+                    CalendarTodayCircleClasses.animations,
+                  )
                 : CalendarDayCircleClasses.style,
             !cell.isCurrentMonth ? CalendarDayCircleOtherMonthRequired : '',
           )}
@@ -214,6 +237,7 @@ export default function Calendar({
       className={twMerge(
         CalendarClasses.required,
         CalendarClasses.style,
+        CalendarClasses.animations,
         className,
       )}
     >
@@ -223,15 +247,24 @@ export default function Calendar({
         onClick={handleSummaryClick}
       >
         <ContentHeader
-          title={`${MONTH_NAMES[month]} ${year}`}
+          title={
+            <>
+              <span className="group-open:hidden">Calendario</span>
+              <span className="hidden group-open:block">{`${MONTH_NAMES[month]} ${year}`}</span>
+            </>
+          }
           action={
-            <div className={twMerge(CalendarActionsClasses.required, CalendarActionsClasses.style)}>
-              {/* Controles de navegación: sólo visibles cuando está abierto */}
+            <div
+              className={twMerge(
+                CalendarActionsClasses.required,
+                CalendarActionsClasses.style,
+                CalendarActionsClasses.animations,
+              )}
+            >
               <CalendarNavigationButtons
                 onPrevMonth={prevMonth}
                 onNextMonth={nextMonth}
               />
-              {/* Flecha de expandir: sólo visible cuando está colapsado */}
               <SummaryButton className="block group-open:hidden" />
             </div>
           }
@@ -243,7 +276,12 @@ export default function Calendar({
         columns={columns}
         rows={weeks}
         rowHeightClassName="h-auto"
-        className={twMerge(CalendarTableClasses.required, CalendarTableClasses.style)}
+        className={twMerge(
+          CalendarTableClasses.required,
+          CalendarTableClasses.style,
+          CalendarTableClasses.animations,
+        )}
+        headerClassName={twMerge(CalendarTableHeaderClasses.required, CalendarTableHeaderClasses.style)}
       />
     </details>
   );

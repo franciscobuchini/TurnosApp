@@ -60,10 +60,26 @@ export default function DaySelectorButtons({
         const distance = Math.abs(idx - centerIdx);
         const visibility = WeekSelectorDayVisibilityClasses[distance];
 
+        const handleDayClick = () => {
+          onSelectDate(date);
+
+          if (!isToday || !isSelected) return;
+
+          window.requestAnimationFrame(() => {
+            const timeline = document.querySelector<HTMLElement>('[data-current-time-line]');
+            const scrollContainer = timeline?.closest<HTMLElement>('[data-schedule-scroll]');
+
+            if (!timeline || !scrollContainer) return;
+
+            const top = Math.max(0, timeline.offsetTop - scrollContainer.clientHeight * 0.1);
+            scrollContainer.scrollTo({ top, behavior: 'smooth' });
+          });
+        };
+
         return (
           <Button
             key={idx}
-            onClick={() => onSelectDate(date)}
+            onClick={handleDayClick}
             className={twMerge(
               WeekSelectorDayButtonClasses.required,
               WeekSelectorDayButtonClasses.style,

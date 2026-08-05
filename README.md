@@ -1,18 +1,18 @@
 TO DO:
 
-poner limite de columnas de schedule segun la resolución
-fila de nombres de empleados, fija en el top de la tabla schedule
+como resolver columnas de schedule en resoluciones pequeñas
+actualizar/seguir el currenttimeline que pasa si son las 00:00 y cambia de día? se va automaticamente al otro dia?
 
 botón de agregar turno
 botón de personalización
 botón de métricas
 botón de ajustes de perfil/usuario/ajustes
+ordenar por (en las listas)
 
-funciones de todos los botones dentro de cada botón dentro de la carpeta buttons add, details y ocultar
-animaciones sutiles al abrir/cerrar los details (esto va a estar en clases animations)
+crear todos los modals
+crear turnos en schdule
 
 
 
-reemplazar todos las variables de sizes por numeros de tailwind (todavía no)
-
-Organizar funciones de cada componente. enviarlas a la carpeta functions?
+para despues:
+normalizar las variables de size/tamaño en todo el proyecto

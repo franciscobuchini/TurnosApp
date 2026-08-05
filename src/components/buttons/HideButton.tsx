@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -6,10 +6,13 @@ import Button from '../interface/Button';
 
 interface HideButtonProps {
   text?: ReactNode;
+  activeText?: ReactNode;
+  inactiveText?: ReactNode;
   icon?: ReactNode;
   className?: string;
   disabled?: boolean;
   defaultVisible?: boolean;
+  visible?: boolean;
   onToggle?: (visible: boolean) => void;
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
@@ -21,33 +24,48 @@ const HideButtonClasses = {
 
 export default function HideButton({
   text,
+  activeText,
+  inactiveText,
   icon,
   className,
   defaultVisible = true,
+  visible,
   onToggle,
   onClick,
   disabled,
   ...props
 }: HideButtonProps) {
-  const [isVisible, setIsVisible] = useState(defaultVisible);
+  const [isVisible, setIsVisible] = useState(visible ?? defaultVisible);
+
+  useEffect(() => {
+    if (visible !== undefined) {
+      setIsVisible(visible);
+    }
+  }, [visible]);
+
+  const resolvedVisible = visible ?? isVisible;
 
   const handleToggle = (event: React.MouseEvent<HTMLElement>) => {
     if (disabled) return;
 
-    const nextVisible = !isVisible;
-    setIsVisible(nextVisible);
+    const nextVisible = !resolvedVisible;
+
+    if (visible === undefined) {
+      setIsVisible(nextVisible);
+    }
+
     onToggle?.(nextVisible);
     onClick?.(event);
   };
 
-  const resolvedText = isVisible ? 'Ocultar' : 'Mostrar';
+  const resolvedText = resolvedVisible ? (activeText ?? 'Ocultar') : (inactiveText ?? 'Mostrar');
 
   return (
     <Button
       {...props}
       onClick={handleToggle}
       text={text ?? resolvedText}
-      icon={icon ?? (isVisible ? <EyeOff size={"var(--size-m)"} /> : <Eye size={"var(--size-m)"} />)}
+      icon={icon ?? (resolvedVisible ? <EyeOff size={"var(--size-m)"} /> : <Eye size={"var(--size-m)"} />)}
       disabled={disabled}
       className={twMerge(HideButtonClasses.required, HideButtonClasses.style, className)}
     />
