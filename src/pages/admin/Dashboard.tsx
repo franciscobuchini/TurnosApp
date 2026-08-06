@@ -9,7 +9,7 @@ import Sidebar from '../../components/layout/Sidebar';
 import MainContent from '../../components/layout/MainContent';
 import Calendar from '../../components/widgets/sidebarWidgets/Calendar';
 import DetailsPanel from '../../components/widgets/sidebarWidgets/DetailsPanel';
-import { getTeamFilters, getServiceFilters, getClientFilters } from '../../variables/data';
+import { getTeamFilters, getServiceFilters, getClientFilters } from '../../database/data';
 import { useTeamFilters } from '../../functions/teamFilters';
 import AddEntityButton from '../../components/buttons/AddEntityButton';
 import AddServiceButton from '../../components/buttons/AddServiceButton';
@@ -121,7 +121,6 @@ function Dashboard() {
             selectedDate={selectedDate}
             onViewDateChange={setViewDate}
             onSelectDate={setSelectedDate}
-            onSelectDateFull={selectDate}
           />
         )}
       </MainContent>

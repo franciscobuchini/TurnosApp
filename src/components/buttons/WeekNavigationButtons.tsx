@@ -15,7 +15,7 @@ const WeekSelectorNavButtonClasses = {
 
 const WeekSelectorNavButtonSelectedClasses = {
   required: '',
-  style: 'bg-gray-900 text-white',
+  style: 'bg-neutral-900 text-white',
 };
 
 export function PrevWeekButton({ onClick, className, isSelected = false }: WeekNavigationButtonProps) {

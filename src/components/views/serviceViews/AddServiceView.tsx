@@ -1,6 +1,7 @@
 ﻿import { ChevronLeft } from 'lucide-react';
 import Button from '../../interface/Button';
 import MainHeader from '../../interface/MainHeader';
+import FormAddService from '../../widgets/serviceWidgets/FormAddService';
 
 export const ADD_SERVICE_VIEW_TITLE = 'Agregar un nuevo servicio';
 
@@ -19,27 +20,22 @@ const AddServiceViewClasses = {
 
 const AddServiceBackButtonClasses = {
   required: 'h-(--size-2xl) w-(--size-2xl) p-0',
-  style: 'text-gray-900 bg-transparent',
+  style: 'text-neutral-900 bg-transparent',
 };
 
 const AddServiceFooterButtonClasses = {
   cancel: {
     required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-gray-50 text-gray-900',
+    style: 'rounded-2xl bg-neutral-50 text-neutral-900',
   },
   confirm: {
     required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-gray-900 text-white',
+    style: 'rounded-2xl bg-neutral-900 text-white',
   },
 };
 
 const AddServiceFooterClasses = {
   required: 'flex justify-end gap-3 pt-(--size-m)',
-  style: '',
-};
-
-const AddServiceContentClasses = {
-  required: 'flex flex-1 items-center justify-center rounded-3xl bg-gray-50 p-(--size-m)',
   style: '',
 };
 
@@ -68,8 +64,7 @@ export default function AddServiceView({
           />
         }
       />
-      <div className={AddServiceContentClasses.required}>
-      </div>
+      <FormAddService />
       <div className={`${AddServiceFooterClasses.required} ${AddServiceFooterClasses.style}`.trim()}>
         <Button
           className={`${AddServiceFooterButtonClasses.cancel.required} ${AddServiceFooterButtonClasses.cancel.style}`.trim()}

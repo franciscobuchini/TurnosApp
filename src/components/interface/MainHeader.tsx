@@ -24,7 +24,7 @@ const MainHeaderTitleColumnClasses = {
 /* MainHeaderTitleClasses */
 const MainHeaderTitleClasses = {
   required: '',
-  style: 'text-4xl font-semibold tracking-tight text-gray-900 leading-none',
+  style: 'text-4xl font-semibold tracking-tight text-neutral-900 leading-none',
 };
 
 /* MainHeaderActionClasses: contenedor de la acción */

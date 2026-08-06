@@ -18,7 +18,7 @@ interface CheckboxProps {
 /* CheckboxSquareClasses: contenedor visible y personalizable */
 const CheckboxSquareClasses = {
   required: 'relative flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl cursor-pointer',
-  style: 'bg-gray-950 text-white',
+  style: 'bg-neutral-950 text-white',
   disabled: 'cursor-not-allowed opacity-50',
 };
 

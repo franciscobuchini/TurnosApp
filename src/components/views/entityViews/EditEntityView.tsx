@@ -17,17 +17,17 @@ const ViewEntityViewClasses = {
 
 const ViewEntityBackButtonClasses = {
   required: 'h-(--size-2xl) w-(--size-2xl) p-0',
-  style: 'text-gray-900 bg-transparent',
+  style: 'text-neutral-900 bg-transparent',
 };
 
 const ViewEntityFooterButtonClasses = {
   cancel: {
     required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-gray-50 text-gray-900',
+    style: 'rounded-2xl bg-neutral-50 text-neutral-900',
   },
   confirm: {
     required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-gray-900 text-white',
+    style: 'rounded-2xl bg-neutral-900 text-white',
   },
 };
 
@@ -37,7 +37,7 @@ const ViewEntityFooterClasses = {
 };
 
 const ViewEntityContentClasses = {
-  required: 'flex flex-1 items-center justify-center rounded-3xl bg-gray-50 p-(--size-m)',
+  required: 'flex flex-1 items-center justify-center rounded-3xl bg-neutral-50 p-(--size-m)',
   style: '',
 };
 

@@ -23,7 +23,7 @@ const DropdownClasses = {
 /* DropdownMenuClasses */
 const DropdownMenuClasses = {
   required: 'fixed z-[9999] p-(--size-s) overflow-hidden',
-  style: 'bg-gray-950 shadow-2xl rounded-2xl',
+  style: 'bg-black shadow-2xl rounded-2xl',
 };
 
 /* DropdownMenu: es el panel del dropdown */

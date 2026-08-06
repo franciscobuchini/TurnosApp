@@ -13,7 +13,6 @@ import CurrentTimeLine from '../../interface/CurrentTimeLine';
 interface ScheduleProps {
   selectedDate: Date;
   members: string[];
-  onSelectDate?: (date: Date) => void;
   className?: string;
 }
 
@@ -61,7 +60,7 @@ const ScheduleLabelCellClasses = {
 
 /* ScheduleLabelTextClasses: etiqueta de texto de la hora flotante */
 const ScheduleLabelTextClasses = {
-  required: 'absolute inset-x-0 top-0 -trangray-y-1/2',
+  required: 'absolute inset-x-0 top-0 -tranneutral-y-1/2',
   style: '',
 };
 
@@ -74,25 +73,24 @@ const ScheduleLabelHeaderClasses = {
 /* ScheduleSlotCellClasses: la celda del contenido de cada fila */
 const ScheduleSlotCellClasses = {
   required: '',
-  style: 'border-t border-gray-100',
+  style: 'border-t border-neutral-100',
 };
 
 /* ScheduleMemberHeaderClasses: cabecera de cada columna de miembro */
 const ScheduleMemberHeaderClasses = {
   required: 'text-center text-sm font-medium truncate',
-  style: 'text-gray-600',
+  style: 'text-neutral-600',
 };
 
 /* ScheduleEmptyClasses: overlay centrado que aparece cuando no hay miembros seleccionados */
 const ScheduleEmptyClasses = {
   required: 'absolute inset-0 flex items-center justify-center pointer-events-none',
-  style: 'text-gray-400 text-sm',
+  style: 'text-neutral-400 text-sm',
 };
 
 export default function Schedule({
   selectedDate,
   members,
-  onSelectDate,
   className,
 }: ScheduleProps) {
   const slots = Array.from({ length: 24 * 4 }, (_, index) => {
@@ -143,12 +141,7 @@ export default function Schedule({
             showHeader
             stickyHeader
           />
-          {!isEmpty && (
-            <CurrentTimeLine
-              selectedDate={selectedDate}
-              onReturnToToday={onSelectDate}
-            />
-          )}
+          {!isEmpty && <CurrentTimeLine selectedDate={selectedDate} />}
         </div>
       </div>
       {isEmpty && (

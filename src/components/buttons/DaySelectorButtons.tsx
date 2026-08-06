@@ -15,7 +15,7 @@ const WeekSelectorDayButtonClasses = {
 
 const WeekSelectorDaySelectedClasses = {
   required: '',
-  style: 'bg-gray-900 text-white',
+  style: 'bg-neutral-900 text-white',
 };
 
 const WeekSelectorDayTodayClasses = {

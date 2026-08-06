@@ -1,35 +1,25 @@
-import { type FocusEvent, type MouseEvent } from 'react';
-import { twMerge } from 'tailwind-merge';
+import { type ChangeEvent, type FocusEvent, type MouseEvent, useState } from 'react';
 import Form from '../../interface/Form';
 import Input from '../../interface/Input';
 
-/* AddClientContentClasses: esto es el lienzo en blanco de la vista. */
-const AddClientContainerClasses = {
-  required: 'relative flex flex-col flex-1 p-(--size-m) h-full w-full',
-  style: 'rounded-4xl bg-white',
-};
-
-const AddClientLayoutClasses = {
-  required: 'flex flex-1 flex-col gap-(--size-m) md:flex-row',
-  style: '',
-};
-
-const AddClientLeftPanelClasses = {
-  required: 'flex-1',
-  style: '',
-};
-
-const AddClientRightPanelClasses = {
-  required: 'flex-1 flex flex-col justify-center items-center',
-  style: ' rounded-4xl border-dashed border-gray-400 border-1 text-gray-400',
-};
-
-const AddClientForm = {
-  required: 'flex flex-col gap-(--size-xl) max-w-2xl p-(--size-m)',
-  style: '',
-};
+const CONTAINER_CLASSES = 'relative flex p-(--size-m) h-full w-full rounded-4xl bg-neutral-50';
+const FORM_CLASSES = 'flex flex-1 flex-col justify-center gap-(--size-xl) max-w-2xl p-(--size-m)';
+const RIGHT_PANEL_CLASSES = 'flex-1 flex flex-col justify-center items-center rounded-4xl border-dashed border-neutral-400 border-1 text-neutral-400';
 
 const whatsappPrefix = '+54 9 ';
+
+function formatCapitalizedWords(value: string) {
+  const hasTrailingSpace = /\s$/.test(value);
+  const words = value.trim().split(/\s+/).filter(Boolean);
+
+  if (!words.length) {
+    return '';
+  }
+
+  const formattedWords = words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+
+  return hasTrailingSpace ? `${formattedWords.join(' ')} ` : formattedWords.join(' ');
+}
 
 function setCursorAfterPrefix(input: HTMLInputElement) {
   const position = whatsappPrefix.length;
@@ -39,6 +29,11 @@ function setCursorAfterPrefix(input: HTMLInputElement) {
 }
 
 export default function FormAddClient() {
+  const [fullName, setFullName] = useState('');
+
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setFullName(formatCapitalizedWords(event.target.value));
+  };
 
   const handleWhatsAppFocus = (event: FocusEvent<HTMLInputElement>) => {
     const input = event.currentTarget;
@@ -55,48 +50,42 @@ export default function FormAddClient() {
   };
 
   return (
-    <div className={twMerge(AddClientContainerClasses.required, AddClientContainerClasses.style)}>
-      <div className={twMerge(AddClientLayoutClasses.required, AddClientLayoutClasses.style)}>
-        <div className={twMerge(AddClientLeftPanelClasses.required, AddClientLeftPanelClasses.style)}>
-          <Form className={twMerge(AddClientForm.required, AddClientForm.style)}>
-            <div className="flex flex-col gap-3 md:flex-row md:items-end">
-              <div className="flex-1">
-                <Input
-                  label="Nombre y apellido"
-                  name="fullName"
-                  placeholder="Juan Pérez"
-                />
-              </div>
-            </div>
-            <Input
-              label="WhatsApp"
-              name="whatsapp"
-              type="tel"
-              defaultValue={whatsappPrefix}
-              onFocus={handleWhatsAppFocus}
-              onMouseUp={handleWhatsAppMouseUp}
-            />
-            <Input
-              label="Email"
-              name="email"
-              type="email"
-              optional
-              placeholder="cliente@ejemplo.com"
-            />
-            <Input
-              label="Notas"
-              name="notes"
-              textarea
-              rows={5}
-              optional
-              placeholder="Agrega observaciones si lo deseas"
-            />
-          </Form>
-        </div>
-        <div className={twMerge(AddClientRightPanelClasses.required, AddClientRightPanelClasses.style)}>
-          <p>Proximamente...</p>
-          <p>Sistema de fidelización de clientes</p>
-        </div>
+    <div className={CONTAINER_CLASSES}>
+      <Form className={FORM_CLASSES}>
+        <Input
+          label="Nombre y Apellido"
+          name="fullName"
+          placeholder="Juan Pérez"
+          value={fullName}
+          onChange={handleNameChange}
+        />
+        <Input
+          label="WhatsApp"
+          name="whatsapp"
+          type="tel"
+          defaultValue={whatsappPrefix}
+          onFocus={handleWhatsAppFocus}
+          onMouseUp={handleWhatsAppMouseUp}
+        />
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          optional
+          placeholder="cliente@ejemplo.com"
+        />
+        <Input
+          label="Notas"
+          name="notes"
+          textarea
+          rows={5}
+          optional
+          placeholder="Agrega observaciones si lo deseas"
+        />
+      </Form>
+      <div className={RIGHT_PANEL_CLASSES}>
+        <p>Proximamente...</p>
+        <p>Sistema de fidelización de clientes</p>
       </div>
     </div>
   );

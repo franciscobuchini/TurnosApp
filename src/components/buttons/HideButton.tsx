@@ -19,7 +19,7 @@ interface HideButtonProps {
 
 const HideButtonClasses = {
   required: 'justify-between w-full h-(--size-xl) p-(--size-s) gap-(--size-l)',
-  style: 'bg-transparent text-gray-400 hover:text-white',
+  style: 'bg-transparent text-neutral-400 hover:text-white',
 };
 
 export default function HideButton({

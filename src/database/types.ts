@@ -1,5 +1,5 @@
 /* 
-  src/variables/types.ts
+  src/database/types.ts
   Tipos compartidos para las entidades de datos de la aplicación.
   Todos los componentes importan sus tipos desde acá.
 */

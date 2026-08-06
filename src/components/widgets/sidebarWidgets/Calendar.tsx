@@ -24,9 +24,9 @@ interface CalendarProps {
    en vez de dejarle ceder espacio solo a este último. */
 const CalendarClasses = {
   required: 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-(--size-xs) p-(--size-xs)',
-  style: 'bg-gray-900 rounded-3xl',
+  style: 'bg-neutral-900 rounded-3xl',
   animations:
-    '[interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-trangray-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:trangray-y-0',
+    '[interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-tranneutral-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:tranneutral-y-0',
 };
 
 /* CalendarActionsClasses: wrapper de los botones de navegación*/
@@ -61,14 +61,14 @@ const CalendarDayCircleOtherMonthRequired = 'opacity-30';
 /* CalendarTodayCircleClasses: resalte del círculo cuando ese día es hoy, pero no está seleccionado */
 const CalendarTodayCircleClasses = {
   required: '',
-  style: 'bg-(--primary-03) text-gray-800 font-medium rounded-full',
+  style: 'bg-(--primary-03) text-neutral-800 font-medium rounded-full',
   animations: 'motion-safe:transition-shadow motion-safe:duration-150 motion-safe:ease-out',
 };
 
 /* CalendarSelectedCircleClasses: resalte del círculo del día seleccionado (prioridad sobre el de hoy) */
 const CalendarSelectedCircleClasses = {
   required: '',
-  style: 'bg-(--primary-01) text-gray-800 font-medium rounded-full',
+  style: 'bg-(--primary-01) text-neutral-800 font-medium rounded-full',
   animations: 'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out',
 };
 

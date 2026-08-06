@@ -1,5 +1,5 @@
 /* 
-  src/variables/data.ts
+  src/database/data.ts
   Central de datos de la aplicación.
   Hoy lee de archivos JSON mock; cuando haya BBDD, se reemplaza
   la implementación interna de cada getter sin tocar los componentes.

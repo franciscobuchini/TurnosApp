@@ -1,6 +1,6 @@
 /* 
-  src/styles/Variables.css
-  Variables pre-establecidas para toda la aplicación.
+  src/styles/database.css
+  database pre-establecidas para toda la aplicación.
 */
 @theme {
   /* Breakpoints */
@@ -32,7 +32,17 @@
   Dark Mode: Colores del tema oscuro 
 */
 :root {
-  --primary-01: #E7FC6F;
-  --primary-02: #C5BDF6;
-  --primary-03: #C4DEEB;
+--primary-01: #E7FC6F; /* lima */
+--primary-02: #C5BDF6; /* lavanda */
+--primary-03: #C4DEEB; /* celeste */
+--primary-04: #F6C6D0; /* rosa */
+--primary-05: #FFD9A8; /* durazno */
+--primary-06: #B8E8D4; /* menta */
+--primary-07: #FFB4A8; /* coral */
+--primary-08: #D9C2F0; /* violeta */
+--primary-09: #FFF3B0; /* manteca */
+--primary-10: #BFD8FF; /* azul pastel */
+--primary-11: #F9C8A9; /* salmón claro */
+--primary-12: #D6F5C3; /* verde lima suave */
+--primary-13: #F5D6B8; /* arena */
 }

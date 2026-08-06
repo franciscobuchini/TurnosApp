@@ -8,7 +8,6 @@ interface ScheduleViewProps {
   selectedDate: Date;
   onViewDateChange: (date: Date) => void;
   onSelectDate: (date: Date) => void;
-  onSelectDateFull: (date: Date) => void;
   children?: ReactNode;
 }
 
@@ -18,7 +17,6 @@ export default function ScheduleView({
   selectedDate,
   onViewDateChange,
   onSelectDate,
-  onSelectDateFull,
   children,
 }: ScheduleViewProps) {
   return (
@@ -29,11 +27,7 @@ export default function ScheduleView({
         onSelectDate={onSelectDate}
         onViewDateChange={onViewDateChange}
       />
-      <Schedule
-        selectedDate={selectedDate}
-        members={selectedMembers}
-        onSelectDate={onSelectDateFull}
-      />
+      <Schedule selectedDate={selectedDate} members={selectedMembers} />
       {children}
     </div>
   );

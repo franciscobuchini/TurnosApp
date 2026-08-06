@@ -1,6 +1,7 @@
 ﻿import { ChevronLeft } from 'lucide-react';
 import Button from '../../interface/Button';
 import MainHeader from '../../interface/MainHeader';
+import FormAddEntity from '../../widgets/entityWidgets/FormAddEntity';
 
 export const ADD_ENTITY_VIEW_TITLE = 'Agregar un nuevo miembro';
 
@@ -19,17 +20,17 @@ const AddEntityViewClasses = {
 
 const AddEntityBackButtonClasses = {
   required: 'h-(--size-2xl) w-(--size-2xl) p-0',
-  style: 'text-gray-900 bg-transparent',
+  style: 'text-neutral-900 bg-transparent',
 };
 
 const AddEntityFooterButtonClasses = {
   cancel: {
     required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-gray-50 text-gray-900',
+    style: 'rounded-2xl bg-neutral-50 text-neutral-900',
   },
   confirm: {
     required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-gray-900 text-white',
+    style: 'rounded-2xl bg-neutral-900 text-white',
   },
 };
 
@@ -39,7 +40,7 @@ const AddEntityFooterClasses = {
 };
 
 const AddEntityContentClasses = {
-  required: 'flex flex-1 items-center justify-center rounded-3xl bg-gray-50 p-(--size-m)',
+  required: 'flex flex-1 items-center justify-center rounded-3xl bg-neutral-50 p-(--size-m)',
   style: '',
 };
 
@@ -69,6 +70,7 @@ export default function AddEntityView({
         }
       />
       <div className={AddEntityContentClasses.required}>
+        <FormAddEntity />
       </div>
       <div className={`${AddEntityFooterClasses.required} ${AddEntityFooterClasses.style}`.trim()}>
         <Button

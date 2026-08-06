@@ -14,4 +14,4 @@ botón de horarios del local
 botón de ajustes de reservas
 
 para despues:
-normalizar las variables de size/tamaño en todo el proyecto
+normalizar las database de size/tamaño en todo el proyecto

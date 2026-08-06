@@ -6,17 +6,7 @@
 */
 
 import { twMerge } from 'tailwind-merge';
-
-// Inline helper: extrae iniciales de la primera y última palabra del nombre.
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/);
-  if (words.length === 0) return '';
-
-  const first = words[0]?.[0] ?? '';
-  const last = words.length > 1 ? (words[words.length - 1]?.[0] ?? '') : '';
-
-  return (first + last).toUpperCase();
-}
+import getInitials from '../../functions/getInitials';
 
 interface ImageProps {
   src?: string;
@@ -30,7 +20,7 @@ interface ImageProps {
    - style: color. Esto sí se puede modificar. */
 const ImageClasses = {
   required: 'flex items-center justify-center select-none leading-none',
-  style: 'bg-gray-600 rounded-full text-white text-xs font-bold',
+  style: 'bg-neutral-600 rounded-full text-white text-xs font-bold',
 };
 
 /* ImageInitialsClasses: estilo del texto de iniciales */

@@ -24,7 +24,7 @@ const ModalOverlayClasses = {
 };
 
 const ModalContainerClasses = {
-  required: 'relative w-full max-w-6xl overflow-hidden rounded-3xl bg-gray-900 text-white',
+  required: 'relative w-full max-w-6xl overflow-hidden rounded-3xl bg-neutral-900 text-white',
   style: '',
 };
 

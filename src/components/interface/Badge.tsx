@@ -3,10 +3,10 @@
   Componente de etiqueta (badge) para mostrar estados, categorías o etiquetas.
 */
 
-import type { ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 
-interface BadgeProps {
+interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
   className?: string;
 }
@@ -15,13 +15,13 @@ interface BadgeProps {
    - required: estructura, tamaño y forma. No varía.
    - style: color. Esto sí se puede modificar. */
 const BadgeClasses = {
-  required: 'inline-flex items-center justify-center px-(--size-xs) py-(--size-3xs) text-sm rounded-full',
+  required: 'inline-flex items-center justify-center px-(--size-s) py-(--size-xs) text-sm rounded-full',
   style: 'bg-neutral-200',
 };
 
-export default function Badge({ children, className }: BadgeProps) {
+export default function Badge({ children, className, ...props }: BadgeProps) {
   return (
-    <span className={twMerge(BadgeClasses.required, BadgeClasses.style, className)}>
+    <span {...props} className={twMerge(BadgeClasses.required, BadgeClasses.style, className)}>
       {children}
     </span>
   );

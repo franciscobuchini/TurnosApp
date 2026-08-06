@@ -55,7 +55,7 @@ const BodyRowClasses = {
 
 const HeaderCellClasses = {
   required: 'px-(--size-s) text-center',
-  style: 'bg-gray-50',
+  style: 'bg-neutral-50',
 };
 
 const StickyHeaderCellClasses = {

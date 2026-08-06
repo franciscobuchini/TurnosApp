@@ -4,7 +4,7 @@
 */
 
 import { useState } from 'react';
-import type { FiltersOption } from '../variables/types';
+import type { FiltersOption } from '../database/types';
 
 /* getSelectedMembers: dado el array de filtros del equipo, devuelve los labels
    de los que están chequeados. */
