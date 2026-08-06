@@ -1,6 +1,7 @@
 [
   {
     "name": "Carlos Rodriguez",
+    "photo": "",
     "role": "Peluquero",
     "email": "carlos@mail.com",
     "phone": "+54 9 11 5678-1234",
@@ -20,6 +21,7 @@
   },
   {
     "name": "Mariana Lopez",
+    "photo": "",
     "role": "Estilista",
     "email": "mariana@mail.com",
     "phone": "+54 9 11 6789-2345",
@@ -38,6 +40,7 @@
   },
   {
     "name": "Diego Fernandez",
+    "photo": "",
     "role": "Barbero",
     "email": "diego@mail.com",
     "phone": "+54 9 11 7890-3456",
@@ -56,6 +59,7 @@
   },
   {
     "name": "Lucia Gomez",
+    "photo": "",
     "role": "Manicurista",
     "email": "lucia@mail.com",
     "phone": "+54 9 11 8901-4567",
@@ -73,6 +77,7 @@
   },
   {
     "name": "Martin Silva",
+    "photo": "",
     "role": "Masajista",
     "email": "martin@mail.com",
     "phone": "+54 9 11 9012-5678",
@@ -88,6 +93,7 @@
   },
   {
     "name": "Sofia Herrera",
+    "photo": "",
     "role": "Colorista",
     "email": "sofia@mail.com",
     "phone": "+54 9 11 0123-6789",
@@ -104,6 +110,7 @@
   },
   {
     "name": "Javier Ortega",
+    "photo": "",
     "role": "Peluquero Infantil",
     "email": "javier@mail.com",
     "phone": "+54 9 11 1234-7890",

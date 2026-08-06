@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AddButton from './AddButton';
-import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../views/serviceViews/AddServiceView';
+import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../views/ServiceView';
 
 interface AddServiceButtonProps {
   onOpen?: () => void;

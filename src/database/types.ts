@@ -4,9 +4,10 @@
   Todos los componentes importan sus tipos desde acá.
 */
 
-export type DaySchedule = {
-  day: string;
-  hours: string[];
+export type OpeningHoursEntry = {
+  dayOfWeek: number;
+  startTime: string | null;
+  endTime: string | null;
 };
 
 export type TeamMember = {
@@ -16,12 +17,13 @@ export type TeamMember = {
   email: string;
   phone: string;
   services: string[];
-  schedule: DaySchedule[] | string;
+  schedule: OpeningHoursEntry[] | string;
 };
 
 export type service = {
   name: string;
   photo?: string;
+  colorId?: string;
   description: string;
   price: number;
   duration: string;
@@ -31,6 +33,8 @@ export type Client = {
   name: string;
   photo?: string;
   phone: string;
+  email?: string;
+  notes?: string;
   appointmentsCount: number;
   totalSpent: number;
 };

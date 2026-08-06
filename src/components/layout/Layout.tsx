@@ -12,13 +12,13 @@ interface LayoutProps {
   sidebarClassName?: string;
 }
 
-const LAYOUT_CLASS = 'h-dvh w-dvw overflow-hidden flex flex-col p-(--size-xs) bg-black';
+const LAYOUT_CLASS = 'h-dvh w-dvw overflow-hidden flex flex-col  bg-black';
 
 const LAYOUT_CONTENT_CLASS = 'flex flex-1 overflow-hidden';
 
 // Reserva el espacio del área principal (mismo layout que ocupaba MainContent,
 // sin sus estilos visuales: eso ahora lo aporta cada vista).
-const MAIN_AREA_CLASS = 'flex flex-1 min-h-0 min-w-0 h-full w-full';
+const MAIN_AREA_CLASS = 'flex flex-1 min-h-0 min-w-0 h-full w-full py-(--size-m)';
 
 export default function Layout({ children, sidebarChildren, sidebarClassName }: LayoutProps) {
   return (

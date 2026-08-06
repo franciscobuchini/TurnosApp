@@ -15,7 +15,7 @@ interface ImageProps {
   className?: string;
 }
 
-const IMAGE_CLASS = 'flex items-center justify-center select-none leading-none bg-neutral-600 rounded-full text-white text-xs font-bold';
+const IMAGE_CLASS = 'flex items-center justify-center select-none overflow-hidden rounded-full bg-neutral-600 text-white text-xs font-bold object-cover';
 
 const IMAGE_INITIALS_CLASS = '';
 
@@ -26,13 +26,15 @@ export default function Image({ src, alt, name, className }: ImageProps) {
     return <img src={src} alt={alt || name || ''} className={mergedClassName} />;
   }
 
+  const initials = name ? getInitials(name) : '';
+
   return (
     <div className={mergedClassName}>
-      {name && (
+      {initials ? (
         <span className={IMAGE_INITIALS_CLASS}>
-          {getInitials(name)}
+          {initials}
         </span>
-      )}
+      ) : null}
     </div>
   );
 }

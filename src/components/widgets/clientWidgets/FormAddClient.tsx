@@ -1,6 +1,23 @@
-import { type ChangeEvent, type FocusEvent, type MouseEvent, useState } from 'react';
+import { type ChangeEvent, type FocusEvent, type MouseEvent, useEffect, useState } from 'react';
 import Form from '../../interface/Form';
 import Input from '../../interface/Input';
+
+interface FormAddClientProps {
+  mode?: 'create' | 'view' | 'edit';
+  initialValues?: {
+    fullName?: string;
+    whatsapp?: string;
+    email?: string;
+    notes?: string;
+  };
+  onValidityChange?: (isValid: boolean) => void;
+  onValuesChange?: (values: {
+    fullName: string;
+    whatsapp: string;
+    email: string;
+    notes: string;
+  }) => void;
+}
 
 const CONTAINER_CLASS = 'relative flex p-(--size-m) h-full w-full rounded-4xl bg-neutral-50';
 const FORM_CLASS = 'flex flex-1 flex-col justify-center gap-(--size-xl) max-w-2xl p-(--size-m)';
@@ -28,8 +45,33 @@ function setCursorAfterPrefix(input: HTMLInputElement) {
   }
 }
 
-export default function FormAddClient() {
-  const [fullName, setFullName] = useState('');
+export default function FormAddClient({ mode = 'create', initialValues, onValidityChange, onValuesChange }: FormAddClientProps) {
+  const [fullName, setFullName] = useState(initialValues?.fullName ?? '');
+  const [whatsapp, setWhatsapp] = useState(initialValues?.whatsapp ?? '');
+  const [email, setEmail] = useState(initialValues?.email ?? '');
+  const [notes, setNotes] = useState(initialValues?.notes ?? '');
+
+  useEffect(() => {
+    setFullName(initialValues?.fullName ?? '');
+    setWhatsapp(initialValues?.whatsapp ?? '');
+    setEmail(initialValues?.email ?? '');
+    setNotes(initialValues?.notes ?? '');
+  }, [mode, initialValues?.fullName, initialValues?.whatsapp, initialValues?.email, initialValues?.notes]);
+
+  const isFormValid = Boolean(fullName.trim()) && Boolean(whatsapp.replace(whatsappPrefix, '').trim());
+
+  useEffect(() => {
+    onValidityChange?.(isFormValid);
+  }, [isFormValid, onValidityChange]);
+
+  useEffect(() => {
+    onValuesChange?.({
+      fullName,
+      whatsapp,
+      email,
+      notes,
+    });
+  }, [fullName, whatsapp, email, notes, onValuesChange]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFullName(formatCapitalizedWords(event.target.value));
@@ -58,14 +100,17 @@ export default function FormAddClient() {
           placeholder="Juan Pérez"
           value={fullName}
           onChange={handleNameChange}
+          readOnly={mode === 'view'}
         />
         <Input
           label="WhatsApp"
           name="whatsapp"
           type="tel"
-          defaultValue={whatsappPrefix}
+          value={whatsapp || whatsappPrefix}
+          onChange={(event) => setWhatsapp(event.target.value)}
           onFocus={handleWhatsAppFocus}
           onMouseUp={handleWhatsAppMouseUp}
+          readOnly={mode === 'view'}
         />
         <Input
           label="Email"
@@ -73,6 +118,9 @@ export default function FormAddClient() {
           type="email"
           optional
           placeholder="cliente@ejemplo.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          readOnly={mode === 'view'}
         />
         <Input
           label="Notas"
@@ -81,6 +129,9 @@ export default function FormAddClient() {
           rows={5}
           optional
           placeholder="Agrega observaciones si lo deseas"
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
+          readOnly={mode === 'view'}
         />
       </Form>
       <div className={RIGHT_PANEL_CLASS}>

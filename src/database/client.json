@@ -1,31 +1,46 @@
 [
   {
     "name": "Sofia Martinez",
+    "photo": "",
     "phone": "+54 9 11 2345-6789",
+    "email": "sofia.martinez@mail.com",
+    "notes": "Cliente frecuente, prefiere turnos matutinos.",
     "appointmentsCount": 12,
     "totalSpent": 145000
   },
   {
     "name": "Lucas Perez",
+    "photo": "",
     "phone": "+54 9 11 3456-7890",
+    "email": "lucas.perez@mail.com",
+    "notes": "Le gusta recibir recordatorios por WhatsApp.",
     "appointmentsCount": 4,
     "totalSpent": 38000
   },
   {
     "name": "Valentina Gomez",
+    "photo": "",
     "phone": "+54 9 11 4567-8901",
+    "email": "valentina.gomez@mail.com",
+    "notes": "Prefiere agendas de fin de semana.",
     "appointmentsCount": 8,
     "totalSpent": 96500
   },
   {
     "name": "Juan Ignacio Rossi",
+    "photo": "",
     "phone": "+54 9 11 5678-9012",
+    "email": "juan.rossi@mail.com",
+    "notes": "Muy puntual, suele reservar con anticipación.",
     "appointmentsCount": 15,
     "totalSpent": 182000
   },
   {
     "name": "Camila Diaz",
+    "photo": "",
     "phone": "+54 9 11 6789-0123",
+    "email": "camila.diaz@mail.com",
+    "notes": "Interesada en promociones de coloración.",
     "appointmentsCount": 3,
     "totalSpent": 24500
   }

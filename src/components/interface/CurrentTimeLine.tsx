@@ -13,7 +13,7 @@ interface CurrentTimeLineProps {
   className?: string;
 }
 
-const CURRENT_TIME_LINE_CLASS = 'absolute left-(--size-4xl) right-0 h-0.5 scroll-mt-(--size-m) pointer-events-none bg-(--primary-07) rounded-full shadow-[0_-4px_6px_rgba(50,50,50,0.2)]';
+const CURRENT_TIME_LINE_CLASS = 'absolute left-(--size-4xl) right-0 h-0.5 scroll-mt-(--size-m) pointer-events-none bg-neutral-700 rounded-full shadow-[0_-4px_6px_rgba(50,50,50,0.2)]';
 
 export default function CurrentTimeLine({
   selectedDate,

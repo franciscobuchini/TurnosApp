@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DetailsButton from './DetailsButton';
-import ViewEntityView from '../views/entityViews/DetailsEntityView';
+import AddEntityView from '../views/EntityView';
 
 interface ViewEntityButtonProps {
   label: string;
@@ -29,10 +29,12 @@ export default function ViewEntityButton({ label, className, onOpen }: ViewEntit
       />
 
       {!onOpen && (
-        <ViewEntityView
+        <AddEntityView
           open={isOpen}
           onClose={() => setIsOpen(false)}
           title={`Perfil de ${label}`}
+          mode="view"
+          memberName={label}
         />
       )}
     </>

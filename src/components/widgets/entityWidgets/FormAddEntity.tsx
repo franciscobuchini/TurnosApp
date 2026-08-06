@@ -15,9 +15,9 @@ const AVATAR_FIELD_CLASS = 'flex items-center gap-(--size-m) px-(--size-m)';
 const AVATAR_IMAGE_CLASS = 'h-(--size-4xl) w-(--size-4xl) text-xl';
 const AVATAR_WRAPPER_CLASS = 'group relative inline-block rounded-full';
 const AVATAR_REMOVE_BUTTON_CLASS =
-  'absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:outline-none';
+  'absolute inset-0 flex items-center justify-center rounded-full bg-black/30 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:outline-none';
 const AVATAR_INPUT_CLASS = 'sr-only';
-const BUTTON_UPLOAD_CLASS = 'flex items-center gap-2 px-(--size-m) py-(--size-s) bg-transparent text-sm text-neutral-600 focus:outline-none focus:ring-offset-0';
+const BUTTON_UPLOAD_CLASS = 'flex items-center gap-(--size-s) px-(--size-xs) bg-transparent text-sm text-neutral-600 focus:outline-none focus:ring-offset-0';
 
 const whatsappPrefix = '+54 9 ';
 

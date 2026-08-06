@@ -5,15 +5,16 @@
   la implementación interna de cada getter sin tocar los componentes.
 */
 
-import type { TeamMember, service, Client, FiltersOption } from './types.ts';
+import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry } from './types.ts';
 import teamMembersJson from './teamMembers.json';
 import servicesJson from './service.json';
 import clientsJson from './client.json';
+import openingHoursJson from './openingHours.json';
 
 /* ── Getters de entidades ─────────────────────────────────── */
 
 export function getTeamMembers(): TeamMember[] {
-  return teamMembersJson as TeamMember[];
+  return teamMembersJson as unknown as TeamMember[];
 }
 
 export function getservices(): service[] {
@@ -22,6 +23,10 @@ export function getservices(): service[] {
 
 export function getClients(): Client[] {
   return clientsJson as Client[];
+}
+
+export function getOpeningHours(): OpeningHoursEntry[] {
+  return openingHoursJson as OpeningHoursEntry[];
 }
 
 /* ── Getters de filtros (derivados de los datos) ──────────── */

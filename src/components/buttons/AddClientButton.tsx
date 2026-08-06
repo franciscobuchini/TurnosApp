@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AddButton from './AddButton';
-import AddClientView, { ADD_CLIENT_VIEW_TITLE } from '../views/clientViews/AddClientView';
+import AddClientView, { ADD_CLIENT_VIEW_TITLE } from '../views/ClientView';
 
 interface AddClientButtonProps {
   onOpen?: () => void;

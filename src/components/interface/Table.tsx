@@ -30,7 +30,7 @@ interface TableProps<T> {
 
 const TABLE_CLASS = 'w-full table-fixed';
 
-const DEFAULT_CELL_CLASS = 'align-middle';
+const DEFAULT_CELL_CLASS = 'align-middle ';
 
 const HEADER_ROW_CLASS = 'h-(--size-2xl)';
 

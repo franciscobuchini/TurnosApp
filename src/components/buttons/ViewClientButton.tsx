@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DetailsButton from './DetailsButton';
-import ViewClientView from '../views/clientViews/DetailsClientView';
+import ClientView from '../views/ClientView';
 
 interface ViewClientButtonProps {
   label: string;
@@ -29,10 +29,12 @@ export default function ViewClientButton({ label, className, onOpen }: ViewClien
       />
 
       {!onOpen && (
-        <ViewClientView
+        <ClientView
           open={isOpen}
           onClose={() => setIsOpen(false)}
           title={`Detalles de ${label}`}
+          mode="view"
+          clientName={label}
         />
       )}
     </>

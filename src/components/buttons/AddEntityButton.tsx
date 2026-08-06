@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AddButton from './AddButton';
-import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../views/entityViews/AddEntityView';
+import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../views/EntityView';
 
 interface AddEntityButtonProps {
   onOpen?: () => void;

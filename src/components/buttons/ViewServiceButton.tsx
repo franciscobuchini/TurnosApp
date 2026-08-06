@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DetailsButton from './DetailsButton';
-import ViewServiceView from '../views/serviceViews/DetailsServiceView';
+import ServiceView from '../views/ServiceView';
 
 interface ViewServiceButtonProps {
   label: string;
@@ -29,10 +29,11 @@ export default function ViewServiceButton({ label, className, onOpen }: ViewServ
       />
 
       {!onOpen && (
-        <ViewServiceView
+        <ServiceView
           open={isOpen}
           onClose={() => setIsOpen(false)}
           title={`Detalles de ${label}`}
+          mode="view"
         />
       )}
     </>

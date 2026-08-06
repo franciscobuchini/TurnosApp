@@ -13,7 +13,7 @@ const CONTENT_HEADER_CLASS = 'flex items-center justify-between px-(--size-l)';
 
 const CONTENT_HEADER_TITLE_COLUMN_CLASS = 'flex flex-1 flex-col gap-(--size-2xs)';
 
-const CONTENT_HEADER_TITLE_CLASS = 'text-xl font-semibold text-white tracking-tight';
+const CONTENT_HEADER_TITLE_CLASS = 'text-xl text-white tracking-tight';
 
 const CONTENT_HEADER_SUBTITLE_CLASS = 'line-clamp-2 text-sm text-neutral-500';
 
