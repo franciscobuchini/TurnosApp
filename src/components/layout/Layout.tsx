@@ -1,33 +1,31 @@
 /* 
   src/components/layout/Layout.tsx
-  Layout principal de la aplicación. Sidebar + MainContent ya armados; children = contenido de MainContent.
+  Layout principal de la aplicación. Arma el Sidebar y reserva el espacio del área principal.
+  Cada vista es responsable de envolver su propio contenido en <MainContent>.
 */
 
 import Sidebar from './Sidebar';
-import MainContent from './MainContent';
 
 interface LayoutProps {
   children: React.ReactNode;
   sidebarChildren?: React.ReactNode;
   sidebarClassName?: string;
-  mainContentClassName?: string;
 }
 
 const LAYOUT_CLASS = 'h-dvh w-dvw overflow-hidden flex flex-col p-(--size-xs) bg-black';
 
-const LAYOUT_CONTENT_CLASS = 'flex flex-1 min-h-0 overflow-hidden';
+const LAYOUT_CONTENT_CLASS = 'flex flex-1 overflow-hidden';
 
-export default function Layout({
-  children,
-  sidebarChildren,
-  sidebarClassName,
-  mainContentClassName,
-}: LayoutProps) {
+// Reserva el espacio del área principal (mismo layout que ocupaba MainContent,
+// sin sus estilos visuales: eso ahora lo aporta cada vista).
+const MAIN_AREA_CLASS = 'flex flex-1 min-h-0 min-w-0 h-full w-full';
+
+export default function Layout({ children, sidebarChildren, sidebarClassName }: LayoutProps) {
   return (
     <div className={LAYOUT_CLASS}>
       <div className={LAYOUT_CONTENT_CLASS}>
         <Sidebar className={sidebarClassName}>{sidebarChildren}</Sidebar>
-        <MainContent className={mainContentClassName}>{children}</MainContent>
+        <div className={MAIN_AREA_CLASS}>{children}</div>
       </div>
     </div>
   );

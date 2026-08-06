@@ -1,21 +1,23 @@
-import { type ChangeEvent, type FocusEvent, type MouseEvent, useState } from 'react';
+import { type ChangeEvent, type FocusEvent, type MouseEvent, useEffect, useRef, useState } from 'react';
+import { ImageUp, X } from 'lucide-react';
 import Form from '../../interface/Form';
+import Image from '../../interface/Image';
 import Input from '../../interface/Input';
 import getInitials from '../../../functions/getInitials';
 import ServiceSelector from './ServiceSelector';
+import Button from '../../interface/Button';
 
-const CONTAINER_CLASS = 'flex h-full w-full flex-1 flex-col rounded-4xl';
-const LAYOUT_CLASS = 'flex flex-1 flex-col gap-(--size-m) md:flex-row';
-const LEFT_PANEL_CLASS = 'flex flex-1 flex-col justify-center';
-const RIGHT_PANEL_CLASS = 'flex flex-1 flex-col items-center justify-center';
 const FORM_CLASS = 'flex flex-col gap-(--size-xl) p-(--size-m)';
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
-
-const PREVIEW_CARD_CLASS = 'flex w-full max-w-sm flex-col items-center rounded-3xl border border-neutral-200 bg-white p-(--size-l) shadow-sm';
-const INITIALS_BADGE_CLASS = 'flex h-16 w-16 items-center justify-center rounded-full bg-(--primary-01) text-xl font-semibold text-neutral-900';
-const PREVIEW_CONTENT_CLASS = 'mt-4 text-center';
-const PREVIEW_NAME_CLASS = 'text-base font-semibold text-neutral-900';
-const PREVIEW_ROLE_CLASS = 'mt-1 text-sm text-neutral-600';
+const FIELD_GROUP_CLASS = 'flex flex-col gap-2';
+const FIELD_LABEL_CLASS = 'px-(--size-m) text-sm font-medium text-neutral-700';
+const AVATAR_FIELD_CLASS = 'flex items-center gap-(--size-m) px-(--size-m)';
+const AVATAR_IMAGE_CLASS = 'h-(--size-4xl) w-(--size-4xl) text-xl';
+const AVATAR_WRAPPER_CLASS = 'group relative inline-block rounded-full';
+const AVATAR_REMOVE_BUTTON_CLASS =
+  'absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:outline-none';
+const AVATAR_INPUT_CLASS = 'sr-only';
+const BUTTON_UPLOAD_CLASS = 'flex items-center gap-2 px-(--size-m) py-(--size-s) bg-transparent text-sm text-neutral-600 focus:outline-none focus:ring-offset-0';
 
 const whatsappPrefix = '+54 9 ';
 
@@ -45,7 +47,17 @@ export default function FormAddEntity() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const initials = getInitials(memberName);
+  const [photoSrc, setPhotoSrc] = useState<string>();
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const imageName = getInitials(memberName) ? memberName : 'Equipo Miembro';
+
+  useEffect(() => {
+    return () => {
+      if (photoSrc) {
+        URL.revokeObjectURL(photoSrc);
+      }
+    };
+  }, [photoSrc]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMemberName(formatCapitalizedWords(event.target.value));
@@ -70,64 +82,109 @@ export default function FormAddEntity() {
     window.requestAnimationFrame(() => setCursorAfterPrefix(input));
   };
 
+  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setPhotoSrc((current) => {
+      if (current) {
+        URL.revokeObjectURL(current);
+      }
+
+      return URL.createObjectURL(file);
+    });
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoSrc((current) => {
+      if (current) {
+        URL.revokeObjectURL(current);
+      }
+      return undefined;
+    });
+
+    if (photoInputRef.current) {
+      photoInputRef.current.value = '';
+    }
+  };
+
   return (
-    <div className={CONTAINER_CLASS}>
-      <div className={LAYOUT_CLASS}>
-        <div className={LEFT_PANEL_CLASS}>
-          <Form className={FORM_CLASS}>
-            <Input
-              label="Nombre y Apellido"
-              name="memberName"
-              placeholder="Juan Pérez"
-              value={memberName}
-              onChange={handleNameChange}
+    <Form className={FORM_CLASS}>
+      <Input
+        label="Nombre y Apellido"
+        name="memberName"
+        placeholder="Juan Perez"
+        value={memberName}
+        onChange={handleNameChange}
+      />
+
+      <Input
+        label="Rol"
+        name="role"
+        placeholder="Peluquero"
+        value={role}
+        onChange={handleRoleChange}
+      />
+
+      <div className={FIELD_GROUP_CLASS}>
+        <p className={FIELD_LABEL_CLASS}>Imagen de perfil</p>
+        <div className={AVATAR_FIELD_CLASS}>
+          <div className={AVATAR_WRAPPER_CLASS}>
+            <Image
+              src={photoSrc}
+              name={imageName}
+              className={AVATAR_IMAGE_CLASS}
             />
-
-            <Input
-              label="Rol"
-              name="role"
-              placeholder="Peluquero"
-              value={role}
-              onChange={handleRoleChange}
-            />
-
-            <div className={TWO_COLUMN_GRID_CLASS}>
-              <Input
-                label="WhatsApp"
-                name="phone"
-                type="tel"
-                value={phone}
-                defaultValue={whatsappPrefix}
-                onChange={(event) => setPhone(event.target.value)}
-                onFocus={handleWhatsAppFocus}
-                onMouseUp={handleWhatsAppMouseUp}
-              />
-
-              <Input
-                label="Email"
-                name="email"
-                type="email"
-                optional
-                placeholder="miembro@ejemplo.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </div>
-
-            <ServiceSelector value={selectedServices} onChange={setSelectedServices} />
-          </Form>
-        </div>
-
-        <div className={RIGHT_PANEL_CLASS}>
-          <div className={PREVIEW_CARD_CLASS}>
-            <div className={INITIALS_BADGE_CLASS}>{initials || 'EM'}</div>
-            <div className={PREVIEW_CONTENT_CLASS}>
-              <p className={PREVIEW_NAME_CLASS}>{memberName || 'Nombre del miembro'}</p>
-              <p className={PREVIEW_ROLE_CLASS}>{role || 'Rol del miembro'}</p>
-            </div>
+            {photoSrc && (
+              <button
+                type="button"
+                className={AVATAR_REMOVE_BUTTON_CLASS}
+                onClick={handleRemovePhoto}
+                aria-label="Eliminar foto"
+              >
+                <X size="var(--size-m)" />
+              </button>
+            )}
           </div>
+          <Button type="button" className={BUTTON_UPLOAD_CLASS} onClick={() => photoInputRef.current?.click()}>
+            <ImageUp size="var(--size-m)" />
+            o cargar una imagen...
+          </Button>
+          <input
+            ref={photoInputRef}
+            className={AVATAR_INPUT_CLASS}
+            name="photo"
+            type="file"
+            accept="image/*"
+            onChange={handlePhotoChange}
+          />
         </div>
       </div>
-    </div>
+
+      <div className={TWO_COLUMN_GRID_CLASS}>
+        <Input
+          label="WhatsApp"
+          name="phone"
+          type="tel"
+          value={phone}
+          defaultValue={whatsappPrefix}
+          onChange={(event) => setPhone(event.target.value)}
+          onFocus={handleWhatsAppFocus}
+          onMouseUp={handleWhatsAppMouseUp}
+        />
+
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          optional
+          placeholder="miembro@ejemplo.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+      </div>
+
+      <ServiceSelector value={selectedServices} onChange={setSelectedServices} />
+    </Form>
   );
 }

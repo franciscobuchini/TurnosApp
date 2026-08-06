@@ -16,3 +16,16 @@ ordenar por (en las listas)
 
 para despues:
 normalizar las database de size/tamaño en todo el proyecto
+
+Normalizar: <MainContent className={ADD_CLIENT_VIEW_CLASS}> todas las vistas deberían tener las mismas clases, por ende llevar eso al componente principal
+
+
+const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m)';
+const VIEW_SERVICE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
+const VIEW_SERVICE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
+const ADD_SERVICE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
+const VIEW_ENTITY_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
+const VIEW_ENTITY_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
+const ADD_ENTITY_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
+const VIEW_CLIENT_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
+const ADD_CLIENT_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m)';

@@ -13,8 +13,68 @@
   },
   {
     "name": "Coloración y Reflejos",
-    "description": "Tinte completo o reflejos con serviceos de alta calidad para cuidar la salud capilar.",
+    "description": "Tinte completo o reflejos con productos de alta calidad para cuidar la salud capilar.",
     "price": 15000,
     "duration": "90 min"
+  },
+  {
+    "name": "Lavado + Peinado",
+    "description": "Lavado profesional con shampoo premium y peinado personalizado.",
+    "price": 4500,
+    "duration": "20 min"
+  },
+  {
+    "name": "Afeitado Clásico",
+    "description": "Afeitado completo con navaja, toallas calientes y loción refrescante.",
+    "price": 5500,
+    "duration": "30 min"
+  },
+  {
+    "name": "Corte Infantil",
+    "description": "Corte para niños con atención personalizada y ambiente amigable.",
+    "price": 6500,
+    "duration": "35 min"
+  },
+  {
+    "name": "Tratamiento Capilar",
+    "description": "Hidratación profunda y nutrición para fortalecer el cabello.",
+    "price": 9000,
+    "duration": "50 min"
+  },
+  {
+    "name": "Alisado Capilar",
+    "description": "Tratamiento de alisado para reducir el frizz y facilitar el peinado diario.",
+    "price": 22000,
+    "duration": "180 min"
+  },
+  {
+    "name": "Permanente Masculina",
+    "description": "Ondulación permanente para lograr volumen y textura duradera.",
+    "price": 18000,
+    "duration": "120 min"
+  },
+  {
+    "name": "Perfilado de Cejas",
+    "description": "Diseño y perfilado de cejas para resaltar la expresión facial.",
+    "price": 3500,
+    "duration": "20 min"
+  },
+  {
+    "name": "Combo Corte + Barba",
+    "description": "Corte de cabello y arreglo completo de barba en una sola sesión.",
+    "price": 13000,
+    "duration": "75 min"
+  },
+  {
+    "name": "Masaje Capilar Relajante",
+    "description": "Masaje con aceites esenciales para estimular la circulación y relajar el cuero cabelludo.",
+    "price": 5000,
+    "duration": "25 min"
+  },
+  {
+    "name": "Decoloración Completa",
+    "description": "Proceso de decoloración profesional con protección de la fibra capilar.",
+    "price": 20000,
+    "duration": "150 min"
   }
 ]

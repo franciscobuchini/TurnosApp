@@ -1,4 +1,5 @@
 ﻿import { ChevronLeft } from 'lucide-react';
+import MainContent from '../../layout/MainContent';
 import Button from '../../interface/Button';
 import MainHeader from '../../interface/MainHeader';
 import FormAddService from '../../widgets/serviceWidgets/FormAddService';
@@ -12,9 +13,6 @@ interface AddServiceViewProps {
   description?: string;
   onBack?: () => void;
 }
-
-const ADD_SERVICE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
-
 const ADD_SERVICE_BACK_BUTTON_CLASS = 'h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent';
 
 const ADD_SERVICE_FOOTER_BUTTON_CANCEL_CLASS = 'px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900';
@@ -35,7 +33,7 @@ export default function AddServiceView({
   const handleConfirm = onClose ?? onBack;
 
   return (
-    <div className={ADD_SERVICE_VIEW_CLASS}>
+    <MainContent>
       <MainHeader
         title={title}
         action={
@@ -60,6 +58,6 @@ export default function AddServiceView({
           text="Confirmar"
         />
       </div>
-    </div>
+    </MainContent>
   );
 }

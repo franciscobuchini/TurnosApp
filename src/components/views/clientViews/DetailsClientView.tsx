@@ -1,4 +1,5 @@
 ﻿import { ChevronLeft } from 'lucide-react';
+import MainContent from '../../layout/MainContent';
 import Button from '../../interface/Button';
 import MainHeader from '../../interface/MainHeader';
 
@@ -10,7 +11,6 @@ interface ViewClientViewProps {
   onBack?: () => void;
 }
 
-const VIEW_CLIENT_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
 
 const VIEW_CLIENT_BACK_BUTTON_CLASS = 'h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent';
 
@@ -34,7 +34,7 @@ export default function ViewClientView({
   const handleConfirm = onClose ?? onBack;
 
   return (
-    <div className={VIEW_CLIENT_VIEW_CLASS}>
+    <MainContent>
       <MainHeader
         title={title}
         action={
@@ -60,6 +60,6 @@ export default function ViewClientView({
           text="Confirmar"
         />
       </div>
-    </div>
+    </MainContent>
   );
 }
