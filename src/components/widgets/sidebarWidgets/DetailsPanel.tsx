@@ -17,6 +17,7 @@ export interface DetailsPanelOption {
   label: string;
   checked?: boolean;
   disabled?: boolean;
+  colorClassName?: string;
 }
 
 interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
@@ -104,7 +105,11 @@ export default function DetailsPanel({
                 className={twMerge(DETAILS_PANEL_CONTENT_CLASS, option.checked === false && 'opacity-40')}
               >
                 <span className={DETAILS_PANEL_AVATAR_CLASS}>
-                  <Image name={option.label} className={DETAILS_PANEL_IMAGE_CLASS} />
+                  {option.colorClassName ? (
+                    <span className={twMerge('h-full w-full rounded-full', option.colorClassName)} />
+                  ) : (
+                    <Image name={option.label} className={DETAILS_PANEL_IMAGE_CLASS} />
+                  )}
                 </span>
                 <span className={DETAILS_PANEL_LABEL_CLASS}>{option.label}</span>
               </div>

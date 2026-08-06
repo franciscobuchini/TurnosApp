@@ -7,9 +7,11 @@ import { useAgendaDate } from '../../functions/agendaDate';
 import Layout from '../../components/layout/Layout';
 import Calendar from '../../components/widgets/sidebarWidgets/Calendar';
 import DetailsPanel from '../../components/widgets/sidebarWidgets/DetailsPanel';
-import { getClients, getTeamFilters, getServiceFilters } from '../../database/data';
-import type { Client, FiltersOption } from '../../database/types';
+import { getClients, getTeamFilters, addClient, updateClient, addService, updateService, addTeamMember, updateTeamMember, getservices, removeClient, removeService, removeTeamMember } from '../../database/data';
+import type { Client, FiltersOption, service, TeamMember } from '../../database/types';
 import { useTeamFilters } from '../../functions/teamFilters';
+import { SERVICE_COLOR_BY_ID } from '../../components/widgets/serviceWidgets/serviceColors';
+import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import AddEntityButton from '../../components/buttons/AddEntityButton';
 import AddServiceButton from '../../components/buttons/AddServiceButton';
 import AddClientButton from '../../components/buttons/AddClientButton';
@@ -31,15 +33,19 @@ type ActiveView =
   | { type: 'view-member'; name: string }
   | { type: 'view-service'; name: string }
   | { type: 'view-client'; name: string }
-  | { type: 'edit-client'; name: string };
-
-function normalizeClientName(value?: string) {
-  return value?.trim().toLowerCase() ?? '';
-}
+  | { type: 'edit-client'; name: string }
+  | { type: 'edit-service'; name: string };
 
 function Dashboard() {
   const { teamFilters, selectedMembers, toggleTeamFilter } = useTeamFilters(getTeamFilters);
-  const [serviceFilters, setServiceFilters] = useState(getServiceFilters);
+  const [serviceFilters, setServiceFilters] = useState<DetailsPanelOption[]>(() =>
+    getservices().map((service) => ({
+      id: service.name.toLowerCase().replace(/\s+/g, '-'),
+      label: service.name,
+      checked: true,
+      colorClassName: SERVICE_COLOR_BY_ID[service.colorId ?? '']?.className,
+    })),
+  );
 
   const toggleServiceFilter = (id: string, checked: boolean) => {
     setServiceFilters((current) =>
@@ -71,7 +77,8 @@ function Dashboard() {
   }, [clients]);
 
   const handleCreateClient = (client: Client) => {
-    setClients((currentClients) => [...currentClients, { ...client, appointmentsCount: 0, totalSpent: 0 }]);
+    addClient({ ...client, appointmentsCount: 0, totalSpent: 0 });
+    setClients(getClients());
     setSelectedClientName(client.name);
     setActiveView({ type: 'schedule' });
   };
@@ -84,17 +91,53 @@ function Dashboard() {
     setActiveView({ type: 'edit-client', name: clientName });
   };
 
+  const handleOpenServiceEdit = (serviceName: string) => {
+    setActiveView({ type: 'edit-service', name: serviceName });
+  };
+
   const handleUpdateClient = (client: Client) => {
     const previousClientName = activeView.type === 'view-client' ? activeView.name : selectedClientName ?? '';
 
-    setClients((currentClients) =>
-      currentClients.map((currentClient) =>
-        normalizeClientName(currentClient.name) === normalizeClientName(previousClientName)
-          ? { ...currentClient, ...client }
-          : currentClient,
-      ),
-    );
+    updateClient(previousClientName, client);
+    setClients(getClients());
     setSelectedClientName(client.name);
+    setActiveView({ type: 'schedule' });
+  };
+
+  const handleCreateService = (newService: service) => {
+    addService(newService);
+    setActiveView({ type: 'schedule' });
+  };
+
+  const handleUpdateService = (previousName: string, updated: service) => {
+    updateService(previousName, updated);
+    setActiveView({ type: 'schedule' });
+  };
+
+  const handleCreateMember = (member: TeamMember) => {
+    addTeamMember(member);
+    setActiveView({ type: 'schedule' });
+  };
+
+  const handleUpdateMember = (previousName: string, member: TeamMember) => {
+    updateTeamMember(previousName, member);
+    setActiveView({ type: 'schedule' });
+  };
+
+  const handleDeleteClient = (clientName: string) => {
+    removeClient(clientName);
+    setClients(getClients());
+    setActiveView({ type: 'schedule' });
+  };
+
+  const handleDeleteService = (serviceName: string) => {
+    removeService(serviceName);
+    setServiceFilters((current) => current.filter((f) => f.label !== serviceName));
+    setActiveView({ type: 'schedule' });
+  };
+
+  const handleDeleteMember = (memberName: string) => {
+    removeTeamMember(memberName);
     setActiveView({ type: 'schedule' });
   };
 
@@ -145,9 +188,17 @@ function Dashboard() {
       }
     >
       {activeView.type === 'add-member' ? (
-        <AddEntityView open={true} onClose={() => setActiveView({ type: 'schedule' })} />
+        <AddEntityView
+          open={true}
+          onClose={() => setActiveView({ type: 'schedule' })}
+          onConfirm={handleCreateMember}
+        />
       ) : activeView.type === 'add-service' ? (
-        <AddServiceView open={true} onClose={() => setActiveView({ type: 'schedule' })} />
+        <AddServiceView
+          open={true}
+          onClose={() => setActiveView({ type: 'schedule' })}
+          onConfirm={handleCreateService}
+        />
       ) : activeView.type === 'add-client' ? (
         <AddClientView
           open={true}
@@ -162,6 +213,8 @@ function Dashboard() {
           title={`Perfil de ${activeView.name}`}
           mode="view"
           memberName={activeView.name}
+          onConfirm={(member) => handleUpdateMember(activeView.name, member)}
+          onDelete={() => handleDeleteMember(activeView.name)}
         />
       ) : activeView.type === 'view-service' ? (
         <ViewServiceView
@@ -169,6 +222,20 @@ function Dashboard() {
           onClose={() => setActiveView({ type: 'schedule' })}
           title={`Detalles de ${activeView.name}`}
           mode="view"
+          serviceName={activeView.name}
+          onEdit={() => handleOpenServiceEdit(activeView.name)}
+          onCancel={() => setActiveView({ type: 'schedule' })}
+          onDelete={() => handleDeleteService(activeView.name)}
+        />
+      ) : activeView.type === 'edit-service' ? (
+        <ViewServiceView
+          open={true}
+          onClose={() => setActiveView({ type: 'schedule' })}
+          title={`Editar ${activeView.name}`}
+          mode="edit"
+          serviceName={activeView.name}
+          onConfirm={(updated) => handleUpdateService(activeView.name, updated)}
+          onCancel={() => setActiveView({ type: 'schedule' })}
         />
       ) : activeView.type === 'view-client' ? (
         <ViewClientView
@@ -181,6 +248,7 @@ function Dashboard() {
           onConfirm={handleUpdateClient}
           onEdit={() => handleOpenClientEdit(activeView.name)}
           onCancel={() => setActiveView({ type: 'schedule' })}
+          onDelete={() => handleDeleteClient(activeView.name)}
         />
       ) : activeView.type === 'edit-client' ? (
         <ViewClientView

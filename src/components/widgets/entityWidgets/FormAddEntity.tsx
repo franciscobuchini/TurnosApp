@@ -7,6 +7,26 @@ import getInitials from '../../../functions/getInitials';
 import ServiceSelector from './ServiceSelector';
 import Button from '../../interface/Button';
 
+interface FormAddEntityProps {
+  mode?: 'create' | 'view' | 'edit';
+  initialValues?: {
+    name?: string;
+    role?: string;
+    phone?: string;
+    email?: string;
+    services?: string[];
+    photo?: string;
+  };
+  onValuesChange?: (values: {
+    name: string;
+    role: string;
+    phone: string;
+    email: string;
+    services: string[];
+    photo?: string;
+  }) => void;
+}
+
 const FORM_CLASS = 'flex flex-col gap-(--size-xl) p-(--size-m)';
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
 const FIELD_GROUP_CLASS = 'flex flex-col gap-2';
@@ -41,15 +61,25 @@ function setCursorAfterPrefix(input: HTMLInputElement) {
   }
 }
 
-export default function FormAddEntity() {
-  const [memberName, setMemberName] = useState('');
-  const [role, setRole] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [photoSrc, setPhotoSrc] = useState<string>();
+export default function FormAddEntity({ mode = 'create', initialValues, onValuesChange }: FormAddEntityProps) {
+  const [memberName, setMemberName] = useState(initialValues?.name ?? '');
+  const [role, setRole] = useState(initialValues?.role ?? '');
+  const [phone, setPhone] = useState(initialValues?.phone ?? '');
+  const [email, setEmail] = useState(initialValues?.email ?? '');
+  const [selectedServices, setSelectedServices] = useState<string[]>(initialValues?.services ?? []);
+  const [photoSrc, setPhotoSrc] = useState<string | undefined>(initialValues?.photo);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const imageName = getInitials(memberName) ? memberName : 'Equipo Miembro';
+  const readOnly = mode === 'view';
+
+  useEffect(() => {
+    setMemberName(initialValues?.name ?? '');
+    setRole(initialValues?.role ?? '');
+    setPhone(initialValues?.phone ?? '');
+    setEmail(initialValues?.email ?? '');
+    setSelectedServices(initialValues?.services ?? []);
+    setPhotoSrc(initialValues?.photo);
+  }, [mode, initialValues?.name, initialValues?.role, initialValues?.phone, initialValues?.email, initialValues?.services, initialValues?.photo]);
 
   useEffect(() => {
     return () => {
@@ -58,6 +88,17 @@ export default function FormAddEntity() {
       }
     };
   }, [photoSrc]);
+
+  useEffect(() => {
+    onValuesChange?.({
+      name: memberName,
+      role,
+      phone,
+      email,
+      services: selectedServices,
+      photo: photoSrc,
+    });
+  }, [memberName, role, phone, email, selectedServices, photoSrc, onValuesChange]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMemberName(formatCapitalizedWords(event.target.value));
@@ -116,6 +157,7 @@ export default function FormAddEntity() {
         placeholder="Juan Perez"
         value={memberName}
         onChange={handleNameChange}
+        readOnly={readOnly}
       />
 
       <Input
@@ -124,6 +166,7 @@ export default function FormAddEntity() {
         placeholder="Peluquero"
         value={role}
         onChange={handleRoleChange}
+        readOnly={readOnly}
       />
 
       <div className={FIELD_GROUP_CLASS}>
@@ -135,7 +178,7 @@ export default function FormAddEntity() {
               name={imageName}
               className={AVATAR_IMAGE_CLASS}
             />
-            {photoSrc && (
+            {photoSrc && !readOnly && (
               <button
                 type="button"
                 className={AVATAR_REMOVE_BUTTON_CLASS}
@@ -146,18 +189,22 @@ export default function FormAddEntity() {
               </button>
             )}
           </div>
-          <Button type="button" className={BUTTON_UPLOAD_CLASS} onClick={() => photoInputRef.current?.click()}>
-            <ImageUp size="var(--size-m)" />
-            o cargar una imagen...
-          </Button>
-          <input
-            ref={photoInputRef}
-            className={AVATAR_INPUT_CLASS}
-            name="photo"
-            type="file"
-            accept="image/*"
-            onChange={handlePhotoChange}
-          />
+          {!readOnly && (
+            <>
+              <Button type="button" className={BUTTON_UPLOAD_CLASS} onClick={() => photoInputRef.current?.click()}>
+                <ImageUp size="var(--size-m)" />
+                o cargar una imagen...
+              </Button>
+              <input
+                ref={photoInputRef}
+                className={AVATAR_INPUT_CLASS}
+                name="photo"
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -171,6 +218,7 @@ export default function FormAddEntity() {
           onChange={(event) => setPhone(event.target.value)}
           onFocus={handleWhatsAppFocus}
           onMouseUp={handleWhatsAppMouseUp}
+          readOnly={readOnly}
         />
 
         <Input
@@ -181,10 +229,11 @@ export default function FormAddEntity() {
           placeholder="miembro@ejemplo.com"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          readOnly={readOnly}
         />
       </div>
 
-      <ServiceSelector value={selectedServices} onChange={setSelectedServices} />
+      <ServiceSelector value={selectedServices} onChange={setSelectedServices} disabled={readOnly} />
     </Form>
   );
 }

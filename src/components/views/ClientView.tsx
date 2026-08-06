@@ -34,6 +34,7 @@ export interface AddClientViewProps {
   onConfirm?: (client: Client) => void;
   onEdit?: () => void;
   onCancel?: () => void;
+  onDelete?: () => void;
 }
 
 export default function AddClientView({
@@ -47,6 +48,7 @@ export default function AddClientView({
   onConfirm,
   onEdit,
   onCancel,
+  onDelete,
 }: AddClientViewProps) {
   if (!open) return null;
 
@@ -161,6 +163,13 @@ export default function AddClientView({
       <div className="flex justify-end gap-3 pt-(--size-m)">
         <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900" onClick={handleCancel} text={cancelLabel} />
         <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white" onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
+        {mode === 'view' && onDelete ? (
+          <Button
+            className="px-(--size-l) py-(--size-s) rounded-2xl bg-red-500 text-white"
+            onClick={onDelete}
+            text="Eliminar"
+          />
+        ) : null}
       </div>
     </MainContent>
   );

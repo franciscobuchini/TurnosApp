@@ -10,9 +10,10 @@ const SERVICE_LABEL_CLASS = 'px-(--size-m) text-sm font-medium text-neutral-700'
 interface ServiceSelectorProps {
   value: string[];
   onChange: (value: string[]) => void;
+  disabled?: boolean;
 }
 
-export default function ServiceSelector({ value, onChange }: ServiceSelectorProps) {
+export default function ServiceSelector({ value, onChange, disabled = false }: ServiceSelectorProps) {
   const availableServices = getservices();
 
   return (
@@ -27,6 +28,9 @@ export default function ServiceSelector({ value, onChange }: ServiceSelectorProp
               key={service.name}
               className={`${SERVICE_BADGE_CLASS} ${isActive ? SERVICE_BADGE_ACTIVE_CLASS : ''}`.trim()}
               onClick={() => {
+                if (disabled) {
+                  return;
+                }
                 onChange(
                   value.includes(service.name)
                     ? value.filter((item) => item !== service.name)

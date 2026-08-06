@@ -34,6 +34,7 @@ export default function ViewServiceButton({ label, className, onOpen }: ViewServ
           onClose={() => setIsOpen(false)}
           title={`Detalles de ${label}`}
           mode="view"
+          serviceName={label}
         />
       )}
     </>
