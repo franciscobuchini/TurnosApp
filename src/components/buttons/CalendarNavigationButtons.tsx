@@ -9,15 +9,9 @@ interface CalendarNavigationButtonsProps {
   buttonClassName?: string;
 }
 
-const CalendarNavigationButtonsClasses = {
-  required: 'hidden group-open:flex gap-(--size-s)',
-  style: '',
-};
+const CALENDAR_NAVIGATION_BUTTONS_CLASS = 'hidden group-open:flex gap-(--size-s)';
 
-const CalendarActionButtonClasses = {
-  required: 'h-(--size-xl) w-(--size-xl) justify-center items-center',
-  style: 'bg-transparent text-white',
-};
+const CALENDAR_ACTION_BUTTON_CLASS = 'h-(--size-xl) w-(--size-xl) justify-center items-center bg-transparent text-white';
 
 export default function CalendarNavigationButtons({
   onPrevMonth,
@@ -26,16 +20,16 @@ export default function CalendarNavigationButtons({
   buttonClassName,
 }: CalendarNavigationButtonsProps) {
   return (
-    <div className={twMerge(CalendarNavigationButtonsClasses.required, CalendarNavigationButtonsClasses.style, className)}>
+    <div className={twMerge(CALENDAR_NAVIGATION_BUTTONS_CLASS, className)}>
       <Button
         onClick={onPrevMonth}
         icon={<ChevronLeft size={"var(--size-m)"} />}
-        className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style, buttonClassName)}
+        className={twMerge(CALENDAR_ACTION_BUTTON_CLASS, buttonClassName)}
       />
       <Button
         onClick={onNextMonth}
         icon={<ChevronRight size={"var(--size-m)"} />}
-        className={twMerge(CalendarActionButtonClasses.required, CalendarActionButtonClasses.style, buttonClassName)}
+        className={twMerge(CALENDAR_ACTION_BUTTON_CLASS, buttonClassName)}
       />
     </div>
   );

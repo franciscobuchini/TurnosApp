@@ -16,17 +16,9 @@ interface WeekSelectorProps {
   nextButtonClassName?: string;
 }
 
-/* Wrapper de los 7 botones de día + los botones de navegación */
-const WeekSelectorClasses = {
-  required: 'flex w-full items-center justify-between',
-  style: '',
-};
+const WEEK_SELECTOR_CLASS = 'flex w-full items-center justify-between';
 
-/* Wrapper de los 7 botones de día */
-const WeekSelectorDaysClasses = {
-  required: '@container flex flex-1 justify-around gap-(--size-xs) px-(--size-xs)',
-  style: '',
-};
+const WEEK_SELECTOR_DAYS_CLASS = '@container flex flex-1 justify-around gap-(--size-xs) px-(--size-xs)';
 
 /* getWeekDays: dado un día, devuelve 7 fechas centradas en él (3 antes, el día, 3 después) */
 const getWeekDays = (date: Date): Date[] => {
@@ -66,13 +58,13 @@ export default function WeekSelector({
   };
 
   return (
-    <div className={twMerge(WeekSelectorClasses.required, WeekSelectorClasses.style, className)}>
+    <div className={twMerge(WEEK_SELECTOR_CLASS, className)}>
       <PrevWeekButton
         onClick={prevWeek}
         isSelected={isSelectedBeforeWeek}
       />
 
-      <div className={twMerge(WeekSelectorDaysClasses.required, WeekSelectorDaysClasses.style)}>
+      <div className={WEEK_SELECTOR_DAYS_CLASS}>
         <DaySelectorButtons
           weekDays={weekDays}
           selectedDate={selectedDate}

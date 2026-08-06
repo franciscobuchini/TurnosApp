@@ -13,36 +13,16 @@ interface AddEntityViewProps {
   onBack?: () => void;
 }
 
-const AddEntityViewClasses = {
-  required: 'flex h-full w-full flex-col gap-(--size-m) text-white',
-  style: '',
-};
+const ADD_ENTITY_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
 
-const AddEntityBackButtonClasses = {
-  required: 'h-(--size-2xl) w-(--size-2xl) p-0',
-  style: 'text-neutral-900 bg-transparent',
-};
+const ADD_ENTITY_BACK_BUTTON_CLASS = 'h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent';
 
-const AddEntityFooterButtonClasses = {
-  cancel: {
-    required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-neutral-50 text-neutral-900',
-  },
-  confirm: {
-    required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-neutral-900 text-white',
-  },
-};
+const ADD_ENTITY_FOOTER_BUTTON_CANCEL_CLASS = 'px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900';
+const ADD_ENTITY_FOOTER_BUTTON_CONFIRM_CLASS = 'px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white';
 
-const AddEntityFooterClasses = {
-  required: 'flex justify-end gap-3 pt-(--size-m)',
-  style: '',
-};
+const ADD_ENTITY_FOOTER_CLASS = 'flex justify-end gap-3 pt-(--size-m)';
 
-const AddEntityContentClasses = {
-  required: 'flex flex-1 items-center justify-center rounded-3xl bg-neutral-50 p-(--size-m)',
-  style: '',
-};
+const ADD_ENTITY_CONTENT_CLASS = 'flex flex-1 items-center justify-center rounded-3xl bg-neutral-50 p-(--size-m)';
 
 export default function AddEntityView({
   open = true,
@@ -57,29 +37,29 @@ export default function AddEntityView({
   const handleConfirm = onClose ?? onBack;
 
   return (
-    <div className={AddEntityViewClasses.required}>
+    <div className={ADD_ENTITY_VIEW_CLASS}>
       <MainHeader
         title={title}
         action={
           <Button
-            className={`${AddEntityBackButtonClasses.required} ${AddEntityBackButtonClasses.style}`.trim()}
+            className={ADD_ENTITY_BACK_BUTTON_CLASS}
             onClick={handleBack}
             icon={<ChevronLeft size="var(--size-l)" />}
             aria-label="Volver"
           />
         }
       />
-      <div className={AddEntityContentClasses.required}>
+      <div className={ADD_ENTITY_CONTENT_CLASS}>
         <FormAddEntity />
       </div>
-      <div className={`${AddEntityFooterClasses.required} ${AddEntityFooterClasses.style}`.trim()}>
+      <div className={ADD_ENTITY_FOOTER_CLASS}>
         <Button
-          className={`${AddEntityFooterButtonClasses.cancel.required} ${AddEntityFooterButtonClasses.cancel.style}`.trim()}
+          className={ADD_ENTITY_FOOTER_BUTTON_CANCEL_CLASS}
           onClick={handleCancel}
           text="Cancelar"
         />
         <Button
-          className={`${AddEntityFooterButtonClasses.confirm.required} ${AddEntityFooterButtonClasses.confirm.style}`.trim()}
+          className={ADD_ENTITY_FOOTER_BUTTON_CONFIRM_CLASS}
           onClick={handleConfirm}
           text="Confirmar"
         />

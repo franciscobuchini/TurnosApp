@@ -11,17 +11,11 @@ interface BoxProps {
   className?: string;
 }
 
-/* BoxClasses:
-   - required: estructura. No varía.
-   - style: color. Esto sí se puede modificar. */
-const BoxClasses = {
-  required: 'w-full p-(--size-s)',
-  style: '',
-};
+const BOX_CLASS = 'w-full p-(--size-s)';
 
 export default function Box({ children, className }: BoxProps) {
   return (
-    <div className={twMerge(BoxClasses.required, BoxClasses.style, className)}>
+    <div className={twMerge(BOX_CLASS, className)}>
       {children}
     </div>
   );

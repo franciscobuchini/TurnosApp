@@ -9,49 +9,29 @@ interface ContentHeaderProps {
   className?: string;
 }
 
-/* ContentHeaderClasses: contenedor (Box)*/
-const ContentHeaderClasses = {
-  required: 'flex items-center justify-between px-(--size-l)',
-  style: '',
-};
+const CONTENT_HEADER_CLASS = 'flex items-center justify-between px-(--size-l)';
 
-/* ContentHeaderTitleColumnClasses: columna de título y subtítulo*/
-const ContentHeaderTitleColumnClasses = {
-  required: 'flex flex-1 flex-col gap-(--size-2xs)',
-  style: '',
-};
+const CONTENT_HEADER_TITLE_COLUMN_CLASS = 'flex flex-1 flex-col gap-(--size-2xs)';
 
-/* ContentHeaderTitleClasses*/
-const ContentHeaderTitleClasses = {
-  required: '',
-  style: 'text-xl font-semibold text-white tracking-tight',
-};
+const CONTENT_HEADER_TITLE_CLASS = 'text-xl font-semibold text-white tracking-tight';
 
-/* ContentHeaderSubtitleClasses*/
-const ContentHeaderSubtitleClasses = {
-  required: 'line-clamp-2 text-sm',
-  style: 'text-neutral-500',
-};
+const CONTENT_HEADER_SUBTITLE_CLASS = 'line-clamp-2 text-sm text-neutral-500';
 
-/* ContentHeaderActionClasses: contenedor de la acción*/
-const ContentHeaderActionClasses = {
-  required: 'flex shrink-0 items-center',
-  style: '',
-};
+const CONTENT_HEADER_ACTION_CLASS = 'flex shrink-0 items-center';
 
 export default function ContentHeader({ title, subtitle, action, className }: ContentHeaderProps) {
   return (
-    <Box className={twMerge(ContentHeaderClasses.required, ContentHeaderClasses.style, className)}>
-      <div className={twMerge(ContentHeaderTitleColumnClasses.required, ContentHeaderTitleColumnClasses.style)}>
-        <h1 className={twMerge(ContentHeaderTitleClasses.required, ContentHeaderTitleClasses.style)}>{title}</h1>
+    <Box className={twMerge(CONTENT_HEADER_CLASS, className)}>
+      <div className={CONTENT_HEADER_TITLE_COLUMN_CLASS}>
+        <h1 className={CONTENT_HEADER_TITLE_CLASS}>{title}</h1>
         {subtitle && (
-          <span className={twMerge(ContentHeaderSubtitleClasses.required, ContentHeaderSubtitleClasses.style)}>
+          <span className={CONTENT_HEADER_SUBTITLE_CLASS}>
             {subtitle}
           </span>
         )}
       </div>
       {action && (
-        <div className={twMerge(ContentHeaderActionClasses.required, ContentHeaderActionClasses.style)}>
+        <div className={CONTENT_HEADER_ACTION_CLASS}>
           {action}
         </div>
       )}

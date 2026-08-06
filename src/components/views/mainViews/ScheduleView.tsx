@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import WeekSelector from '../../widgets/mainWidgets/WeekSelector';
 import Schedule from '../../widgets/mainWidgets/Schedule';
 
+const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m)';
+
 interface ScheduleViewProps {
   selectedMembers: string[];
   viewDate: Date;
@@ -20,7 +22,7 @@ export default function ScheduleView({
   children,
 }: ScheduleViewProps) {
   return (
-    <div className="flex h-full w-full flex-col gap-(--size-m)">
+    <div className={SCHEDULE_VIEW_CLASS}>
       <WeekSelector
         viewDate={viewDate}
         selectedDate={selectedDate}

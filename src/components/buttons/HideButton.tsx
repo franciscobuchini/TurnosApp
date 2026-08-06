@@ -17,10 +17,7 @@ interface HideButtonProps {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const HideButtonClasses = {
-  required: 'justify-between w-full h-(--size-xl) p-(--size-s) gap-(--size-l)',
-  style: 'bg-transparent text-neutral-400 hover:text-white',
-};
+const HIDE_BUTTON_CLASS = 'justify-between w-full h-(--size-xl) p-(--size-s) gap-(--size-l) bg-transparent text-neutral-400 hover:text-white';
 
 export default function HideButton({
   text,
@@ -67,7 +64,7 @@ export default function HideButton({
       text={text ?? resolvedText}
       icon={icon ?? (resolvedVisible ? <EyeOff size={"var(--size-m)"} /> : <Eye size={"var(--size-m)"} />)}
       disabled={disabled}
-      className={twMerge(HideButtonClasses.required, HideButtonClasses.style, className)}
+      className={twMerge(HIDE_BUTTON_CLASS, className)}
     />
   );
 }

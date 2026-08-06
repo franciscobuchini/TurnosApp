@@ -6,14 +6,14 @@ import ServicePreviewCard from './ServicePreviewCard';
 import ColorPicker from './ColorPicker';
 import PhotoPicker from './PhotoPicker';
 
-const ADD_SERVICE_CONTAINER_CLASSES ='flex h-full w-full flex-1 flex-col rounded-4xl bg-neutral-50 p-(--size-m)';
-const ADD_SERVICE_LAYOUT_CLASSES = 'flex flex-1 flex-col gap-(--size-m) md:flex-row';
-const ADD_SERVICE_LEFT_PANEL_CLASSES = 'flex flex-1 flex-col justify-center';
-const ADD_SERVICE_RIGHT_PANEL_CLASSES = 'flex flex-1 flex-col items-center justify-center gap-3 rounded-4xl bg-neutral-50 p-(--size-m)';
-const ADD_SERVICE_FORM_CLASSES = 'flex flex-col gap-(--size-xl) p-(--size-m)';
-const FIELD_GROUP_CLASSES = 'flex flex-col gap-2';
-const FIELD_LABEL_CLASSES = 'px-(--size-m) text-sm font-medium text-neutral-700';
-const TWO_COLUMN_GRID_CLASSES = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
+const ADD_SERVICE_CONTAINER_CLASS ='flex h-full w-full flex-1 flex-col rounded-4xl bg-neutral-50 p-(--size-m)';
+const ADD_SERVICE_LAYOUT_CLASS = 'flex flex-1 flex-col gap-(--size-m) md:flex-row';
+const ADD_SERVICE_LEFT_PANEL_CLASS = 'flex flex-1 flex-col justify-center';
+const ADD_SERVICE_RIGHT_PANEL_CLASS = 'flex flex-1 flex-col items-center justify-center gap-3 rounded-4xl bg-neutral-50 p-(--size-m)';
+const ADD_SERVICE_FORM_CLASS = 'flex flex-col gap-(--size-xl) p-(--size-m)';
+const FIELD_GROUP_CLASS = 'flex flex-col gap-2';
+const FIELD_LABEL_CLASS = 'px-(--size-m) text-sm font-medium text-neutral-700';
+const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
 
 const SERVICE_COLORS: { id: string; label: string; className: string }[] = [
   { id: 'lima', label: 'Lima', className: 'bg-(--primary-01)' },
@@ -62,10 +62,10 @@ export default function FormAddService() {
   };
 
   return (
-    <div className={ADD_SERVICE_CONTAINER_CLASSES}>
-      <div className={ADD_SERVICE_LAYOUT_CLASSES}>
-        <div className={ADD_SERVICE_LEFT_PANEL_CLASSES}>
-          <Form className={ADD_SERVICE_FORM_CLASSES}>
+    <div className={ADD_SERVICE_CONTAINER_CLASS}>
+      <div className={ADD_SERVICE_LAYOUT_CLASS}>
+        <div className={ADD_SERVICE_LEFT_PANEL_CLASS}>
+          <Form className={ADD_SERVICE_FORM_CLASS}>
             <Input
               label="Nombre del servicio"
               name="serviceName"
@@ -74,8 +74,8 @@ export default function FormAddService() {
               onChange={handleServiceNameChange}
             />
 
-            <div className={FIELD_GROUP_CLASSES}>
-              <p className={FIELD_LABEL_CLASSES}>Color del servicio</p>
+            <div className={FIELD_GROUP_CLASS}>
+              <p className={FIELD_LABEL_CLASS}>Color del servicio</p>
 
               <ColorPicker
                 colors={SERVICE_COLORS}
@@ -84,8 +84,8 @@ export default function FormAddService() {
               />
             </div>
 
-            <div className={FIELD_GROUP_CLASSES}>
-              <p className={FIELD_LABEL_CLASSES}>Foto del servicio</p>
+            <div className={FIELD_GROUP_CLASS}>
+              <p className={FIELD_LABEL_CLASS}>Foto del servicio</p>
 
               <PhotoPicker
                 count={17}
@@ -94,7 +94,7 @@ export default function FormAddService() {
               />
             </div>
 
-            <div className={TWO_COLUMN_GRID_CLASSES}>
+            <div className={TWO_COLUMN_GRID_CLASS}>
               <Input
                 label="Duración (min)"
                 name="duration"
@@ -125,7 +125,7 @@ export default function FormAddService() {
           </Form>
         </div>
 
-        <div className={ADD_SERVICE_RIGHT_PANEL_CLASSES}>
+        <div className={ADD_SERVICE_RIGHT_PANEL_CLASS}>
           <ServicePreviewCard
             name={serviceName}
             description={description}

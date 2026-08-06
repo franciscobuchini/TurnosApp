@@ -17,12 +17,8 @@ interface ButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClick'>
   type?: 'button' | 'submit' | 'reset';
 }
 
-/* ButtonClasses: el botón/link en sí */
-const ButtonClasses = {
-  required: 'relative flex items-center group cursor-pointer select-none justify-center',
-  style: 'bg-red-500 rounded-2xl',
-  disabled: 'pointer-events-none opacity-50',
-};
+const BUTTON_CLASS = 'relative flex items-center group cursor-pointer select-none justify-center bg-red-500 rounded-2xl';
+const BUTTON_DISABLED_CLASS = 'pointer-events-none opacity-50';
 
 export default function Button(props: ButtonProps) {
   const {
@@ -37,10 +33,8 @@ export default function Button(props: ButtonProps) {
     ...rest
   } = props;
 
-  const buttonClassName = twMerge(
-    ButtonClasses.required,
-    ButtonClasses.style,
-    disabled ? ButtonClasses.disabled : '',
+  const buttonClassName = twMerge(BUTTON_CLASS,
+    disabled ? BUTTON_DISABLED_CLASS : '',
     className,
   );
 

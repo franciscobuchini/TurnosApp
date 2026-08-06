@@ -15,16 +15,9 @@ interface DropdownMenuProps {
   menuRef: RefObject<HTMLDivElement | null>;
 }
 
-/* DropdownClasses: contenedor raíz, solo posiciona */
-const DropdownClasses = {
-  required: 'relative',
-};
+const DROPDOWN_CLASS = 'relative';
 
-/* DropdownMenuClasses */
-const DropdownMenuClasses = {
-  required: 'fixed z-[9999] p-(--size-s) overflow-hidden',
-  style: 'bg-black shadow-2xl rounded-2xl',
-};
+const DROPDOWN_MENU_CLASS = 'fixed z-[9999] p-(--size-s) overflow-hidden bg-black shadow-2xl rounded-2xl';
 
 /* DropdownMenu: es el panel del dropdown */
 function DropdownMenu({ items, position, menuRef }: DropdownMenuProps) {
@@ -32,7 +25,7 @@ function DropdownMenu({ items, position, menuRef }: DropdownMenuProps) {
     <div
       ref={menuRef}
       role="menu"
-      className={twMerge(DropdownMenuClasses.required, DropdownMenuClasses.style)}
+      className={DROPDOWN_MENU_CLASS}
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
@@ -150,7 +143,7 @@ export default function Dropdown({
   };
 
   return (
-    <div ref={dropdownRef} className={DropdownClasses.required}>
+    <div ref={dropdownRef} className={DROPDOWN_CLASS}>
       <Button
         aria-haspopup="menu"
         aria-expanded={isOpen}

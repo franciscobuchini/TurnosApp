@@ -12,16 +12,11 @@ interface SidebarProps {
   className?: string;
 }
 
-/* SidebarClasses: envuelve SidebarNav y SidebarContent para que ambos
-   se comporten como un solo item flex dentro de Layout. */
-const SidebarClasses = {
-  required: 'flex flex-col h-full min-w-0 shrink-0 gap-(--size-m) p-(--size-m) w-lg overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
-  style: '',
-};
+const SIDEBAR_CLASS = 'flex flex-col h-full min-w-0 shrink-0 gap-(--size-m) p-(--size-m) w-lg overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
 
 export default function Sidebar({ children, className }: SidebarProps) {
   return (
-      <aside className={twMerge(SidebarClasses.required, SidebarClasses.style, className)}>
+      <aside className={twMerge(SIDEBAR_CLASS, className)}>
         <FiltersGroupProvider value="sidebar">{children}</FiltersGroupProvider>
       </aside>
   );

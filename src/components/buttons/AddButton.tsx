@@ -10,10 +10,7 @@ interface AddButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClic
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const AddButtonClasses = {
-  required: 'w-full h-(--size-2xl) gap-(--size-m) shrink-0 justify-center',
-  style: 'bg-transparent text-neutral-400 hover:text-white',
-};
+const ADD_BUTTON_CLASS = 'w-full h-(--size-2xl) gap-(--size-m) shrink-0 justify-center bg-transparent text-neutral-400 hover:text-white';
 
 export default function AddButton({
   text,
@@ -28,7 +25,7 @@ export default function AddButton({
       onClick={onClick}
       icon={icon !== undefined ? icon : <Plus size={"var(--size-m)"} />}
       text={text ?? 'Agregar'}
-      className={twMerge(AddButtonClasses.required, AddButtonClasses.style, className)}
+      className={twMerge(ADD_BUTTON_CLASS, className)}
     />
   );
 }

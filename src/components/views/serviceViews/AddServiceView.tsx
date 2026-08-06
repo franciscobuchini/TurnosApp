@@ -13,31 +13,14 @@ interface AddServiceViewProps {
   onBack?: () => void;
 }
 
-const AddServiceViewClasses = {
-  required: 'flex h-full w-full flex-col gap-(--size-m) text-white',
-  style: '',
-};
+const ADD_SERVICE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) text-white';
 
-const AddServiceBackButtonClasses = {
-  required: 'h-(--size-2xl) w-(--size-2xl) p-0',
-  style: 'text-neutral-900 bg-transparent',
-};
+const ADD_SERVICE_BACK_BUTTON_CLASS = 'h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent';
 
-const AddServiceFooterButtonClasses = {
-  cancel: {
-    required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-neutral-50 text-neutral-900',
-  },
-  confirm: {
-    required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-neutral-900 text-white',
-  },
-};
+const ADD_SERVICE_FOOTER_BUTTON_CANCEL_CLASS = 'px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900';
+const ADD_SERVICE_FOOTER_BUTTON_CONFIRM_CLASS = 'px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white';
 
-const AddServiceFooterClasses = {
-  required: 'flex justify-end gap-3 pt-(--size-m)',
-  style: '',
-};
+const ADD_SERVICE_FOOTER_CLASS = 'flex justify-end gap-3 pt-(--size-m)';
 
 export default function AddServiceView({
   open = true,
@@ -52,12 +35,12 @@ export default function AddServiceView({
   const handleConfirm = onClose ?? onBack;
 
   return (
-    <div className={AddServiceViewClasses.required}>
+    <div className={ADD_SERVICE_VIEW_CLASS}>
       <MainHeader
         title={title}
         action={
           <Button
-            className={`${AddServiceBackButtonClasses.required} ${AddServiceBackButtonClasses.style}`.trim()}
+            className={ADD_SERVICE_BACK_BUTTON_CLASS}
             onClick={handleBack}
             icon={<ChevronLeft size="var(--size-l)" />}
             aria-label="Volver"
@@ -65,14 +48,14 @@ export default function AddServiceView({
         }
       />
       <FormAddService />
-      <div className={`${AddServiceFooterClasses.required} ${AddServiceFooterClasses.style}`.trim()}>
+      <div className={ADD_SERVICE_FOOTER_CLASS}>
         <Button
-          className={`${AddServiceFooterButtonClasses.cancel.required} ${AddServiceFooterButtonClasses.cancel.style}`.trim()}
+          className={ADD_SERVICE_FOOTER_BUTTON_CANCEL_CLASS}
           onClick={handleCancel}
           text="Cancelar"
         />
         <Button
-          className={`${AddServiceFooterButtonClasses.confirm.required} ${AddServiceFooterButtonClasses.confirm.style}`.trim()}
+          className={ADD_SERVICE_FOOTER_BUTTON_CONFIRM_CLASS}
           onClick={handleConfirm}
           text="Confirmar"
         />

@@ -7,15 +7,13 @@ interface FormProps {
   title?: string;
 }
 
-const FormClasses = {
-  wrapper: 'flex flex-col w-full gap-4',
-  title: 'text-lg font-semibold text-neutral-900',
-};
+const FORM_WRAPPER_CLASS = 'flex flex-col w-full gap-4';
+const FORM_TITLE_CLASS = 'text-lg font-semibold text-neutral-900';
 
 export default function Form({ children, className, title }: FormProps) {
   return (
-    <form className={twMerge(FormClasses.wrapper, className)}>
-      {title ? <h2 className={FormClasses.title}>{title}</h2> : null}
+    <form className={twMerge(FORM_WRAPPER_CLASS, className)}>
+      {title ? <h2 className={FORM_TITLE_CLASS}>{title}</h2> : null}
       {children}
     </form>
   );

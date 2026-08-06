@@ -2,9 +2,9 @@ import { type ChangeEvent, type FocusEvent, type MouseEvent, useState } from 're
 import Form from '../../interface/Form';
 import Input from '../../interface/Input';
 
-const CONTAINER_CLASSES = 'relative flex p-(--size-m) h-full w-full rounded-4xl bg-neutral-50';
-const FORM_CLASSES = 'flex flex-1 flex-col justify-center gap-(--size-xl) max-w-2xl p-(--size-m)';
-const RIGHT_PANEL_CLASSES = 'flex-1 flex flex-col justify-center items-center rounded-4xl border-dashed border-neutral-400 border-1 text-neutral-400';
+const CONTAINER_CLASS = 'relative flex p-(--size-m) h-full w-full rounded-4xl bg-neutral-50';
+const FORM_CLASS = 'flex flex-1 flex-col justify-center gap-(--size-xl) max-w-2xl p-(--size-m)';
+const RIGHT_PANEL_CLASS = 'flex-1 flex flex-col justify-center items-center rounded-4xl border-dashed border-neutral-400 border-1 text-neutral-400';
 
 const whatsappPrefix = '+54 9 ';
 
@@ -50,8 +50,8 @@ export default function FormAddClient() {
   };
 
   return (
-    <div className={CONTAINER_CLASSES}>
-      <Form className={FORM_CLASSES}>
+    <div className={CONTAINER_CLASS}>
+      <Form className={FORM_CLASS}>
         <Input
           label="Nombre y Apellido"
           name="fullName"
@@ -83,7 +83,7 @@ export default function FormAddClient() {
           placeholder="Agrega observaciones si lo deseas"
         />
       </Form>
-      <div className={RIGHT_PANEL_CLASSES}>
+      <div className={RIGHT_PANEL_CLASS}>
         <p>Proximamente...</p>
         <p>Sistema de fidelización de clientes</p>
       </div>

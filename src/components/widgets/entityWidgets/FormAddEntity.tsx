@@ -4,18 +4,18 @@ import Input from '../../interface/Input';
 import getInitials from '../../../functions/getInitials';
 import ServiceSelector from './ServiceSelector';
 
-const CONTAINER_CLASSES = 'flex h-full w-full flex-1 flex-col rounded-4xl';
-const LAYOUT_CLASSES = 'flex flex-1 flex-col gap-(--size-m) md:flex-row';
-const LEFT_PANEL_CLASSES = 'flex flex-1 flex-col justify-center';
-const RIGHT_PANEL_CLASSES = 'flex flex-1 flex-col items-center justify-center';
-const FORM_CLASSES = 'flex flex-col gap-(--size-xl) p-(--size-m)';
-const TWO_COLUMN_GRID_CLASSES = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
+const CONTAINER_CLASS = 'flex h-full w-full flex-1 flex-col rounded-4xl';
+const LAYOUT_CLASS = 'flex flex-1 flex-col gap-(--size-m) md:flex-row';
+const LEFT_PANEL_CLASS = 'flex flex-1 flex-col justify-center';
+const RIGHT_PANEL_CLASS = 'flex flex-1 flex-col items-center justify-center';
+const FORM_CLASS = 'flex flex-col gap-(--size-xl) p-(--size-m)';
+const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
 
-const PREVIEW_CARD_CLASSES = 'flex w-full max-w-sm flex-col items-center rounded-3xl border border-neutral-200 bg-white p-(--size-l) shadow-sm';
-const INITIALS_BADGE_CLASSES = 'flex h-16 w-16 items-center justify-center rounded-full bg-(--primary-01) text-xl font-semibold text-neutral-900';
-const PREVIEW_CONTENT_CLASSES = 'mt-4 text-center';
-const PREVIEW_NAME_CLASSES = 'text-base font-semibold text-neutral-900';
-const PREVIEW_ROLE_CLASSES = 'mt-1 text-sm text-neutral-600';
+const PREVIEW_CARD_CLASS = 'flex w-full max-w-sm flex-col items-center rounded-3xl border border-neutral-200 bg-white p-(--size-l) shadow-sm';
+const INITIALS_BADGE_CLASS = 'flex h-16 w-16 items-center justify-center rounded-full bg-(--primary-01) text-xl font-semibold text-neutral-900';
+const PREVIEW_CONTENT_CLASS = 'mt-4 text-center';
+const PREVIEW_NAME_CLASS = 'text-base font-semibold text-neutral-900';
+const PREVIEW_ROLE_CLASS = 'mt-1 text-sm text-neutral-600';
 
 const whatsappPrefix = '+54 9 ';
 
@@ -71,10 +71,10 @@ export default function FormAddEntity() {
   };
 
   return (
-    <div className={CONTAINER_CLASSES}>
-      <div className={LAYOUT_CLASSES}>
-        <div className={LEFT_PANEL_CLASSES}>
-          <Form className={FORM_CLASSES}>
+    <div className={CONTAINER_CLASS}>
+      <div className={LAYOUT_CLASS}>
+        <div className={LEFT_PANEL_CLASS}>
+          <Form className={FORM_CLASS}>
             <Input
               label="Nombre y Apellido"
               name="memberName"
@@ -91,7 +91,7 @@ export default function FormAddEntity() {
               onChange={handleRoleChange}
             />
 
-            <div className={TWO_COLUMN_GRID_CLASSES}>
+            <div className={TWO_COLUMN_GRID_CLASS}>
               <Input
                 label="WhatsApp"
                 name="phone"
@@ -118,12 +118,12 @@ export default function FormAddEntity() {
           </Form>
         </div>
 
-        <div className={RIGHT_PANEL_CLASSES}>
-          <div className={PREVIEW_CARD_CLASSES}>
-            <div className={INITIALS_BADGE_CLASSES}>{initials || 'EM'}</div>
-            <div className={PREVIEW_CONTENT_CLASSES}>
-              <p className={PREVIEW_NAME_CLASSES}>{memberName || 'Nombre del miembro'}</p>
-              <p className={PREVIEW_ROLE_CLASSES}>{role || 'Rol del miembro'}</p>
+        <div className={RIGHT_PANEL_CLASS}>
+          <div className={PREVIEW_CARD_CLASS}>
+            <div className={INITIALS_BADGE_CLASS}>{initials || 'EM'}</div>
+            <div className={PREVIEW_CONTENT_CLASS}>
+              <p className={PREVIEW_NAME_CLASS}>{memberName || 'Nombre del miembro'}</p>
+              <p className={PREVIEW_ROLE_CLASS}>{role || 'Rol del miembro'}</p>
             </div>
           </div>
         </div>

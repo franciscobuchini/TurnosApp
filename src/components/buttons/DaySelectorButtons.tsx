@@ -8,42 +8,28 @@ interface DaySelectorButtonsProps {
   onSelectDate: (date: Date) => void;
 }
 
-const WeekSelectorDayButtonClasses = {
-  required: 'h-(--size-6xl) flex-1 p-(--size-s) shrink-0 justify-center items-center',
-  style: 'bg-transparent',
+const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-(--size-6xl) flex-1 p-(--size-s) shrink-0 justify-center items-center bg-transparent';
+
+const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-neutral-900 text-white';
+
+const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-white';
+
+const WEEK_SELECTOR_DAY_VISIBILITY_0_CLASS = '';
+const WEEK_SELECTOR_DAY_VISIBILITY_1_CLASS = 'hidden @min-[380px]:flex';
+const WEEK_SELECTOR_DAY_VISIBILITY_2_CLASS = 'hidden @min-[620px]:flex';
+const WEEK_SELECTOR_DAY_VISIBILITY_3_CLASS = 'hidden @min-[840px]:flex';
+const WEEK_SELECTOR_DAY_VISIBILITY_CLASS: Record<number, string> = {
+  0: WEEK_SELECTOR_DAY_VISIBILITY_0_CLASS,
+  1: WEEK_SELECTOR_DAY_VISIBILITY_1_CLASS,
+  2: WEEK_SELECTOR_DAY_VISIBILITY_2_CLASS,
+  3: WEEK_SELECTOR_DAY_VISIBILITY_3_CLASS,
 };
 
-const WeekSelectorDaySelectedClasses = {
-  required: '',
-  style: 'bg-neutral-900 text-white',
-};
+const WEEK_SELECTOR_DAY_COLUMN_CLASS = 'flex flex-col items-center';
 
-const WeekSelectorDayTodayClasses = {
-  required: '',
-  style: 'bg-white',
-};
+const WEEK_SELECTOR_DAY_LABEL_CLASS = 'text-l';
 
-const WeekSelectorDayVisibilityClasses: Record<number, { required: string; style: string }> = {
-  0: { required: '', style: '' },
-  1: { required: 'hidden @min-[380px]:flex', style: '' },
-  2: { required: 'hidden @min-[620px]:flex', style: '' },
-  3: { required: 'hidden @min-[840px]:flex', style: '' },
-};
-
-const WeekSelectorDayColumnClasses = {
-  required: 'flex flex-col items-center',
-  style: '',
-};
-
-const WeekSelectorDayLabelClasses = {
-  required: 'text-l',
-  style: '',
-};
-
-const WeekSelectorDayNumberClasses = {
-  required: 'text-4xl font-semibold px-(--size-2xs)',
-  style: '',
-};
+const WEEK_SELECTOR_DAY_NUMBER_CLASS = 'text-4xl font-semibold px-(--size-2xs)';
 
 export default function DaySelectorButtons({
   weekDays,
@@ -58,7 +44,7 @@ export default function DaySelectorButtons({
         const isSelected = isSameDay(date, selectedDate);
         const isToday = isSameDay(date, new Date());
         const distance = Math.abs(idx - centerIdx);
-        const visibility = WeekSelectorDayVisibilityClasses[distance];
+        const visibilityClassName = WEEK_SELECTOR_DAY_VISIBILITY_CLASS[distance];
 
         const handleDayClick = () => {
           onSelectDate(date);
@@ -80,23 +66,20 @@ export default function DaySelectorButtons({
           <Button
             key={idx}
             onClick={handleDayClick}
-            className={twMerge(
-              WeekSelectorDayButtonClasses.required,
-              WeekSelectorDayButtonClasses.style,
-              visibility.required,
-              visibility.style,
+            className={twMerge(WEEK_SELECTOR_DAY_BUTTON_CLASS,
+              visibilityClassName,
               isSelected
-                ? twMerge(WeekSelectorDaySelectedClasses.required, WeekSelectorDaySelectedClasses.style)
+                ? WEEK_SELECTOR_DAY_SELECTED_CLASS
                 : isToday
-                  ? twMerge(WeekSelectorDayTodayClasses.required, WeekSelectorDayTodayClasses.style)
+                  ? WEEK_SELECTOR_DAY_TODAY_CLASS
                   : '',
             )}
           >
-            <span className={twMerge(WeekSelectorDayColumnClasses.required, WeekSelectorDayColumnClasses.style)}>
-              <span className={twMerge(WeekSelectorDayLabelClasses.required, WeekSelectorDayLabelClasses.style)}>
+            <span className={WEEK_SELECTOR_DAY_COLUMN_CLASS}>
+              <span className={WEEK_SELECTOR_DAY_LABEL_CLASS}>
                 {getDayName(date)}
               </span>
-              <span className={twMerge(WeekSelectorDayNumberClasses.required, WeekSelectorDayNumberClasses.style)}>
+              <span className={WEEK_SELECTOR_DAY_NUMBER_CLASS}>
                 {date.getDate()}
               </span>
             </span>

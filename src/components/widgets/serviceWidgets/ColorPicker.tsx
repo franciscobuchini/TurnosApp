@@ -12,10 +12,10 @@ type Props = {
   onChange: (id: string) => void;
 };
 
-const WRAPPER_CLASSES = 'flex flex-wrap justify-center gap-(--size-s)';
-const SWATCH_CLASSES = 'h-(--size-xl) w-(--size-xl) rounded-full border-1 transition';
-const SWATCH_ACTIVE_CLASSES = 'border-neutral-500';
-const SWATCH_INACTIVE_CLASSES = 'border-transparent hover:border-neutral-300';
+const WRAPPER_CLASS = 'flex flex-wrap justify-center gap-(--size-s)';
+const SWATCH_CLASS = 'h-(--size-xl) w-(--size-xl) rounded-full border-1 transition';
+const SWATCH_ACTIVE_CLASS = 'border-neutral-500';
+const SWATCH_INACTIVE_CLASS = 'border-transparent hover:border-neutral-300';
 
 export default function ColorPicker({
   colors,
@@ -23,7 +23,7 @@ export default function ColorPicker({
   onChange,
 }: Props) {
   return (
-    <div className={WRAPPER_CLASSES}>
+    <div className={WRAPPER_CLASS}>
       {colors.map((color) => {
         const isActive = value === color.id;
 
@@ -36,9 +36,9 @@ export default function ColorPicker({
             title={color.label}
             onClick={() => onChange(color.id)}
             className={twMerge(
-              SWATCH_CLASSES,
+              SWATCH_CLASS,
               color.className,
-              isActive ? SWATCH_ACTIVE_CLASSES : SWATCH_INACTIVE_CLASSES
+              isActive ? SWATCH_ACTIVE_CLASS : SWATCH_INACTIVE_CLASS
             )}
           />
         );

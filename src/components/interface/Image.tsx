@@ -15,22 +15,12 @@ interface ImageProps {
   className?: string;
 }
 
-/* ImageClasses:
-   - required: estructura y tamaño. No varía.
-   - style: color. Esto sí se puede modificar. */
-const ImageClasses = {
-  required: 'flex items-center justify-center select-none leading-none',
-  style: 'bg-neutral-600 rounded-full text-white text-xs font-bold',
-};
+const IMAGE_CLASS = 'flex items-center justify-center select-none leading-none bg-neutral-600 rounded-full text-white text-xs font-bold';
 
-/* ImageInitialsClasses: estilo del texto de iniciales */
-const ImageInitialsClasses = {
-  required: '',
-  style: '',
-};
+const IMAGE_INITIALS_CLASS = '';
 
 export default function Image({ src, alt, name, className }: ImageProps) {
-  const mergedClassName = twMerge(ImageClasses.required, ImageClasses.style, className);
+  const mergedClassName = twMerge(IMAGE_CLASS, className);
 
   if (src) {
     return <img src={src} alt={alt || name || ''} className={mergedClassName} />;
@@ -39,7 +29,7 @@ export default function Image({ src, alt, name, className }: ImageProps) {
   return (
     <div className={mergedClassName}>
       {name && (
-        <span className={twMerge(ImageInitialsClasses.required, ImageInitialsClasses.style)}>
+        <span className={IMAGE_INITIALS_CLASS}>
           {getInitials(name)}
         </span>
       )}

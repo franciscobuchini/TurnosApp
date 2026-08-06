@@ -15,24 +15,12 @@ interface CheckboxProps {
   className?: string;
 }
 
-/* CheckboxSquareClasses: contenedor visible y personalizable */
-const CheckboxSquareClasses = {
-  required: 'relative flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl cursor-pointer',
-  style: 'bg-neutral-950 text-white',
-  disabled: 'cursor-not-allowed opacity-50',
-};
+const CHECKBOX_SQUARE_CLASS = 'relative flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl cursor-pointer bg-neutral-950 text-white';
+const CHECKBOX_SQUARE_DISABLED_CLASS = 'cursor-not-allowed opacity-50';
 
-/* CheckboxInputClasses: input real oculto */
-const CheckboxInputClasses = {
-  required: 'peer sr-only',
-  style: '',
-};
+const CHECKBOX_INPUT_CLASS = 'peer sr-only';
 
-/* CheckboxIconClasses: tilde visible cuando está activo */
-const CheckboxIconClasses = {
-  required: 'h-3 w-3 opacity-0 transition-opacity duration-150 peer-checked:opacity-100',
-  style: '',
-};
+const CHECKBOX_ICON_CLASS = 'h-3 w-3 opacity-0 transition-opacity duration-150 peer-checked:opacity-100';
 
 export default function Checkbox({
   id,
@@ -47,10 +35,8 @@ export default function Checkbox({
 
   return (
     <label
-      className={twMerge(
-        CheckboxSquareClasses.required,
-        CheckboxSquareClasses.style,
-        disabled && CheckboxSquareClasses.disabled,
+      className={twMerge(CHECKBOX_SQUARE_CLASS,
+        disabled && CHECKBOX_SQUARE_DISABLED_CLASS,
         className,
       )}
     >
@@ -59,11 +45,11 @@ export default function Checkbox({
         checked={Boolean(checked)}
         disabled={disabled}
         onChange={handleChange}
-        className={twMerge(CheckboxInputClasses.required, CheckboxInputClasses.style)}
+        className={CHECKBOX_INPUT_CLASS}
       />
       <Check
         strokeWidth={3}
-        className={twMerge(CheckboxIconClasses.required, CheckboxIconClasses.style)}
+        className={CHECKBOX_ICON_CLASS}
       />
     </label>
   );

@@ -30,53 +30,19 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   onActionClick?: () => void;
 }
 
-/* FilterPanelClasses: contenedor nativo del panel */
-const FilterPanelClasses = {
-  required: 'group w-full cursor-pointer p-(--size-xs) shrink-0',
-  style: 'bg-neutral-900 rounded-3xl text-white',
-  animations:
-    '[interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-tranneutral-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:tranneutral-y-0',
-};
+const FILTER_PANEL_CLASS = 'group w-full cursor-pointer p-(--size-xs) shrink-0 bg-neutral-900 rounded-3xl text-white [interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-tranneutral-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:tranneutral-y-0';
 
-/* FilterPanelBodyClasses: wrapper de la lista de opciones + botón de acción, dentro del details abierto */
-const FilterPanelBodyClasses = {
-  required: 'flex flex-col gap-(--size-s) flex-1 min-h-0 overflow-y-auto',
-  style: '',
-  animations: 'motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out',
-};
+const FILTER_PANEL_BODY_CLASS = 'flex flex-col gap-(--size-s) flex-1 min-h-0 overflow-y-auto motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out';
 
-/* DetailsPanelContentClasses: wrapper del contenido del trigger (imagen + label). */
-const DetailsPanelContentClasses = {
-  required: 'flex items-center gap-(--size-s) w-full h-(--size-2xl) text-left',
-  style: '',
-  animations: '',
-};
+const DETAILS_PANEL_CONTENT_CLASS = 'flex items-center gap-(--size-s) w-full h-(--size-2xl) text-left';
 
-/* DetailsPanelAvatarClasses: forma y tamaño de la imagen del trigger. */
-const DetailsPanelAvatarClasses = {
-  required: 'h-(--size-xl) w-(--size-xl) shrink-0',
-  style: '',
-  animations: '',
-};
+const DETAILS_PANEL_AVATAR_CLASS = 'h-(--size-xl) w-(--size-xl) shrink-0';
+const DETAILS_PANEL_IMAGE_CLASS = 'h-full w-full';
 
-/* DetailsPanelLabelClasses: texto del nombre en el trigger. */
-const DetailsPanelLabelClasses = {
-  required: '',
-  style: 'transition-opacity',
-  animations: 'motion-safe:duration-150 motion-safe:ease-out',
-};
+const DETAILS_PANEL_LABEL_CLASS = 'transition-opacity motion-safe:duration-150 motion-safe:ease-out';
 
-/* el trigger completo (Dropdown) de cada fila. */
-const DetailsPanelTriggerClasses = {
-  required: 'w-full justify-start px-(--size-xs)',
-  style: 'bg-transparent hover:bg-black',
-  animations:
-    'motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-content]]:tranneutral-x-0.5',
-};
-/* estilo que se aplica al trigger cuando el dropdown está abierto */
-const DetailsPanelTriggerOpenClasses = {
-  style: 'bg-black',
-};
+const DETAILS_PANEL_TRIGGER_CLASS = 'w-full justify-start px-(--size-xs) bg-transparent hover:bg-black motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-content]]:tranneutral-x-0.5';
+const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-black';
 
 export default function DetailsPanel({
   title,
@@ -105,43 +71,31 @@ export default function DetailsPanel({
           content={
             <div
               data-details-panel-content
-              className={twMerge(
-                DetailsPanelContentClasses.required,
-                DetailsPanelContentClasses.style,
-                DetailsPanelContentClasses.animations,
+              className={twMerge(DETAILS_PANEL_CONTENT_CLASS,
                 option.checked === false && 'opacity-40',
               )}
             >
               <span
                 data-details-panel-avatar
-                className={twMerge(
-                  DetailsPanelAvatarClasses.required,
-                  DetailsPanelAvatarClasses.style,
-                  DetailsPanelAvatarClasses.animations,
+                className={twMerge(DETAILS_PANEL_AVATAR_CLASS,
                 )}
               >
                 <Image
                   name={option.label}
-                  className="h-full w-full"
+                  className={DETAILS_PANEL_IMAGE_CLASS}
                 />
               </span>
               <span
-                className={twMerge(
-                  DetailsPanelLabelClasses.required,
-                  DetailsPanelLabelClasses.style,
-                  DetailsPanelLabelClasses.animations,
+                className={twMerge(DETAILS_PANEL_LABEL_CLASS,
                 )}
               >
                 {option.label}
               </span>
             </div>
           }
-          className={twMerge(
-            DetailsPanelTriggerClasses.required,
-            DetailsPanelTriggerClasses.style,
-            DetailsPanelTriggerClasses.animations,
+          className={twMerge(DETAILS_PANEL_TRIGGER_CLASS,
           )}
-          openClassName={twMerge(DetailsPanelTriggerOpenClasses.style)}
+          openClassName={DETAILS_PANEL_TRIGGER_OPEN_CLASS}
         />
       ),
     },
@@ -178,7 +132,7 @@ export default function DetailsPanel({
           }
         }
       }}
-      className={twMerge(FilterPanelClasses.required, FilterPanelClasses.style, FilterPanelClasses.animations, className)}
+      className={twMerge(FILTER_PANEL_CLASS, className)}
     >
       <summary>
         <ContentHeader
@@ -189,10 +143,7 @@ export default function DetailsPanel({
 
       <div
         data-filter-panel-body
-        className={twMerge(
-          FilterPanelBodyClasses.required,
-          FilterPanelBodyClasses.style,
-          FilterPanelBodyClasses.animations,
+        className={twMerge(FILTER_PANEL_BODY_CLASS,
         )}
       >
         <Table

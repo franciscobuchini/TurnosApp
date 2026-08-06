@@ -9,9 +9,10 @@ botón de agregar turno
 botón de personalización
 botón de métricas
 botón de ajustes de perfil/usuario/ajustes
-ordenar por (en las listas)
 botón de horarios del local
 botón de ajustes de reservas
+
+ordenar por (en las listas)
 
 para despues:
 normalizar las database de size/tamaño en todo el proyecto

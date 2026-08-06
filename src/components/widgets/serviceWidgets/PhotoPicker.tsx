@@ -6,11 +6,11 @@ type Props = {
   onChange: (index: number | null) => void;
 };
 
-const GRID_CLASSES = 'grid grid-cols-[repeat(auto-fill,80px)] justify-center gap-(--size-s)';
-const PHOTO_CLASSES = 'h-(--size-5xl) w-(--size-5xl) overflow-hidden rounded-lg border-1 bg-white';
-const PHOTO_ACTIVE_CLASSES = 'border-neutral-500';
-const PHOTO_INACTIVE_CLASSES = 'border-transparent border-neutral-200';
-const NO_PHOTO_LABEL_CLASSES = 'flex h-full w-full items-center justify-center text-neutral-500';
+const GRID_CLASS = 'grid grid-cols-[repeat(auto-fill,80px)] justify-center gap-(--size-s)';
+const PHOTO_CLASS = 'h-(--size-5xl) w-(--size-5xl) overflow-hidden rounded-lg border-1 bg-white';
+const PHOTO_ACTIVE_CLASS = 'border-neutral-500';
+const PHOTO_INACTIVE_CLASS = 'border-transparent border-neutral-200';
+const NO_PHOTO_LABEL_CLASS = 'flex h-full w-full items-center justify-center text-neutral-500';
 
 export default function PhotoPicker({
   count,
@@ -18,17 +18,17 @@ export default function PhotoPicker({
   onChange,
 }: Props) {
   return (
-    <div className={GRID_CLASSES}>
+    <div className={GRID_CLASS}>
       <button
         type="button"
         onClick={() => onChange(null)}
         aria-pressed={value === null}
         className={twMerge(
-          PHOTO_CLASSES,
-          value === null ? PHOTO_ACTIVE_CLASSES : PHOTO_INACTIVE_CLASSES
+          PHOTO_CLASS,
+          value === null ? PHOTO_ACTIVE_CLASS : PHOTO_INACTIVE_CLASS
         )}
       >
-        <span className={NO_PHOTO_LABEL_CLASSES}>X</span>
+        <span className={NO_PHOTO_LABEL_CLASS}>X</span>
       </button>
 
       {Array.from({ length: count }, (_, index) => {
@@ -41,12 +41,12 @@ export default function PhotoPicker({
             onClick={() => onChange(index)}
             aria-pressed={isActive}
             className={twMerge(
-              PHOTO_CLASSES,
-              isActive ? PHOTO_ACTIVE_CLASSES : PHOTO_INACTIVE_CLASSES
+              PHOTO_CLASS,
+              isActive ? PHOTO_ACTIVE_CLASS : PHOTO_INACTIVE_CLASS
             )}
           >
             {/* Reemplazar por la imagen real */}
-            <span className={NO_PHOTO_LABEL_CLASSES}>
+            <span className={NO_PHOTO_LABEL_CLASS}>
               {index + 1}
             </span>
           </button>

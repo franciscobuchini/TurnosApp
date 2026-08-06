@@ -13,32 +13,14 @@ interface AddClientViewProps {
   onBack?: () => void;
 }
 
-/* AddClientViewClasses: esto es el lienzo en blanco de la vista. */
-const AddClientViewClasses = {
-  required: 'flex h-full w-full flex-col gap-(--size-m)',
-  style: '',
-};
+const ADD_CLIENT_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m)';
 
-const AddClientBackButtonClasses = {
-  required: 'h-(--size-2xl) w-(--size-2xl) p-0',
-  style: 'text-neutral-900 bg-transparent',
-};
+const ADD_CLIENT_BACK_BUTTON_CLASS = 'h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent';
 
-const AddClientFooterButtonClasses = {
-  cancel: {
-    required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-neutral-50 text-neutral-900',
-  },
-  confirm: {
-    required: 'px-(--size-l) py-(--size-s)',
-    style: 'rounded-2xl bg-neutral-900 text-white',
-  },
-};
+const ADD_CLIENT_FOOTER_BUTTON_CANCEL_CLASS = 'px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900';
+const ADD_CLIENT_FOOTER_BUTTON_CONFIRM_CLASS = 'px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white';
 
-const AddClientFooterClasses = {
-  required: 'flex justify-end gap-3 pt-(--size-m)',
-  style: '',
-};
+const ADD_CLIENT_FOOTER_CLASS = 'flex justify-end gap-3 pt-(--size-m)';
 
 export default function AddClientView({
   open = true,
@@ -53,12 +35,12 @@ export default function AddClientView({
   const handleConfirm = onClose ?? onBack;
 
   return (
-    <div className={AddClientViewClasses.required}>
+    <div className={ADD_CLIENT_VIEW_CLASS}>
       <MainHeader
         title={title}
         action={
           <Button
-            className={`${AddClientBackButtonClasses.required} ${AddClientBackButtonClasses.style}`.trim()}
+            className={ADD_CLIENT_BACK_BUTTON_CLASS}
             onClick={handleBack}
             icon={<ChevronLeft size="var(--size-l)" />}
             aria-label="Volver"
@@ -66,14 +48,14 @@ export default function AddClientView({
         }
       />
       <FormAddClient />
-      <div className={`${AddClientFooterClasses.required} ${AddClientFooterClasses.style}`.trim()}>
+      <div className={ADD_CLIENT_FOOTER_CLASS}>
         <Button
-          className={`${AddClientFooterButtonClasses.cancel.required} ${AddClientFooterButtonClasses.cancel.style}`.trim()}
+          className={ADD_CLIENT_FOOTER_BUTTON_CANCEL_CLASS}
           onClick={handleCancel}
           text="Cancelar"
         />
         <Button
-          className={`${AddClientFooterButtonClasses.confirm.required} ${AddClientFooterButtonClasses.confirm.style}`.trim()}
+          className={ADD_CLIENT_FOOTER_BUTTON_CONFIRM_CLASS}
           onClick={handleConfirm}
           text="Confirmar"
         />

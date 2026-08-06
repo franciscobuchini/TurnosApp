@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import HideButton from './HideButton';
 import ViewEntityButton from './ViewEntityButton';
 
+const TEAM_FILTER_BUTTON_CLASS = 'w-full justify-between';
+
 interface TeamFilterButtonProps {
   option: {
     id: string;
@@ -24,7 +26,7 @@ export default function TeamFilterButton({ option, onToggle, onOpenDetails, clas
       />
       <ViewEntityButton
         label={option.label}
-        className="w-full justify-between"
+        className={TEAM_FILTER_BUTTON_CLASS}
         onOpen={onOpenDetails}
       />
     </>

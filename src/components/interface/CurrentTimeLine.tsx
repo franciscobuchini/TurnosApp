@@ -13,12 +13,7 @@ interface CurrentTimeLineProps {
   className?: string;
 }
 
-/* CurrentTimeLineClasses: línea horizontal, arranca después de la columna de horas y llega hasta el borde derecho.
-   scroll-mt-(--size-m): margen que respeta scrollIntoView, para que la línea no quede pegada al borde. */
-const CurrentTimeLineClasses = {
-  required: 'absolute left-(--size-4xl) right-0 h-0.5 scroll-mt-(--size-m) pointer-events-none',
-  style: 'bg-neutral-900 rounded-full',
-};
+const CURRENT_TIME_LINE_CLASS = 'absolute left-(--size-4xl) right-0 h-0.5 scroll-mt-(--size-m) pointer-events-none bg-(--primary-07) rounded-full shadow-[0_-4px_6px_rgba(50,50,50,0.2)]';
 
 export default function CurrentTimeLine({
   selectedDate,
@@ -86,7 +81,7 @@ export default function CurrentTimeLine({
     <div
       ref={lineRef}
       data-current-time-line
-      className={twMerge(CurrentTimeLineClasses.required, CurrentTimeLineClasses.style, className)}
+      className={twMerge(CURRENT_TIME_LINE_CLASS, className)}
       style={lineTop !== null ? { top: `${lineTop}px` } : undefined}
     />
   );

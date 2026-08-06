@@ -8,25 +8,17 @@ interface WeekNavigationButtonProps {
   isSelected?: boolean;
 }
 
-const WeekSelectorNavButtonClasses = {
-  required: 'h-(--size-6xl) w-(--size-4xl) shrink-0 justify-center items-center',
-  style: 'rounded-2xl bg-transparent',
-};
+const WEEK_SELECTOR_NAV_BUTTON_CLASS = 'h-(--size-6xl) w-(--size-4xl) shrink-0 justify-center items-center rounded-2xl bg-transparent';
 
-const WeekSelectorNavButtonSelectedClasses = {
-  required: '',
-  style: 'bg-neutral-900 text-white',
-};
+const WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS = 'bg-neutral-900 text-white';
 
 export function PrevWeekButton({ onClick, className, isSelected = false }: WeekNavigationButtonProps) {
   return (
     <Button
       onClick={onClick}
       icon={<ChevronLeft />}
-      className={twMerge(
-        WeekSelectorNavButtonClasses.required,
-        WeekSelectorNavButtonClasses.style,
-        isSelected ? twMerge(WeekSelectorNavButtonSelectedClasses.required, WeekSelectorNavButtonSelectedClasses.style) : '',
+      className={twMerge(WEEK_SELECTOR_NAV_BUTTON_CLASS,
+        isSelected ? WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS : '',
         className,
       )}
     />
@@ -38,10 +30,8 @@ export function NextWeekButton({ onClick, className, isSelected = false }: WeekN
     <Button
       onClick={onClick}
       icon={<ChevronRight />}
-      className={twMerge(
-        WeekSelectorNavButtonClasses.required,
-        WeekSelectorNavButtonClasses.style,
-        isSelected ? twMerge(WeekSelectorNavButtonSelectedClasses.required, WeekSelectorNavButtonSelectedClasses.style) : '',
+      className={twMerge(WEEK_SELECTOR_NAV_BUTTON_CLASS,
+        isSelected ? WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS : '',
         className,
       )}
     />

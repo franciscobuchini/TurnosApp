@@ -28,45 +28,19 @@ interface TableProps<T> {
   stickyHeader?: boolean;
 }
 
-/* TableClasses:
-   - required: estructura. No varía.
-   - style: color. Esto sí se puede modificar. */
-const TableClasses = {
-  required: 'w-full table-fixed',
-  style: '',
-};
+const TABLE_CLASS = 'w-full table-fixed';
 
-/* Consts sueltos de la tabla, ya preparados con required/style separados
-   para cuando se agregue color a cada uno. */
-const DefaultCellClasses = {
-  required: 'align-middle',
-  style: '',
-};
+const DEFAULT_CELL_CLASS = 'align-middle';
 
-const HeaderRowClasses = {
-  required: 'h-(--size-2xl)',
-  style: '',
-};
+const HEADER_ROW_CLASS = 'h-(--size-2xl)';
 
-const BodyRowClasses = {
-  required: '',
-  style: '',
-};
+const BODY_ROW_CLASS = '';
 
-const HeaderCellClasses = {
-  required: 'px-(--size-s) text-center',
-  style: 'bg-neutral-50',
-};
+const HEADER_CELL_CLASS = 'px-(--size-s) text-center bg-neutral-50';
 
-const StickyHeaderCellClasses = {
-  required: 'sticky top-0 z-20',
-  style: '',
-};
+const STICKY_HEADER_CELL_CLASS = 'sticky top-0 z-20';
 
-const BodyCellClasses = {
-  required: 'px-(--size-s)',
-  style: '',
-};
+const BODY_CELL_CLASS = 'px-(--size-s)';
 
 export default function Table<T>({
   columns,
@@ -81,7 +55,7 @@ export default function Table<T>({
   const shouldShowHeader = showHeader ?? columns.some((column) => column.header);
 
   return (
-    <table className={twMerge(TableClasses.required, TableClasses.style, className)}>
+    <table className={twMerge(TABLE_CLASS, className)}>
       <colgroup>
         {columns.map((column) => (
           <col key={column.key} style={column.width ? { width: column.width } : undefined} />
@@ -89,17 +63,14 @@ export default function Table<T>({
       </colgroup>
       {shouldShowHeader && (
         <thead>
-          <tr className={twMerge(rowHeightClassName, HeaderRowClasses.required, HeaderRowClasses.style)}>
+          <tr className={twMerge(rowHeightClassName, HEADER_ROW_CLASS)}>
             {columns.map((column) => (
               <th
                 key={column.key}
                 className={twMerge(
-                  DefaultCellClasses.required,
-                  DefaultCellClasses.style,
-                  HeaderCellClasses.required,
-                  HeaderCellClasses.style,
-                  stickyHeader && StickyHeaderCellClasses.required,
-                  stickyHeader && StickyHeaderCellClasses.style,
+                  DEFAULT_CELL_CLASS,
+                  HEADER_CELL_CLASS,
+                  stickyHeader && STICKY_HEADER_CELL_CLASS,
                   column.alignClassName,
                   column.className,
                   headerClassName,
@@ -114,7 +85,7 @@ export default function Table<T>({
       )}
       <tbody>
         {rows.map((row, rowIndex) => (
-          <tr key={rowIndex} className={twMerge(BodyRowClasses.required, BodyRowClasses.style, rowHeightClassName)}>
+          <tr key={rowIndex} className={twMerge(BODY_ROW_CLASS, rowHeightClassName)}>
             {columns.map((column) => {
               const resolvedCellClassName = typeof column.cellClassName === 'function'
                 ? column.cellClassName(row, rowIndex)
@@ -124,10 +95,8 @@ export default function Table<T>({
                 <td
                   key={column.key}
                   className={twMerge(
-                    DefaultCellClasses.required,
-                    DefaultCellClasses.style,
-                    BodyCellClasses.required,
-                    BodyCellClasses.style,
+                    DEFAULT_CELL_CLASS,
+                    BODY_CELL_CLASS,
                     column.alignClassName,
                     column.className,
                     resolvedCellClassName,
@@ -144,7 +113,7 @@ export default function Table<T>({
       {footer && (
         <tfoot>
           <tr>
-            <td colSpan={columns.length} className={twMerge(BodyCellClasses.required, BodyCellClasses.style, 'p-0')}>
+            <td colSpan={columns.length} className={twMerge(BODY_CELL_CLASS, 'p-0')}>
               {footer}
             </td>
           </tr>

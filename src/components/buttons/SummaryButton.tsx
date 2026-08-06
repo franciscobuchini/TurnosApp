@@ -6,10 +6,7 @@ interface SummaryButtonProps {
   iconClassName?: string;
 }
 
-const SummaryButtonClasses = {
-  required: 'transition-transform duration-200 group-open:rotate-180',
-  style: 'text-white',
-};
+const SUMMARY_BUTTON_CLASS = 'transition-transform duration-200 group-open:rotate-180 text-white';
 
 export default function SummaryButton({
   className,
@@ -17,7 +14,7 @@ export default function SummaryButton({
 }: SummaryButtonProps) {
   return (
     <ChevronDown
-      className={twMerge(SummaryButtonClasses.required, SummaryButtonClasses.style, className, iconClassName)}
+      className={twMerge(SUMMARY_BUTTON_CLASS, className, iconClassName)}
       size={"var(--size-m)"}
     />
   );

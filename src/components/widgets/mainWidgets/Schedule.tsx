@@ -16,77 +16,29 @@ interface ScheduleProps {
   className?: string;
 }
 
-/* ScheduleClasses: contenedor (Box)*/
-const ScheduleClasses = {
-  required: 'relative flex flex-col flex-1 p-0 overflow-hidden',
-  style: 'rounded-3xl bg-white ',
-};
+const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-3xl bg-neutral-50 shadow-xl';
 
-/* ScheduleScrollClasses: wrapper que scrollea, altura fija por flex-1 */
-const ScheduleScrollClasses = {
-  required: 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
-  style: '',
-};
+const SCHEDULE_SCROLL_CLASS = 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
 
-/* ScheduleContentClasses: wrapper relative que sí tiene la altura real de la tabla (crece con su contenido) */
-const ScheduleContentClasses = {
-  required: 'relative',
-  style: '',
-};
+const SCHEDULE_CONTENT_CLASS = 'relative';
 
-/* ScheduleTableClasses*/
-const ScheduleTableClasses = {
-  required: '',
-  style: '',
-};
+const SCHEDULE_TABLE_CLASS = '';
 
-/* ScheduleTableHeaderClasses: clases globales para el header de la tabla de turnos */
-const ScheduleTableHeaderClasses = {
-  required: '',
-  style: 'bg-white',
-};
+const SCHEDULE_TABLE_HEADER_CLASS = 'bg-neutral-50';
 
-/* ScheduleRowHeightClasses*/
-const ScheduleRowHeightClasses = {
-  required: 'h-(--size-2xl)',
-  style: '',
-};
+const SCHEDULE_ROW_HEIGHT_CLASS = 'h-(--size-2xl)';
 
-/* ScheduleLabelCellClasses: la celda de la etiqueta de hora, relative para anclar el label */
-const ScheduleLabelCellClasses = {
-  required: 'relative w-(--size-4xl) text-center',
-  style: '',
-};
+const SCHEDULE_LABEL_CELL_CLASS = 'relative w-(--size-4xl) text-center';
 
-/* ScheduleLabelTextClasses: etiqueta de texto de la hora flotante */
-const ScheduleLabelTextClasses = {
-  required: 'absolute inset-x-0 top-0 -tranneutral-y-1/2',
-  style: '',
-};
+const SCHEDULE_LABEL_TEXT_CLASS = 'absolute inset-x-0 -top-[5%] -translate-y-1/2 font-thin text-neutral-600 leading-none';
 
-/* ScheduleLabelHeaderClasses: cabecera invisible para accesibilidad de horas */
-const ScheduleLabelHeaderClasses = {
-  required: 'sr-only',
-  style: '',
-};
+const SCHEDULE_LABEL_HEADER_CLASS = 'sr-only';
 
-/* ScheduleSlotCellClasses: la celda del contenido de cada fila */
-const ScheduleSlotCellClasses = {
-  required: '',
-  style: 'border-t border-neutral-100',
-};
+const SCHEDULE_SLOT_CELL_CLASS = 'border-t border-neutral-200/60';
 
-/* ScheduleMemberHeaderClasses: cabecera de cada columna de miembro */
-const ScheduleMemberHeaderClasses = {
-  required: 'text-center text-sm font-medium truncate',
-  style: 'text-neutral-600',
-};
+const SCHEDULE_MEMBER_HEADER_CLASS = 'text-center text-sm font-medium truncate text-neutral-600';
 
-/* ScheduleEmptyClasses: overlay centrado que aparece cuando no hay miembros seleccionados */
-const ScheduleEmptyClasses = {
-  required: 'absolute inset-0 flex items-center justify-center pointer-events-none',
-  style: 'text-neutral-400 text-sm',
-};
+const SCHEDULE_EMPTY_CLASS = 'absolute inset-0 flex items-center justify-center pointer-events-none text-neutral-400 text-sm';
 
 export default function Schedule({
   selectedDate,
@@ -106,11 +58,11 @@ export default function Schedule({
      en el reparto equitativo — las columnas de miembros se dividen el espacio sobrante. */
   const labelColumn: TableColumn<string> = {
     key: 'label',
-    header: <span className={twMerge(ScheduleLabelHeaderClasses.required, ScheduleLabelHeaderClasses.style)}>Horas</span>,
+    header: <span className={SCHEDULE_LABEL_HEADER_CLASS}>Horas</span>,
     width: 'var(--size-4xl)',
-    cellClassName: twMerge(ScheduleLabelCellClasses.required, ScheduleLabelCellClasses.style),
+    cellClassName: SCHEDULE_LABEL_CELL_CLASS,
     cell: (slot, index) =>
-      index === 0 ? '' : index % 4 === 0 ? <span className={twMerge(ScheduleLabelTextClasses.required, ScheduleLabelTextClasses.style)}>{slot}</span> : '',
+      index === 0 ? '' : index % 4 === 0 ? <span className={SCHEDULE_LABEL_TEXT_CLASS}>{slot}</span> : '',
   };
 
   /* Una columna por cada miembro seleccionado. Si no hay ninguno,
@@ -121,23 +73,23 @@ export default function Schedule({
     ? [{ key: 'empty', header: null, cell: () => null }]
     : members.map((member) => ({
         key: `member-${member}`,
-        header: <span className={twMerge(ScheduleMemberHeaderClasses.required, ScheduleMemberHeaderClasses.style)}>{member}</span>,
-        cellClassName: twMerge(ScheduleSlotCellClasses.required, ScheduleSlotCellClasses.style),
+        header: <span className={SCHEDULE_MEMBER_HEADER_CLASS}>{member}</span>,
+        cellClassName: SCHEDULE_SLOT_CELL_CLASS,
         cell: () => null,
       }));
 
   const columns: TableColumn<string>[] = [labelColumn, ...memberColumns];
 
   return (
-    <Box className={twMerge(ScheduleClasses.required, ScheduleClasses.style, className)}>
-      <div data-schedule-scroll className={twMerge(ScheduleScrollClasses.required, ScheduleScrollClasses.style)}>
-        <div className={twMerge(ScheduleContentClasses.required, ScheduleContentClasses.style)}>
+    <Box className={twMerge(SCHEDULE_CLASS, className)}>
+      <div data-schedule-scroll className={SCHEDULE_SCROLL_CLASS}>
+        <div className={SCHEDULE_CONTENT_CLASS}>
           <Table
             columns={columns}
             rows={slots}
-            rowHeightClassName={twMerge(ScheduleRowHeightClasses.required, ScheduleRowHeightClasses.style)}
-            className={twMerge(ScheduleTableClasses.required, ScheduleTableClasses.style)}
-            headerClassName={twMerge(ScheduleTableHeaderClasses.required, ScheduleTableHeaderClasses.style)}
+            rowHeightClassName={SCHEDULE_ROW_HEIGHT_CLASS}
+            className={SCHEDULE_TABLE_CLASS}
+            headerClassName={SCHEDULE_TABLE_HEADER_CLASS}
             showHeader
             stickyHeader
           />
@@ -145,7 +97,7 @@ export default function Schedule({
         </div>
       </div>
       {isEmpty && (
-        <div className={twMerge(ScheduleEmptyClasses.required, ScheduleEmptyClasses.style)}>
+        <div className={SCHEDULE_EMPTY_CLASS}>
           No hay miembros del equipo seleccionados
         </div>
       )}

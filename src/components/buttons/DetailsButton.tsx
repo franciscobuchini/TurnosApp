@@ -10,10 +10,7 @@ interface DetailsButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'ch
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const DetailsButtonClasses = {
-  required: 'justify-between w-full h-(--size-xl) p-(--size-s) gap-(--size-l)',
-  style: 'bg-transparent text-neutral-400 hover:text-white',
-};
+const DETAILS_BUTTON_CLASS = 'justify-between w-full h-(--size-xl) p-(--size-s) gap-(--size-l) bg-transparent text-neutral-400 hover:text-white';
 
 export default function DetailsButton({
   text,
@@ -28,7 +25,7 @@ export default function DetailsButton({
       onClick={onClick}
       text={text}
       icon={icon ?? <ChevronRight size={"var(--size-m)"} />}
-      className={twMerge(DetailsButtonClasses.required, DetailsButtonClasses.style, className)}
+      className={twMerge(DETAILS_BUTTON_CLASS, className)}
     />
   );
 }
