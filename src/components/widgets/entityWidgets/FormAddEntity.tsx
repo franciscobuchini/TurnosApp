@@ -25,6 +25,7 @@ interface FormAddEntityProps {
     services: string[];
     photo?: string;
   }) => void;
+  onValidityChange?: (isValid: boolean) => void;
 }
 
 const FORM_CLASS = 'flex flex-col gap-(--size-xl) p-(--size-m)';
@@ -61,7 +62,14 @@ function setCursorAfterPrefix(input: HTMLInputElement) {
   }
 }
 
-export default function FormAddEntity({ mode = 'create', initialValues, onValuesChange }: FormAddEntityProps) {
+// Solo números y un "+" al inicio: descarta cualquier otro carácter.
+function sanitizeWhatsApp(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  const hasLeadingPlus = value.startsWith('+');
+  return hasLeadingPlus ? `+${digits}` : digits;
+}
+
+export default function FormAddEntity({ mode = 'create', initialValues, onValuesChange, onValidityChange }: FormAddEntityProps) {
   const [memberName, setMemberName] = useState(initialValues?.name ?? '');
   const [role, setRole] = useState(initialValues?.role ?? '');
   const [phone, setPhone] = useState(initialValues?.phone ?? '');
@@ -71,15 +79,6 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
   const photoInputRef = useRef<HTMLInputElement>(null);
   const imageName = getInitials(memberName) ? memberName : 'Equipo Miembro';
   const readOnly = mode === 'view';
-
-  useEffect(() => {
-    setMemberName(initialValues?.name ?? '');
-    setRole(initialValues?.role ?? '');
-    setPhone(initialValues?.phone ?? '');
-    setEmail(initialValues?.email ?? '');
-    setSelectedServices(initialValues?.services ?? []);
-    setPhotoSrc(initialValues?.photo);
-  }, [mode, initialValues?.name, initialValues?.role, initialValues?.phone, initialValues?.email, initialValues?.services, initialValues?.photo]);
 
   useEffect(() => {
     return () => {
@@ -99,6 +98,12 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
       photo: photoSrc,
     });
   }, [memberName, role, phone, email, selectedServices, photoSrc, onValuesChange]);
+
+  const isFormValid = Boolean(memberName.trim() && role.trim() && phone.replace(whatsappPrefix, '').trim());
+
+  useEffect(() => {
+    onValidityChange?.(isFormValid);
+  }, [isFormValid, onValidityChange]);
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     setMemberName(formatCapitalizedWords(event.target.value));
@@ -214,7 +219,7 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
           name="phone"
           type="tel"
           value={phone || whatsappPrefix}
-          onChange={(event) => setPhone(event.target.value)}
+          onChange={(event) => setPhone(sanitizeWhatsApp(event.target.value))}
           onFocus={handleWhatsAppFocus}
           onMouseUp={handleWhatsAppMouseUp}
           readOnly={readOnly}

@@ -12,13 +12,12 @@ import { Eye } from 'lucide-react';
 
 function Personalizacion() {
   return (
-    <Layout>
-      <Sidebar>
+    <Layout sidebar={<Sidebar>
         <MainHeader
           title="Personalizacion"
           action={<Button text="Visitar sitio" icon={<Eye size={20} />} />}
         />
-      </Sidebar>
+      </Sidebar>}>
       <MainContent />
     </Layout>
   );

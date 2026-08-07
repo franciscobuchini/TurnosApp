@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react';
 import { useAgendaDate } from '../../functions/agendaDate';
 import Layout from '../../components/layout/Layout';
+import Sidebar from '../../components/layout/Sidebar';
 import Calendar from '../../components/widgets/sidebarWidgets/Calendar';
 import DetailsPanel from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import { getClients, getTeamFilters, addClient, updateClient, addService, updateService, addTeamMember, updateTeamMember, getservices, removeClient, removeService, removeTeamMember } from '../../database/data';
@@ -143,8 +144,8 @@ function Dashboard() {
 
   return (
     <Layout
-      sidebarChildren={
-        <>
+      sidebar={
+        <Sidebar>
           <Calendar selectedDate={selectedDate} onSelectDate={selectDate} />
           <DetailsPanel
             title="Equipo"
@@ -184,7 +185,7 @@ function Dashboard() {
             ]}
             action={<AddClientButton onOpen={() => setActiveView({ type: 'add-client' })} />}
           />
-        </>
+        </Sidebar>
       }
     >
       {activeView.type === 'add-member' ? (

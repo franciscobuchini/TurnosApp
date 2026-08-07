@@ -56,6 +56,7 @@ export default function AddEntityView({
     : undefined) ?? teamMembers[0];
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
   const [draftValues, setDraftValues] = useState<MemberDraftValues>({
     name: '',
     role: '',
@@ -116,6 +117,7 @@ export default function AddEntityView({
   };
   const actionLabel = isEditing ? 'Guardar' : mode === 'view' ? 'Editar' : 'Confirmar';
   const cancelLabel = isEditing ? 'Cancelar' : mode === 'view' ? 'Volver' : 'Cancelar';
+  const isConfirmDisabled = mode === 'create' && !isEditing && !isFormValid;
 
   return (
     <MainContent>
@@ -135,7 +137,7 @@ export default function AddEntityView({
           <div className={FIRST_COLUMN_CLASS}>
             <div className={ADD_ENTITY_CONTENT_CLASS}>
               <div className={ADD_ENTITY_FORM_COLUMN_CLASS}>
-                <FormAddEntity mode={resolvedMode} initialValues={formValues} onValuesChange={setDraftValues} />
+                <FormAddEntity key={mode === 'create' ? 'create' : selectedMember?.name ?? 'member'} mode={resolvedMode} initialValues={formValues} onValidityChange={setIsFormValid} onValuesChange={setDraftValues} />
               </div>
             </div>
           </div>
@@ -148,7 +150,7 @@ export default function AddEntityView({
       </div>
       <div className="flex justify-end gap-3 pt-(--size-m)">
         <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900" onClick={handleCancel} text={cancelLabel} />
-        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white" onClick={handleConfirm} text={actionLabel} />
+        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white" onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
         {mode === 'view' && !isEditing && onDelete ? (
           <Button
             className="px-(--size-l) py-(--size-s) rounded-2xl bg-red-500 text-white"

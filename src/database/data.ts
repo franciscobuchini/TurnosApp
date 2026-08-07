@@ -42,8 +42,64 @@ function writeCollection<T>(key: string, value: T[]) {
 
 /* ── Getters y mutaciones de entidades ─────────────────────── */
 
+// Los horarios pueden llegar en dos formatos distintos:
+//  - OpeningHoursEntry[]: { dayOfWeek, startTime, endTime } con "HH:mm".
+//  - Formato "Día y horas" del seed: { day: "L", hours: ["9:00 - 18:00"] }.
+// Esta función normaliza cualquier valor al formato OpeningHoursEntry para que
+// el componente EntityWeekSchedule coincida siempre con lo guardado en la BBDD.
+const DAY_LETTER_TO_NUMBER: Record<string, number> = {
+  L: 1, M: 2, X: 3, J: 4, V: 5, S: 6, D: 0,
+};
+
+function padTime(time: string): string {
+  const [hours, minutes = '00'] = time.split(':');
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+}
+
+export function normalizeOpeningHours(schedule: unknown): OpeningHoursEntry[] {
+  if (!Array.isArray(schedule)) {
+    return [];
+  }
+
+  const result: OpeningHoursEntry[] = [];
+
+  for (const entry of schedule as Array<Record<string, unknown>>) {
+    if (!entry || typeof entry !== 'object') {
+      continue;
+    }
+
+    if (typeof entry.dayOfWeek === 'number' && typeof entry.startTime === 'string' && typeof entry.endTime === 'string') {
+      const startTime = padTime(entry.startTime);
+      const endTime = padTime(entry.endTime);
+      result.push({ dayOfWeek: entry.dayOfWeek, startTime, endTime });
+      continue;
+    }
+
+    const dayNumber = DAY_LETTER_TO_NUMBER[String(entry.day ?? '')];
+    if (dayNumber === undefined || !Array.isArray(entry.hours)) {
+      continue;
+    }
+
+    for (const hour of entry.hours as unknown[]) {
+      if (typeof hour !== 'string') {
+        continue;
+      }
+      const [startTime, endTime] = hour.split('-').map((part) => part.trim());
+      if (startTime && endTime) {
+        result.push({ dayOfWeek: dayNumber, startTime: padTime(startTime), endTime: padTime(endTime) });
+      }
+    }
+  }
+
+  return result;
+}
+
 export function getTeamMembers(): TeamMember[] {
-  return readCollection(TEAM_MEMBERS_STORAGE_KEY, teamMembersJson as unknown as TeamMember[]);
+  const members = readCollection(TEAM_MEMBERS_STORAGE_KEY, teamMembersJson as unknown as TeamMember[]);
+  return members.map((member) => ({
+    ...member,
+    schedule: normalizeOpeningHours(member.schedule),
+  }));
 }
 
 export function saveTeamMembers(members: TeamMember[]) {
