@@ -213,8 +213,7 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
           label="WhatsApp"
           name="phone"
           type="tel"
-          value={phone}
-          defaultValue={whatsappPrefix}
+          value={phone || whatsappPrefix}
           onChange={(event) => setPhone(event.target.value)}
           onFocus={handleWhatsAppFocus}
           onMouseUp={handleWhatsAppMouseUp}

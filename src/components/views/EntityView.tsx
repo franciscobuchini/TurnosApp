@@ -1,11 +1,12 @@
 ﻿import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 import { getOpeningHours, getTeamMembers } from '../../database/data';
-import type { TeamMember } from '../../database/types';
+import type { OpeningHoursEntry, TeamMember } from '../../database/types';
 import MainContent from '../layout/MainContent';
 import Button from '../interface/Button';
 import MainHeader from '../interface/MainHeader';
 import FormAddEntity from '../widgets/entityWidgets/FormAddEntity';
+import EntityWeekSchedule from '../widgets/entityWidgets/EntityWeekSchedule';
 
 export const ADD_ENTITY_VIEW_TITLE = 'Agregar un nuevo miembro';
 
@@ -34,9 +35,10 @@ export interface AddEntityViewProps {
 
 const ADD_ENTITY_CONTENT_CLASS = 'flex min-h-0 flex-1 w-full rounded-3xl bg-neutral-50 p-(--size-m)';
 const ADD_ENTITY_FORM_COLUMN_CLASS = 'flex min-h-0 w-full flex-col justify-center';
-const TWO_COLUMN_LAYOUT_CLASS = 'flex w-full flex-1 flex-col gap-(--size-m) md:flex-row';
-const FIRST_COLUMN_CLASS = 'flex w-full flex-1 flex-col';
-const SECOND_COLUMN_CLASS = 'flex w-full flex-1 flex-col';
+const TWO_COLUMN_LAYOUT_CLASS = 'flex min-h-0 w-full flex-1 flex-col gap-(--size-m) md:flex-row';
+const FIRST_COLUMN_CLASS = 'flex min-h-0 w-full flex-1 flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
+const SECOND_COLUMN_CLASS = 'flex min-h-0 w-full flex-1 flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
+const SECOND_COLUMN_CONTENT_CLASS = 'flex min-h-0 flex-1 w-full rounded-3xl bg-neutral-50 p-(--size-m)';
 
 export default function AddEntityView({
   open = true,
@@ -48,6 +50,11 @@ export default function AddEntityView({
   onConfirm,
   onDelete,
 }: AddEntityViewProps) {
+  const teamMembers = getTeamMembers();
+  const selectedMember = (open
+    ? teamMembers.find((member) => member.name === memberName)
+    : undefined) ?? teamMembers[0];
+
   const [isEditing, setIsEditing] = useState(false);
   const [draftValues, setDraftValues] = useState<MemberDraftValues>({
     name: '',
@@ -57,12 +64,15 @@ export default function AddEntityView({
     services: [],
     photo: undefined,
   });
+  const [schedule, setSchedule] = useState<OpeningHoursEntry[]>(() =>
+    mode === 'create' || !Array.isArray(selectedMember?.schedule)
+      ? getOpeningHours()
+      : (selectedMember.schedule as OpeningHoursEntry[]),
+  );
 
   if (!open) return null;
 
   const resolvedMode = isEditing ? 'edit' : mode;
-  const teamMembers = getTeamMembers();
-  const selectedMember = teamMembers.find((member) => member.name === memberName) ?? teamMembers[0];
 
   const formValues =
     mode === 'create'
@@ -83,7 +93,7 @@ export default function AddEntityView({
     phone: draftValues.phone.trim(),
     services: draftValues.services,
     photo: draftValues.photo,
-    schedule: mode === 'create' ? getOpeningHours() : selectedMember?.schedule ?? [],
+    schedule,
   });
 
   const handleBack = onBack ?? onClose;
@@ -129,7 +139,11 @@ export default function AddEntityView({
               </div>
             </div>
           </div>
-          <div className={SECOND_COLUMN_CLASS} />
+          <div className={SECOND_COLUMN_CLASS}>
+            <div className={SECOND_COLUMN_CONTENT_CLASS}>
+              <EntityWeekSchedule value={schedule} onChange={setSchedule} readOnly={resolvedMode === 'view'} />
+            </div>
+          </div>
         </div>
       </div>
       <div className="flex justify-end gap-3 pt-(--size-m)">
