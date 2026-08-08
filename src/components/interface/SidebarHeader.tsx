@@ -9,7 +9,7 @@ interface SidebarHeaderProps {
   leading?: ReactNode;
 }
 
-const SIDEBAR_HEADER_CLASS = 'flex h-32 w-full shrink-0 bg-transparent';
+const SIDEBAR_HEADER_CLASS = 'flex h-(--size-6xl) w-full shrink-0 bg-transparent)';
 
 export default function SidebarHeader({
   title = 'minube.site',
@@ -22,7 +22,6 @@ export default function SidebarHeader({
       leading={leading}
       titleClassName="text-neutral-50"
       gradient={false}
-      fullBleed={false}
       className={twMerge(SIDEBAR_HEADER_CLASS, className)}
     />
   );

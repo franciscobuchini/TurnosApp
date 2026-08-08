@@ -9,7 +9,7 @@ import PhotoPicker from './PhotoPicker';
 import { SERVICE_COLORS } from './serviceColors';
 
 const FORM_CLASS = 'flex flex-1 flex-col gap-(--size-xl)';
-const FIELD_GROUP_CLASS = 'flex flex-col gap-2';
+const FIELD_GROUP_CLASS = 'flex flex-col gap-(--size-m)';
 const FIELD_LABEL_CLASS = 'px-(--size-s) text-md text-neutral-300';
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
 
@@ -149,28 +149,6 @@ export default function FormAddService({
           readOnly={readOnly}
         />
 
-        <div className={FIELD_GROUP_CLASS}>
-          <p className={FIELD_LABEL_CLASS}>Color del servicio</p>
-
-          <ColorPicker
-            colors={SERVICE_COLORS}
-            value={selectedColorId}
-            onChange={setSelectedColorId}
-            disabled={readOnly}
-          />
-        </div>
-
-        <div className={FIELD_GROUP_CLASS}>
-          <p className={FIELD_LABEL_CLASS}>Foto del servicio</p>
-
-          <PhotoPicker
-            count={17}
-            value={selectedPhotoIndex}
-            onChange={setSelectedPhotoIndex}
-            disabled={readOnly}
-          />
-        </div>
-
         <div className={TWO_COLUMN_GRID_CLASS}>
           <Input
             label="Duración (min)"
@@ -202,6 +180,28 @@ export default function FormAddService({
           onChange={(event) => setDescription(event.target.value)}
           readOnly={readOnly}
         />
+
+        <div className={FIELD_GROUP_CLASS}>
+          <p className={FIELD_LABEL_CLASS}>Color del servicio</p>
+
+          <ColorPicker
+            colors={SERVICE_COLORS}
+            value={selectedColorId}
+            onChange={setSelectedColorId}
+            disabled={readOnly}
+          />
+        </div>
+
+        <div className={FIELD_GROUP_CLASS}>
+          <p className={FIELD_LABEL_CLASS}>Foto del servicio</p>
+
+          <PhotoPicker
+            count={17}
+            value={selectedPhotoIndex}
+            onChange={setSelectedPhotoIndex}
+            disabled={readOnly}
+          />
+        </div>
       </Form>
   );
 }

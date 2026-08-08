@@ -5,7 +5,12 @@ import Button from '../interface/Button';
 import WeekSelector from '../widgets/mainWidgets/WeekSelector';
 import Schedule from '../widgets/mainWidgets/Schedule';
 
-const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-l)';
+const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col gap-(--size-m) p-(--size-m)';
+const ACTIONS_WRAPPER_CLASS = 'flex justify-end w-full gap-(--size-l)';
+const ADD_SHIFT_BUTTON_CLASS =
+  'gap-(--size-s) px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white';
+const EDIT_WEB_BUTTON_CLASS =
+  'gap-(--size-s) px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900';
 
 interface ScheduleViewProps {
   selectedMembers: string[];
@@ -35,19 +40,17 @@ export default function ScheduleView({
       />
       <Schedule selectedDate={selectedDate} members={selectedMembers} />
       {children}
-      <div className="mt-auto">
-        <div>
-          <Button
-            className="gap-(--size-s) px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white"
-            icon={<Plus size="var(--size-m)" />}
-            text="Agregar turno"
-          />
-          <Button
-            className="gap-(--size-s) px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900"
-            icon={<Pencil size="var(--size-m)" />}
-            text="Editar web"
-          />
-        </div>
+      <div className={ACTIONS_WRAPPER_CLASS}>
+        <Button
+          className={EDIT_WEB_BUTTON_CLASS}
+          icon={<Pencil size="var(--size-m)" />}
+          text="Editar web"
+        />
+        <Button
+          className={ADD_SHIFT_BUTTON_CLASS}
+          icon={<Plus size="var(--size-m)" />}
+          text="Agregar turno"
+        />
       </div>
     </MainContent>
   );

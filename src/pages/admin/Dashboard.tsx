@@ -38,7 +38,7 @@ type ActiveView =
   | { type: 'edit-service'; name: string };
 
 function Dashboard() {
-  const { teamFilters, selectedMembers, toggleTeamFilter } = useTeamFilters(getTeamFilters);
+  const { teamFilters, selectedMembers, toggleTeamFilter, removeTeamFilter } = useTeamFilters(getTeamFilters);
   const [serviceFilters, setServiceFilters] = useState<DetailsPanelOption[]>(() =>
     getservices().map((service) => ({
       id: service.name.toLowerCase().replace(/\s+/g, '-'),
@@ -102,7 +102,7 @@ function Dashboard() {
     updateClient(previousClientName, client);
     setClients(getClients());
     setSelectedClientName(client.name);
-    setActiveView({ type: 'schedule' });
+    setActiveView({ type: 'view-client', name: client.name });
   };
 
   const handleCreateService = (newService: service) => {
@@ -112,7 +112,7 @@ function Dashboard() {
 
   const handleUpdateService = (previousName: string, updated: service) => {
     updateService(previousName, updated);
-    setActiveView({ type: 'schedule' });
+    setActiveView({ type: 'view-service', name: updated.name });
   };
 
   const handleCreateMember = (member: TeamMember) => {
@@ -122,7 +122,7 @@ function Dashboard() {
 
   const handleUpdateMember = (previousName: string, member: TeamMember) => {
     updateTeamMember(previousName, member);
-    setActiveView({ type: 'schedule' });
+    setActiveView({ type: 'view-member', name: member.name });
   };
 
   const handleDeleteClient = (clientName: string) => {
@@ -139,6 +139,7 @@ function Dashboard() {
 
   const handleDeleteMember = (memberName: string) => {
     removeTeamMember(memberName);
+    removeTeamFilter(memberName);
     setActiveView({ type: 'schedule' });
   };
 
@@ -231,12 +232,13 @@ function Dashboard() {
       ) : activeView.type === 'edit-service' ? (
         <ViewServiceView
           open={true}
-          onClose={() => setActiveView({ type: 'schedule' })}
+          onClose={() => setActiveView({ type: 'view-service', name: activeView.name })}
           title={`Editar ${activeView.name}`}
           mode="edit"
           serviceName={activeView.name}
           onConfirm={(updated) => handleUpdateService(activeView.name, updated)}
-          onCancel={() => setActiveView({ type: 'schedule' })}
+          onCancel={() => setActiveView({ type: 'view-service', name: activeView.name })}
+          onDelete={() => handleDeleteService(activeView.name)}
         />
       ) : activeView.type === 'view-client' ? (
         <ViewClientView
@@ -254,13 +256,14 @@ function Dashboard() {
       ) : activeView.type === 'edit-client' ? (
         <ViewClientView
           open={true}
-          onClose={() => setActiveView({ type: 'schedule' })}
+          onClose={() => setActiveView({ type: 'view-client', name: activeView.name })}
           title={`Editar ${activeView.name}`}
           mode="edit"
           clientName={activeView.name}
           clients={clients}
           onConfirm={handleUpdateClient}
           onCancel={() => setActiveView({ type: 'view-client', name: activeView.name })}
+          onDelete={() => handleDeleteClient(activeView.name)}
         />
       ) : (
         <ScheduleView

@@ -22,6 +22,13 @@ export function toggleTeamFilterChecked(
   );
 }
 
+export function removeTeamFilterChecked(
+  teamFilters: FiltersOption[],
+  label: string,
+): FiltersOption[] {
+  return teamFilters.filter((filter) => filter.label !== label);
+}
+
 export function useTeamFilters(initialFilters: () => FiltersOption[]) {
   const [teamFilters, setTeamFilters] = useState(initialFilters);
 
@@ -29,9 +36,14 @@ export function useTeamFilters(initialFilters: () => FiltersOption[]) {
     setTeamFilters((currentFilters) => toggleTeamFilterChecked(currentFilters, id, checked));
   };
 
+  const removeTeamFilter = (label: string) => {
+    setTeamFilters((currentFilters) => removeTeamFilterChecked(currentFilters, label));
+  };
+
   return {
     teamFilters,
     selectedMembers: getSelectedMembers(teamFilters),
     toggleTeamFilter,
+    removeTeamFilter,
   };
 }

@@ -3,7 +3,7 @@
 import { getOpeningHours, getTeamMembers } from '../../database/data';
 import type { OpeningHoursEntry, TeamMember } from '../../database/types';
 
-import TwoColumnView from './TwoColumnView';
+import ViewLayout from '../layout/ViewLayout';
 import CancelButton from '../buttons/CancelButton';
 import ConfirmButton from '../buttons/ConfirmButton';
 import DeleteButton from '../buttons/DeleteButton';
@@ -21,7 +21,6 @@ interface MemberDraftValues {
   phone: string;
   email: string;
   services: string[];
-  photo?: string;
 }
 
 export interface AddEntityViewProps {
@@ -67,7 +66,6 @@ export default function AddEntityView({
           phone: member?.phone ?? '',
           email: member?.email ?? '',
           services: member?.services ?? [],
-          photo: member?.photo,
         };
 
   const [editing, setEditing] = useState(false);
@@ -110,6 +108,11 @@ export default function AddEntityView({
       schedule,
     });
 
+    if (mode === 'view') {
+      setEditing(false);
+      return;
+    }
+
     onClose?.();
   };
 
@@ -120,7 +123,7 @@ export default function AddEntityView({
     editing ? 'Cancelar' : mode === 'view' ? 'Volver' : 'Cancelar';
 
   return (
-    <TwoColumnView
+    <ViewLayout
       title={title}
       onBack={handleBack}
       left={
@@ -141,8 +144,8 @@ export default function AddEntityView({
       }
       footer={
         <>
-          {mode === 'view' && !editing && onDelete && (
-            <DeleteButton onClick={onDelete} text="Eliminar" />
+          {editing && onDelete && (
+            <DeleteButton className="mr-auto" onClick={onDelete} text="Eliminar" />
           )}
 
           <CancelButton onClick={handleCancel} text={cancelLabel} />

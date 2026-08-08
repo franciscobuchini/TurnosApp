@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getClients } from '../../database/data';
 import type { Client } from '../../database/types';
-import TwoColumnView from './TwoColumnView';
+import ViewLayout from '../layout/ViewLayout';
 import CancelButton from '../buttons/CancelButton';
 import ConfirmButton from '../buttons/ConfirmButton';
 import DeleteButton from '../buttons/DeleteButton';
@@ -134,7 +134,7 @@ export default function AddClientView({
       };
 
       onConfirm?.(nextClient);
-      onClose?.();
+      if (!onConfirm) onClose?.();
       return;
     }
 
@@ -147,7 +147,7 @@ export default function AddClientView({
   const resolvedMode = mode;
 
   return (
-    <TwoColumnView
+    <ViewLayout
       title={title}
       onBack={handleBack}
       left={
@@ -161,11 +161,11 @@ export default function AddClientView({
       }
       footer={
         <>
+          {mode === 'edit' && onDelete ? (
+            <DeleteButton className="mr-auto" onClick={onDelete} text="Eliminar" />
+          ) : null}
           <CancelButton onClick={handleCancel} text={cancelLabel} />
           <ConfirmButton onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
-          {mode === 'view' && onDelete ? (
-            <DeleteButton onClick={onDelete} text="Eliminar" />
-          ) : null}
         </>
       }
     />

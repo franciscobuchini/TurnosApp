@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 import type { OpeningHoursEntry } from '../../../database/types';
-import Input from '../../interface/Input';
+import HourSelector from '../../interface/HourSelector';
 import Checkbox from '../../interface/Checkbox';
 import Button from '../../interface/Button';
-import Box from '../../interface/Box';
 import Table, { type TableColumn } from '../../interface/Table';
 
 /*
@@ -12,8 +12,22 @@ import Table, { type TableColumn } from '../../interface/Table';
   Selector semanal (lunes a domingo) para elegir los horarios en los que se trabaja.
   Cada día puede tener varios turnos (doble/triple). Se emiten entradas del tipo
   OpeningHoursEntry: { dayOfWeek, startTime, endTime } con dayOfWeek 0 = Domingo.
-  Usa Table con 3 columnas (día / checkbox / horario) para que todo quede alineado
-  verticalmente entre filas.
+
+  El componente raíz es un <div flex-col>, y cada día de la semana se renderiza
+  como su propia <Table> de UNA sola fila (en vez de una única Table de 7 filas
+  como antes). Cada día queda como una "pill" independiente; la separación entre
+  días la da el gap del contenedor flex, no border-spacing de una tabla común.
+
+  Como cada día vive ahora en su propia <table> (table-auto), el ancho de cada
+  columna se calcula de forma INDEPENDIENTE por tabla según su propio contenido.
+  Para que las columnas sigan alineadas entre un día y otro (que "Horario"
+  arranque siempre en la misma posición X), las columnas de ancho fijo
+  (checkbox y nombre del día) declaran un `width` explícito — ya no alcanza con
+  dejar que table-auto lo infiera fila por fila.
+
+  El borde/redondeo de cada celda ("pill" por día) se calcula según la POSICIÓN
+  de la columna en el array (ver getEdgeClassName/withPillEdges), no por nombre
+  de columna. Así, reordenar columnas nunca rompe los rounded-borders.
 
   Validaciones de horario:
   - Dentro de un mismo turno, "desde" siempre debe ser menor a "hasta" (no se
@@ -58,35 +72,70 @@ const DAYS: DayRow[] = [
   { dayOfWeek: 0, label: 'Domingo' },
 ];
 
-const SCHEDULE_FIELD_CLASS = 'flex flex-col gap-2 w-full';
+const SCHEDULE_FIELD_CLASS = 'flex flex-col gap-(--size-s) w-full';
 const SCHEDULE_LABEL_CLASS = 'text-md text-neutral-300';
-const SCHEDULE_LIST_CLASS = 'flex flex-col w-full';
 
-// table-auto reemplaza el table-fixed por defecto de Table: las columnas "día" y
-// "checkbox" se ajustan a su contenido, "horario" se estira (width: 100%).
-// border-spacing-y recrea el gap-y entre filas de la versión con grid.
-const SCHEDULE_TABLE_CLASS = 'table-auto border-separate border-spacing-x-0 border-spacing-y-(--size-s)';
+// Contenedor de los 7 días: cada día es ahora una <Table> independiente, así
+// que el gap-y acá es lo que reemplaza al border-spacing-y que antes daba la
+// separación entre filas de una única tabla compartida.
+const SCHEDULE_LIST_CLASS = 'flex flex-col gap-(--size-s) w-full';
+
+// table-auto reemplaza el table-fixed por defecto de Table: las columnas de
+// contenido fijo se ajustan a su contenido, "horario" se estira (width: 100%).
+const SCHEDULE_TABLE_CLASS = 'table-auto border-separate border-spacing-x-0';
 const TABLE_ROW_HEIGHT_CLASS = 'h-(--size-5xl)';
 
-// min-h + h-full en la celda (además de la altura de fila) para que el contenido
-// de cada columna quede centrado y las tres columnas midan siempre lo mismo.
-const DAY_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle rounded-l-2xl border border-r-0 border-neutral-700 bg-neutral-800 px-(--size-m)';
-const CHECKBOX_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle border-y border-neutral-700 bg-neutral-800 px-(--size-m)';
-const SCHEDULE_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle rounded-r-2xl border border-l-0 border-neutral-700 bg-neutral-800 px-(--size-m) py-(--size-s)';
+// Anchos fijos para que checkbox/día no varíen de una tabla (día) a otra —
+// necesario ahora que cada día calcula su table-auto por separado.
+const CHECKBOX_COLUMN_WIDTH = '2.5rem';
+const DAY_COLUMN_WIDTH = '7rem';
 
-const DAY_CELL_CONTENT_CLASS = 'flex h-full items-center';
-const CHECKBOX_CELL_CONTENT_CLASS = 'flex h-full items-center';
+// Estilo común a toda celda de la "pill": altura, alineación, fondo y borde
+// horizontal. El borde/rounded vertical (izquierda/derecha) NO va acá — se
+// agrega según posición con getEdgeClassName, para que no dependa de qué
+// columna es sino de dónde está parada en la fila.
+const CELL_BASE_CLASS = 'min-h-(--size-5xl) h-full align-middle border-y border-neutral-700 bg-neutral-800 px-(--size-xs)';
+const SCHEDULE_CELL_CLASS = `${CELL_BASE_CLASS} py-(--size-s)`;
+
+const DAY_CELL_CONTENT_CLASS = 'flex h-full items-center w-28';
 const SCHEDULE_CELL_CONTENT_CLASS = 'flex h-full flex-col justify-center gap-(--size-s)';
 const DAY_NAME_CLASS = 'shrink-0 text-sm font-medium text-neutral-100';
 const DAY_OPEN_CLASS = 'flex shrink-0 items-center gap-2 text-sm text-neutral-300';
 
 const RANGE_LINE_CLASS = 'flex w-full shrink-0 items-center gap-(--size-s)';
 const RANGE_ERROR_CLASS = 'shrink-0 text-xs text-red-400';
-const TIME_INPUT_CLASS = 'min-w-0 w-full flex-1';
 const TIME_INPUT_ERROR_CLASS = 'border-red-400 focus:border-red-400';
-const DAYS_OFF_CLASS = 'text-sm text-neutral-500 w-full';
+const DAYS_OFF_CLASS = 'text-sm text-neutral-500 w-full flex justify-center';
 const ADD_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl bg-transparent text-neutral-300';
 const REMOVE_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl bg-transparent text-neutral-500';
+
+// Devuelve el borde lateral + rounded que le toca a una celda según su
+// POSICIÓN en la fila (no según qué columna es). Primera columna: borde y
+// rounded a la izquierda. Última: a la derecha. Del medio: sin borde lateral
+// ni rounded, para que la fila se siga viendo como una sola "pill" continua.
+function getEdgeClassName(index: number, total: number): string {
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
+
+  if (isFirst && isLast) return 'border-x rounded-2xl';
+  if (isFirst) return 'border-l rounded-l-2xl';
+  if (isLast) return 'border-r rounded-r-2xl';
+  return '';
+}
+
+// Recorre las columnas en el orden en que fueron declaradas y les mergea el
+// borde/rounded que corresponde a esa posición. Al depender del índice del
+// array y no de un nombre fijo, reordenar columnas (como mover "checkbox"
+// antes que "day") nunca vuelve a romper los rounded-borders.
+function withPillEdges(columns: TableColumn<DayRow>[]): TableColumn<DayRow>[] {
+  return columns.map((column, index) => ({
+    ...column,
+    cellClassName: twMerge(
+      column.cellClassName as string,
+      getEdgeClassName(index, columns.length),
+    ),
+  }));
+}
 
 function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(':').map(Number);
@@ -249,38 +298,39 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
     });
   };
 
-  const columns: TableColumn<DayRow>[] = [
+  // Orden real de las columnas: acá es donde se reordena si hace falta.
+  // El redondeo de bordes se resuelve solo, gracias a withPillEdges() más abajo.
+  const columns: TableColumn<DayRow>[] = withPillEdges([
+    {
+      key: 'checkbox',
+      header: null,
+      width: CHECKBOX_COLUMN_WIDTH,
+      cellClassName: CELL_BASE_CLASS,
+      cell: (row) => {
+        const day = days[row.dayOfWeek];
+
+        return (
+          <span className={DAY_OPEN_CLASS}>
+            <Checkbox
+              id={`week-day-${row.dayOfWeek}`}
+              checked={day.works}
+              disabled={readOnly}
+              onChange={(_, checked) => toggleWorks(row.dayOfWeek, checked)}
+            />
+          </span>
+        );
+      },
+    },
     {
       key: 'day',
       header: null,
-      cellClassName: DAY_CELL_CLASS,
+      width: DAY_COLUMN_WIDTH,
+      cellClassName: CELL_BASE_CLASS,
       cell: (row) => (
         <div className={DAY_CELL_CONTENT_CLASS}>
           <span className={DAY_NAME_CLASS}>{row.label}</span>
         </div>
       ),
-    },
-    {
-      key: 'checkbox',
-      header: null,
-      cellClassName: CHECKBOX_CELL_CLASS,
-      cell: (row) => {
-        const day = days[row.dayOfWeek];
-
-        return (
-          <div className={CHECKBOX_CELL_CONTENT_CLASS}>
-            <span className={DAY_OPEN_CLASS}>
-              <Checkbox
-                id={`week-day-${row.dayOfWeek}`}
-                checked={day.works}
-                disabled={readOnly}
-                onChange={(_, checked) => toggleWorks(row.dayOfWeek, checked)}
-              />
-              <span>Trabaja</span>
-            </span>
-          </div>
-        );
-      },
     },
     {
       key: 'schedule',
@@ -292,9 +342,7 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
 
         if (!day.works) {
           return (
-            <span className="flex h-full w-full items-center justify-center">
               <span className={DAYS_OFF_CLASS}>No trabaja</span>
-            </span>
           );
         }
 
@@ -312,26 +360,22 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
 
               return (
                 <div key={index} className={RANGE_LINE_CLASS}>
-                  <Input
-                    name={`week-start-${row.dayOfWeek}-${index}`}
-                    type="time"
+                  <HourSelector
                     value={range.startTime}
                     min={prevRange?.endTime || undefined}
                     max={range.endTime || undefined}
-                    onChange={(event) => updateRange(row.dayOfWeek, index, { startTime: event.target.value })}
+                    onChange={(time) => updateRange(row.dayOfWeek, index, { startTime: time })}
                     readOnly={readOnly}
-                    className={`${TIME_INPUT_CLASS} ${invalid ? TIME_INPUT_ERROR_CLASS : ''}`}
+                    className={invalid ? TIME_INPUT_ERROR_CLASS : ''}
                   />
                   <span className="text-neutral-500">—</span>
-                  <Input
-                    name={`week-end-${row.dayOfWeek}-${index}`}
-                    type="time"
+                  <HourSelector
                     value={range.endTime}
                     min={range.startTime || undefined}
                     max={nextRange?.startTime || undefined}
-                    onChange={(event) => updateRange(row.dayOfWeek, index, { endTime: event.target.value })}
+                    onChange={(time) => updateRange(row.dayOfWeek, index, { endTime: time })}
                     readOnly={readOnly}
-                    className={`${TIME_INPUT_CLASS} ${invalid ? TIME_INPUT_ERROR_CLASS : ''}`}
+                    className={invalid ? TIME_INPUT_ERROR_CLASS : ''}
                   />
                   {!readOnly && index > 0 ? (
                     <Button
@@ -342,11 +386,11 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
                       aria-label="Quitar turno"
                     />
                   ) : null}
-                  {index === 0 ? (
+                  {index === 0 && !readOnly ? (
                     <Button
                       type="button"
                       className={ADD_TURN_BUTTON_CLASS}
-                      disabled={readOnly || day.ranges.length >= 2}
+                      disabled={day.ranges.length >= 2}
                       onClick={() => addRange(row.dayOfWeek)}
                       icon={<Plus size="var(--size-m)" />}
                       aria-label="Agregar turno"
@@ -362,20 +406,23 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
         );
       },
     },
-  ];
+  ]);
 
   return (
     <div className={SCHEDULE_FIELD_CLASS}>
-      <p className={SCHEDULE_LABEL_CLASS}>Horarios semanales</p>
-      <Box className={SCHEDULE_LIST_CLASS}>
-        <Table
-          columns={columns}
-          rows={DAYS}
-          rowHeightClassName={TABLE_ROW_HEIGHT_CLASS}
-          className={SCHEDULE_TABLE_CLASS}
-          showHeader={false}
-        />
-      </Box>
+      <p className={SCHEDULE_LABEL_CLASS}>Días y horarios de trabajo</p>
+      <div className={SCHEDULE_LIST_CLASS}>
+        {DAYS.map((day) => (
+          <Table
+            key={day.dayOfWeek}
+            columns={columns}
+            rows={[day]}
+            rowHeightClassName={TABLE_ROW_HEIGHT_CLASS}
+            className={SCHEDULE_TABLE_CLASS}
+            showHeader={false}
+          />
+        ))}
+      </div>
     </div>
   );
 }

@@ -18,8 +18,8 @@ type InputProps = InputVariant | TextareaVariant;
 
 const INPUT_WRAPPER_CLASS = 'flex flex-col gap-(--size-s)';
 const INPUT_LABEL_CLASS = 'text-md text-neutral-300 px-(--size-s)';
-const INPUT_INPUT_CLASS = 'w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-(--size-m) py-(--size-s) text-neutral-100 outline-none transition focus:border-neutral-400';
-const INPUT_TEXTAREA_CLASS = 'min-h-28 resize-none';
+const INPUT_INPUT_CLASS = 'h-(--size-3xl) w-full rounded-2xl border border-neutral-700 bg-neutral-800 px-(--size-m) py-(--size-s) text-neutral-100 outline-none transition focus:border-neutral-400';
+const INPUT_TEXTAREA_CLASS = 'h-(--size-6xl) resize-none';
 
 export default function Input({
   label,

@@ -1,7 +1,7 @@
 ﻿import { useState } from 'react';
 import { getservices } from '../../database/data';
 import type { service } from '../../database/types';
-import TwoColumnView from './TwoColumnView';
+import ViewLayout from '../layout/ViewLayout';
 import FormAddService from '../widgets/serviceWidgets/FormAddService';
 import ServicePreviewCard from '../widgets/serviceWidgets/ServicePreviewCard';
 import { SERVICE_COLOR_BY_ID, SERVICE_COLORS } from '../widgets/serviceWidgets/serviceColors';
@@ -114,7 +114,7 @@ export default function AddServiceView({
 
     if (mode === 'edit') {
       onConfirm?.(buildService());
-      onClose?.();
+      if (!onConfirm) onClose?.();
       return;
     }
 
@@ -128,7 +128,7 @@ export default function AddServiceView({
   const previewDuration = draftValues.duration.replace(/\s*min$/i, '');
 
   return (
-    <TwoColumnView
+    <ViewLayout
       title={title}
       onBack={handleBack}
       left={
@@ -153,11 +153,11 @@ export default function AddServiceView({
       }
       footer={
         <>
+          {mode === 'edit' && onDelete ? (
+            <DeleteButton className="mr-auto" onClick={onDelete} text="Eliminar" />
+          ) : null}
           <CancelButton onClick={handleCancel} text={cancelLabel} />
           <ConfirmButton onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
-          {mode === 'view' && onDelete ? (
-            <DeleteButton onClick={onDelete} text="Eliminar" />
-          ) : null}
         </>
       }
     />
