@@ -83,10 +83,15 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
 
   const closePanel = () => setOpen(false);
 
+  const confirmSelection = (h: number, m: number) => {
+    if (!isMinuteEnabled(m)) return;
+    onChange?.(`${pad(h)}:${pad(m)}`);
+    closePanel();
+  };
+
   const pickMinute = (m: number) => {
     if (!isMinuteEnabled(m)) return;
-    onChange?.(`${pad(draftHour)}:${pad(m)}`);
-    closePanel();
+    confirmSelection(draftHour, m);
   };
 
   useEffect(() => {
@@ -112,10 +117,16 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
     };
   }, [open]);
 
+  const displayValue = open
+    ? `${pad(draftHour)}:${pad(draftMinute ?? 0)}`
+    : hour != null && minute != null
+      ? `${pad(hour)}:${pad(minute)}`
+      : '--:--';
+
   if (readOnly) {
     return (
       <div className={twMerge(SELECTOR_CLASS, 'cursor-default', className)}>
-        {hour != null && minute != null ? `${pad(hour)}:${pad(minute)}` : '--:--'}
+        {displayValue}
       </div>
     );
   }
@@ -127,7 +138,7 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
         className={twMerge(SELECTOR_CLASS, className)}
         onClick={openPanel}
       >
-        {hour != null && minute != null ? `${pad(hour)}:${pad(minute)}` : '--:--'}
+        {displayValue}
       </button>
 
       {open ? (
@@ -143,6 +154,7 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
                     disabled={!enabled}
                     className={optionClass(h === draftHour, !enabled)}
                     onClick={() => setDraftHour(h)}
+                    onDoubleClick={() => confirmSelection(h, draftMinute ?? 0)}
                   >
                     {pad(h)}
                   </button>
@@ -161,6 +173,7 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
                     disabled={!enabled}
                     className={optionClass(m === draftMinute, !enabled)}
                     onClick={() => pickMinute(m)}
+                    onDoubleClick={() => confirmSelection(draftHour, m)}
                   >
                     {pad(m)}
                   </button>

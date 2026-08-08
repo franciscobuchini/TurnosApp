@@ -191,18 +191,21 @@ function Dashboard() {
     >
       {activeView.type === 'add-member' ? (
         <AddEntityView
+          key="member-create"
           open={true}
           onClose={() => setActiveView({ type: 'schedule' })}
           onConfirm={handleCreateMember}
         />
       ) : activeView.type === 'add-service' ? (
         <AddServiceView
+          key="service-create"
           open={true}
           onClose={() => setActiveView({ type: 'schedule' })}
           onConfirm={handleCreateService}
         />
       ) : activeView.type === 'add-client' ? (
         <AddClientView
+          key="client-create"
           open={true}
           onClose={() => setActiveView({ type: 'schedule' })}
           clients={clients}
@@ -210,6 +213,7 @@ function Dashboard() {
         />
       ) : activeView.type === 'view-member' ? (
         <AddEntityView
+          key={`member-${activeView.name}`}
           open={true}
           onClose={() => setActiveView({ type: 'schedule' })}
           title={`Perfil de ${activeView.name}`}
@@ -220,6 +224,7 @@ function Dashboard() {
         />
       ) : activeView.type === 'view-service' ? (
         <ViewServiceView
+          key={`service-view-${activeView.name}`}
           open={true}
           onClose={() => setActiveView({ type: 'schedule' })}
           title={`Detalles de ${activeView.name}`}
@@ -231,6 +236,7 @@ function Dashboard() {
         />
       ) : activeView.type === 'edit-service' ? (
         <ViewServiceView
+          key={`service-edit-${activeView.name}`}
           open={true}
           onClose={() => setActiveView({ type: 'view-service', name: activeView.name })}
           title={`Editar ${activeView.name}`}
@@ -242,6 +248,7 @@ function Dashboard() {
         />
       ) : activeView.type === 'view-client' ? (
         <ViewClientView
+          key={`client-view-${activeView.name}`}
           open={true}
           onClose={() => setActiveView({ type: 'schedule' })}
           title={`Acerca de ${activeView.name}`}
@@ -255,6 +262,7 @@ function Dashboard() {
         />
       ) : activeView.type === 'edit-client' ? (
         <ViewClientView
+          key={`client-edit-${activeView.name}`}
           open={true}
           onClose={() => setActiveView({ type: 'view-client', name: activeView.name })}
           title={`Editar ${activeView.name}`}

@@ -12,16 +12,20 @@ interface ServiceSelectorProps {
   value: string[];
   onChange: (value: string[]) => void;
   disabled?: boolean;
+  showOnlySelected?: boolean;
 }
 
-export default function ServiceSelector({ value, onChange, disabled = false }: ServiceSelectorProps) {
+export default function ServiceSelector({ value, onChange, disabled = false, showOnlySelected = false }: ServiceSelectorProps) {
   const availableServices = getservices();
+  const visibleServices = showOnlySelected
+    ? availableServices.filter((service) => value.includes(service.name))
+    : availableServices;
 
   return (
     <div className={SERVICE_FIELD_CLASS}>
       <label className={SERVICE_LABEL_CLASS}>Servicios que presta</label>
       <div className={SERVICE_SELECTOR_CLASS}>
-        {availableServices.map((service) => {
+        {visibleServices.map((service) => {
           const isActive = value.includes(service.name);
           const colorClassName = SERVICE_COLOR_BY_ID[service.colorId ?? '']?.className ?? '';
 

@@ -47,6 +47,8 @@ function writeCollection<T>(key: string, value: T[]) {
 //  - Formato "Día y horas" del seed: { day: "L", hours: ["9:00 - 18:00"] }.
 // Esta función normaliza cualquier valor al formato OpeningHoursEntry para que
 // el componente EntityWeekSchedule coincida siempre con lo guardado en la BBDD.
+// Las entradas sin ambos horarios (startTime/endTime) se descartan: un horario
+// incompleto nunca se persiste.
 const DAY_LETTER_TO_NUMBER: Record<string, number> = {
   L: 1, M: 2, X: 3, J: 4, V: 5, S: 6, D: 0,
 };

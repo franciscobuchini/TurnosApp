@@ -147,7 +147,7 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
         />
       </div>
 
-      <ServiceSelector value={selectedServices} onChange={setSelectedServices} disabled={readOnly} />
+      <ServiceSelector value={selectedServices} onChange={setSelectedServices} disabled={readOnly} showOnlySelected={readOnly} />
     </Form>
   );
 }
