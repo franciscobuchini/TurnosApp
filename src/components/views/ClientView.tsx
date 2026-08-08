@@ -1,10 +1,10 @@
-import { ChevronLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getClients } from '../../database/data';
 import type { Client } from '../../database/types';
-import MainContent from '../layout/MainContent';
-import Button from '../interface/Button';
-import MainHeader from '../interface/MainHeader';
+import TwoColumnView from './TwoColumnView';
+import CancelButton from '../buttons/CancelButton';
+import ConfirmButton from '../buttons/ConfirmButton';
+import DeleteButton from '../buttons/DeleteButton';
 import FormAddClient from '../widgets/clientWidgets/FormAddClient';
 
 export const ADD_CLIENT_VIEW_TITLE = 'Agregar un nuevo cliente';
@@ -36,6 +36,8 @@ export interface AddClientViewProps {
   onCancel?: () => void;
   onDelete?: () => void;
 }
+
+const RIGHT_PANEL_CLASS = 'flex flex-1 flex-col items-center justify-center gap-2 rounded-4xl border-1 border-dashed border-neutral-500 text-neutral-400';
 
 export default function AddClientView({
   open = true,
@@ -145,32 +147,27 @@ export default function AddClientView({
   const resolvedMode = mode;
 
   return (
-    <MainContent>
-      <MainHeader
-        title={title}
-        action={
-          <Button
-            className="h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent"
-            onClick={handleBack}
-            icon={<ChevronLeft size="var(--size-l)" />}
-            aria-label="Volver"
-          />
-        }
-      />
-      <div className="flex min-h-0 w-full flex-1 flex-col">
+    <TwoColumnView
+      title={title}
+      onBack={handleBack}
+      left={
         <FormAddClient mode={resolvedMode} initialValues={formValues} onValidityChange={setIsFormValid} onValuesChange={setDraftValues} />
-      </div>
-      <div className="flex justify-end gap-3 pt-(--size-m)">
-        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900" onClick={handleCancel} text={cancelLabel} />
-        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white" onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
-        {mode === 'view' && onDelete ? (
-          <Button
-            className="px-(--size-l) py-(--size-s) rounded-2xl bg-red-500 text-white"
-            onClick={onDelete}
-            text="Eliminar"
-          />
-        ) : null}
-      </div>
-    </MainContent>
+      }
+      right={
+        <div className={RIGHT_PANEL_CLASS}>
+          <p>Proximamente...</p>
+          <p>Sistema de fidelización de clientes</p>
+        </div>
+      }
+      footer={
+        <>
+          <CancelButton onClick={handleCancel} text={cancelLabel} />
+          <ConfirmButton onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
+          {mode === 'view' && onDelete ? (
+            <DeleteButton onClick={onDelete} text="Eliminar" />
+          ) : null}
+        </>
+      }
+    />
   );
 }

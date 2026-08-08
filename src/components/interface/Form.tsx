@@ -7,8 +7,8 @@ interface FormProps {
   title?: string;
 }
 
-const FORM_WRAPPER_CLASS = 'flex flex-col w-full gap-4';
-const FORM_TITLE_CLASS = 'text-lg font-semibold text-neutral-900';
+const FORM_WRAPPER_CLASS = 'flex flex-col w-full';
+const FORM_TITLE_CLASS = 'text-lg text-neutral-900';
 
 export default function Form({ children, className, title }: FormProps) {
   return (

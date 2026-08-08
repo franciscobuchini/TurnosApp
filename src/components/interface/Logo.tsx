@@ -1,9 +1,21 @@
 import type { SVGProps } from 'react';
+import { twMerge } from 'tailwind-merge';
 
 export default function Logo(props: SVGProps<SVGSVGElement>) {
+  const { className, ...rest } = props;
+
   return (
-    <svg width="189" height="175" viewBox="0 0 189 175" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg className={twMerge('w-auto overflow-visible', className)} width="189" height="175" viewBox="-14 -12 217 199" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
       <style>{`
+        .logo-pulse {
+          transform-box: fill-box;
+          transform-origin: center;
+          animation: logoPulse 0.9s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.03); }
+        }
         .logo-blob {
           transform-box: fill-box;
           transform-origin: center;
@@ -60,7 +72,7 @@ export default function Logo(props: SVGProps<SVGSVGElement>) {
         </filter>
       </defs>
 
-      <g clipPath="url(#logoClip)">
+      <g className="logo-pulse" clipPath="url(#logoClip)">
         <rect x="0" y="0" width="189" height="175" fill="#C7ACFF" />
         <g filter="url(#logoBlur)">
           <circle className="logo-blob b1" cx="40" cy="50" r="55" fill="#E7FC6F" opacity="0.85" />

@@ -11,21 +11,15 @@ interface LayoutProps {
   sidebar?: ReactNode;
 }
 
-const LAYOUT_CLASS = 'h-dvh w-dvw overflow-hidden flex flex-col  bg-black';
+const LAYOUT_CONTENT_CLASS = 'h-dvh w-dvw flex flex-1 overflow-hidden p-(--size-m) gap-(--size-m) bg-neutral-950';
 
-const LAYOUT_CONTENT_CLASS = 'flex flex-1 overflow-hidden';
-
-// Reserva el espacio del área principal (mismo layout que ocupaba MainContent,
-// sin sus estilos visuales: eso ahora lo aporta cada vista).
-const MAIN_AREA_CLASS = 'flex flex-1 min-h-0 min-w-0 h-full w-full py-(--size-m)';
+const MAIN_AREA_CLASS = 'flex flex-1 min-h-0 min-w-0 h-full w-full';
 
 export default function Layout({ children, sidebar }: LayoutProps) {
   return (
-    <div className={LAYOUT_CLASS}>
       <div className={LAYOUT_CONTENT_CLASS}>
         {sidebar}
         <div className={MAIN_AREA_CLASS}>{children}</div>
       </div>
-    </div>
   );
 }

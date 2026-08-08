@@ -1,10 +1,13 @@
-﻿import { ChevronLeft } from 'lucide-react';
-import { useState } from 'react';
+﻿import { useState } from 'react';
+
 import { getOpeningHours, getTeamMembers } from '../../database/data';
 import type { OpeningHoursEntry, TeamMember } from '../../database/types';
-import MainContent from '../layout/MainContent';
-import Button from '../interface/Button';
-import MainHeader from '../interface/MainHeader';
+
+import TwoColumnView from './TwoColumnView';
+import CancelButton from '../buttons/CancelButton';
+import ConfirmButton from '../buttons/ConfirmButton';
+import DeleteButton from '../buttons/DeleteButton';
+
 import FormAddEntity from '../widgets/entityWidgets/FormAddEntity';
 import EntityWeekSchedule from '../widgets/entityWidgets/EntityWeekSchedule';
 
@@ -33,12 +36,13 @@ export interface AddEntityViewProps {
   onDelete?: () => void;
 }
 
-const ADD_ENTITY_CONTENT_CLASS = 'flex min-h-0 flex-1 w-full rounded-3xl bg-neutral-50 p-(--size-m)';
-const ADD_ENTITY_FORM_COLUMN_CLASS = 'flex min-h-0 w-full flex-col justify-center';
-const TWO_COLUMN_LAYOUT_CLASS = 'flex min-h-0 w-full flex-1 flex-col gap-(--size-m) md:flex-row';
-const FIRST_COLUMN_CLASS = 'flex min-h-0 w-full flex-1 flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
-const SECOND_COLUMN_CLASS = 'flex min-h-0 w-full flex-1 flex-col overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
-const SECOND_COLUMN_CONTENT_CLASS = 'flex min-h-0 flex-1 w-full rounded-3xl bg-neutral-50 p-(--size-m)';
+const EMPTY_MEMBER: MemberDraftValues = {
+  name: '',
+  role: '',
+  phone: '',
+  email: '',
+  services: [],
+};
 
 export default function AddEntityView({
   open = true,
@@ -50,115 +54,106 @@ export default function AddEntityView({
   onConfirm,
   onDelete,
 }: AddEntityViewProps) {
-  const teamMembers = getTeamMembers();
-  const selectedMember = (open
-    ? teamMembers.find((member) => member.name === memberName)
-    : undefined) ?? teamMembers[0];
+  const member = getTeamMembers().find(
+    (member) => member.name === memberName,
+  );
 
-  const [isEditing, setIsEditing] = useState(false);
+  const initialValues =
+    mode === 'create'
+      ? EMPTY_MEMBER
+      : {
+          name: member?.name ?? '',
+          role: member?.role ?? '',
+          phone: member?.phone ?? '',
+          email: member?.email ?? '',
+          services: member?.services ?? [],
+          photo: member?.photo,
+        };
+
+  const [editing, setEditing] = useState(false);
   const [isFormValid, setIsFormValid] = useState(false);
-  const [draftValues, setDraftValues] = useState<MemberDraftValues>({
-    name: '',
-    role: '',
-    phone: '',
-    email: '',
-    services: [],
-    photo: undefined,
-  });
-  const [schedule, setSchedule] = useState<OpeningHoursEntry[]>(() =>
-    mode === 'create' || !Array.isArray(selectedMember?.schedule)
+  const [values, setValues] = useState<MemberDraftValues>(initialValues);
+
+  const [schedule, setSchedule] = useState<OpeningHoursEntry[]>(
+    mode === 'create' || !Array.isArray(member?.schedule)
       ? getOpeningHours()
-      : (selectedMember.schedule as OpeningHoursEntry[]),
+      : member.schedule,
   );
 
   if (!open) return null;
 
-  const resolvedMode = isEditing ? 'edit' : mode;
-
-  const formValues =
-    mode === 'create'
-      ? { name: '', role: '', phone: '', email: '', services: [], photo: undefined }
-      : {
-          name: selectedMember?.name ?? '',
-          role: selectedMember?.role ?? '',
-          phone: selectedMember?.phone ?? '',
-          email: selectedMember?.email ?? '',
-          services: selectedMember?.services ?? [],
-          photo: selectedMember?.photo,
-        };
-
-  const buildMember = (): TeamMember => ({
-    name: draftValues.name.trim(),
-    role: draftValues.role.trim(),
-    email: draftValues.email.trim(),
-    phone: draftValues.phone.trim(),
-    services: draftValues.services,
-    photo: draftValues.photo,
-    schedule,
-  });
-
+  const resolvedMode = editing ? 'edit' : mode;
   const handleBack = onBack ?? onClose;
+
   const handleCancel = () => {
-    if (isEditing) {
-      setIsEditing(false);
+    if (editing) {
+      setValues(initialValues);
+      setEditing(false);
       return;
     }
 
     handleBack?.();
   };
+
   const handleConfirm = () => {
-    if (mode === 'view' && !isEditing) {
-      setIsEditing(true);
+    if (mode === 'view' && !editing) {
+      setEditing(true);
       return;
     }
 
-    onConfirm?.(buildMember());
+    onConfirm?.({
+      ...values,
+      name: values.name.trim(),
+      role: values.role.trim(),
+      phone: values.phone.trim(),
+      email: values.email.trim(),
+      schedule,
+    });
+
     onClose?.();
   };
-  const actionLabel = isEditing ? 'Guardar' : mode === 'view' ? 'Editar' : 'Confirmar';
-  const cancelLabel = isEditing ? 'Cancelar' : mode === 'view' ? 'Volver' : 'Cancelar';
-  const isConfirmDisabled = mode === 'create' && !isEditing && !isFormValid;
+
+  const actionLabel =
+    editing ? 'Guardar' : mode === 'view' ? 'Editar' : 'Confirmar';
+
+  const cancelLabel =
+    editing ? 'Cancelar' : mode === 'view' ? 'Volver' : 'Cancelar';
 
   return (
-    <MainContent>
-      <MainHeader
-        title={title}
-        action={
-          <Button
-            className="h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent"
-            onClick={handleBack}
-            icon={<ChevronLeft size="var(--size-l)" />}
-            aria-label="Volver"
+    <TwoColumnView
+      title={title}
+      onBack={handleBack}
+      left={
+        <FormAddEntity
+          key={mode === 'create' ? 'create' : member?.name}
+          mode={resolvedMode}
+          initialValues={initialValues}
+          onValidityChange={setIsFormValid}
+          onValuesChange={setValues}
+        />
+      }
+      right={
+        <EntityWeekSchedule
+          value={schedule}
+          onChange={setSchedule}
+          readOnly={resolvedMode === 'view'}
+        />
+      }
+      footer={
+        <>
+          {mode === 'view' && !editing && onDelete && (
+            <DeleteButton onClick={onDelete} text="Eliminar" />
+          )}
+
+          <CancelButton onClick={handleCancel} text={cancelLabel} />
+
+          <ConfirmButton
+            onClick={handleConfirm}
+            text={actionLabel}
+            disabled={mode === 'create' && !isFormValid}
           />
-        }
-      />
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className={TWO_COLUMN_LAYOUT_CLASS}>
-          <div className={FIRST_COLUMN_CLASS}>
-            <div className={ADD_ENTITY_CONTENT_CLASS}>
-              <div className={ADD_ENTITY_FORM_COLUMN_CLASS}>
-                <FormAddEntity key={mode === 'create' ? 'create' : selectedMember?.name ?? 'member'} mode={resolvedMode} initialValues={formValues} onValidityChange={setIsFormValid} onValuesChange={setDraftValues} />
-              </div>
-            </div>
-          </div>
-          <div className={SECOND_COLUMN_CLASS}>
-            <div className={SECOND_COLUMN_CONTENT_CLASS}>
-              <EntityWeekSchedule value={schedule} onChange={setSchedule} readOnly={resolvedMode === 'view'} />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex justify-end gap-3 pt-(--size-m)">
-        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900" onClick={handleCancel} text={cancelLabel} />
-        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white" onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
-        {mode === 'view' && !isEditing && onDelete ? (
-          <Button
-            className="px-(--size-l) py-(--size-s) rounded-2xl bg-red-500 text-white"
-            onClick={onDelete}
-            text="Eliminar"
-          />
-        ) : null}
-      </div>
-    </MainContent>
+        </>
+      }
+    />
   );
 }

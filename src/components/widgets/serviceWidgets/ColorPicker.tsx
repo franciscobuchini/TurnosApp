@@ -30,9 +30,9 @@ type Props = {
 
 const WRAPPER_CLASS = 'flex flex-wrap justify-center gap-(--size-s)';
 
-const SWATCH_CLASS = 'h-(--size-xl) w-(--size-xl) rounded-full border-1 transition';
+const SWATCH_CLASS = 'h-(--size-xl) w-(--size-xl) rounded-full border border-neutral-700 transition';
 
-const SWATCH_ACTIVE_CLASS = 'border-neutral-500';
+const SWATCH_ACTIVE_CLASS = 'border-4 border-neutral-50';
 
 const SWATCH_INACTIVE_CLASS = 'border-transparent hover:border-neutral-300';
 

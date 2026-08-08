@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FocusEvent, type MouseEvent, useEffect, useRef, useState } from 'react';
-import { ImageUp, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import Form from '../../interface/Form';
 import Image from '../../interface/Image';
 import Input from '../../interface/Input';
@@ -28,17 +28,17 @@ interface FormAddEntityProps {
   onValidityChange?: (isValid: boolean) => void;
 }
 
-const FORM_CLASS = 'flex flex-col gap-(--size-xl) p-(--size-m)';
+const FORM_CLASS = 'flex flex-col gap-(--size-4xl)';
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
-const FIELD_GROUP_CLASS = 'flex flex-col gap-2';
-const FIELD_LABEL_CLASS = 'px-(--size-m) text-sm font-medium text-neutral-700';
+const FIELD_GROUP_CLASS = 'flex flex-col gap-(--size-m)';
+const FIELD_LABEL_CLASS = 'text-md text-neutral-300 px-(--size-s)';
 const AVATAR_FIELD_CLASS = 'flex items-center gap-(--size-m) px-(--size-m)';
 const AVATAR_IMAGE_CLASS = 'h-(--size-4xl) w-(--size-4xl) text-xl';
 const AVATAR_WRAPPER_CLASS = 'group relative inline-block rounded-full';
 const AVATAR_REMOVE_BUTTON_CLASS =
-  'absolute inset-0 flex items-center justify-center rounded-full bg-black/30 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:outline-none';
+  'absolute inset-0 flex items-center justify-center rounded-full bg-neutral-950/30 text-white opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus:outline-none';
 const AVATAR_INPUT_CLASS = 'sr-only';
-const BUTTON_UPLOAD_CLASS = 'flex items-center gap-(--size-s) px-(--size-xs) bg-transparent text-sm text-neutral-600 focus:outline-none focus:ring-offset-0';
+const BUTTON_UPLOAD_CLASS = 'flex items-center gap-(--size-s) px-(--size-xs) bg-transparent text-sm text-neutral-300 focus:outline-none focus:ring-offset-0';
 
 const whatsappPrefix = '+54 9 ';
 
@@ -156,23 +156,25 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
 
   return (
     <Form className={FORM_CLASS}>
-      <Input
-        label="Nombre y Apellido"
-        name="memberName"
-        placeholder="Juan Perez"
-        value={memberName}
-        onChange={handleNameChange}
-        readOnly={readOnly}
-      />
+      <div className={TWO_COLUMN_GRID_CLASS}>
+        <Input
+          label="Nombre y Apellido"
+          name="memberName"
+          placeholder="Juan Perez"
+          value={memberName}
+          onChange={handleNameChange}
+          readOnly={readOnly}
+        />
 
-      <Input
-        label="Rol"
-        name="role"
-        placeholder="Peluquero"
-        value={role}
-        onChange={handleRoleChange}
-        readOnly={readOnly}
-      />
+        <Input
+          label="Rol"
+          name="role"
+          placeholder="Peluquero"
+          value={role}
+          onChange={handleRoleChange}
+          readOnly={readOnly}
+        />
+      </div>
 
       <div className={FIELD_GROUP_CLASS}>
         <p className={FIELD_LABEL_CLASS}>Imagen de perfil</p>
@@ -197,7 +199,6 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
           {!readOnly && (
             <>
               <Button type="button" className={BUTTON_UPLOAD_CLASS} onClick={() => photoInputRef.current?.click()}>
-                <ImageUp size="var(--size-m)" />
                 o cargar una imagen...
               </Button>
               <input

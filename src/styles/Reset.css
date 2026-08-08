@@ -348,11 +348,7 @@ select {
   border-radius: 0;
 }
 
-/* Reset de scrollbar (opcional, WebKit) */
-::-webkit-scrollbar {
-  width: initial;
-  height: initial;
-}
+/* Los scrollbars se ocultan globalmente en Index.css */
 
 /* 15. Respeta preferencia de reduced motion */
 @media (prefers-reduced-motion: reduce) {

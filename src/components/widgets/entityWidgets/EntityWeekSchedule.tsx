@@ -59,8 +59,8 @@ const DAYS: DayRow[] = [
 ];
 
 const SCHEDULE_FIELD_CLASS = 'flex flex-col gap-2 w-full';
-const SCHEDULE_LABEL_CLASS = 'px-(--size-m) text-sm font-medium text-neutral-700';
-const SCHEDULE_LIST_CLASS = 'flex flex-col gap-(--size-s) p-(--size-m) w-full';
+const SCHEDULE_LABEL_CLASS = 'text-md text-neutral-300';
+const SCHEDULE_LIST_CLASS = 'flex flex-col w-full';
 
 // table-auto reemplaza el table-fixed por defecto de Table: las columnas "día" y
 // "checkbox" se ajustan a su contenido, "horario" se estira (width: 100%).
@@ -70,23 +70,23 @@ const TABLE_ROW_HEIGHT_CLASS = 'h-(--size-5xl)';
 
 // min-h + h-full en la celda (además de la altura de fila) para que el contenido
 // de cada columna quede centrado y las tres columnas midan siempre lo mismo.
-const DAY_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle rounded-l-2xl border border-r-0 border-neutral-200 bg-white px-(--size-m)';
-const CHECKBOX_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle border-y border-neutral-200 bg-white px-(--size-m)';
-const SCHEDULE_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle rounded-r-2xl border border-l-0 border-neutral-200 bg-white px-(--size-m) py-(--size-s)';
+const DAY_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle rounded-l-2xl border border-r-0 border-neutral-700 bg-neutral-800 px-(--size-m)';
+const CHECKBOX_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle border-y border-neutral-700 bg-neutral-800 px-(--size-m)';
+const SCHEDULE_CELL_CLASS = 'min-h-(--size-5xl) h-full align-middle rounded-r-2xl border border-l-0 border-neutral-700 bg-neutral-800 px-(--size-m) py-(--size-s)';
 
 const DAY_CELL_CONTENT_CLASS = 'flex h-full items-center';
 const CHECKBOX_CELL_CONTENT_CLASS = 'flex h-full items-center';
 const SCHEDULE_CELL_CONTENT_CLASS = 'flex h-full flex-col justify-center gap-(--size-s)';
+const DAY_NAME_CLASS = 'shrink-0 text-sm font-medium text-neutral-100';
+const DAY_OPEN_CLASS = 'flex shrink-0 items-center gap-2 text-sm text-neutral-300';
 
-const DAY_NAME_CLASS = 'shrink-0 text-sm font-medium text-neutral-900';
-const DAY_OPEN_CLASS = 'flex shrink-0 items-center gap-2 text-sm text-neutral-600';
 const RANGE_LINE_CLASS = 'flex w-full shrink-0 items-center gap-(--size-s)';
-const RANGE_ERROR_CLASS = 'shrink-0 text-xs text-red-500';
+const RANGE_ERROR_CLASS = 'shrink-0 text-xs text-red-400';
 const TIME_INPUT_CLASS = 'min-w-0 w-full flex-1';
 const TIME_INPUT_ERROR_CLASS = 'border-red-400 focus:border-red-400';
-const DAYS_OFF_CLASS = 'text-sm text-neutral-400 w-full';
-const ADD_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl bg-transparent text-neutral-600';
-const REMOVE_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl bg-transparent text-neutral-400';
+const DAYS_OFF_CLASS = 'text-sm text-neutral-500 w-full';
+const ADD_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl bg-transparent text-neutral-300';
+const REMOVE_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center rounded-xl bg-transparent text-neutral-500';
 
 function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(':').map(Number);
@@ -322,7 +322,7 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
                     readOnly={readOnly}
                     className={`${TIME_INPUT_CLASS} ${invalid ? TIME_INPUT_ERROR_CLASS : ''}`}
                   />
-                  <span className="text-neutral-400">—</span>
+                  <span className="text-neutral-500">—</span>
                   <Input
                     name={`week-end-${row.dayOfWeek}-${index}`}
                     type="time"

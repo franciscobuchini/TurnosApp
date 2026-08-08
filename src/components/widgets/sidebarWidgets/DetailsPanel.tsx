@@ -8,7 +8,7 @@ import { twMerge } from 'tailwind-merge';
 import Dropdown from '../../interface/Dropdown';
 import Image from '../../interface/Image';
 import ContentHeader from '../../interface/ContentHeader';
-import { useFiltersGroup } from '../../../functions/filtersGroupContext';
+import { useFiltersGroup } from '../../../functions/detailPanelColapseFunction';
 import AddButton from '../../buttons/AddButton';
 import SummaryButton from '../../buttons/SummaryButton';
 
@@ -40,8 +40,8 @@ const DETAILS_PANEL_IMAGE_CLASS = 'h-full w-full';
 
 const DETAILS_PANEL_LABEL_CLASS = '';
 
-const DETAILS_PANEL_TRIGGER_CLASS = 'w-full px-(--size-xs) bg-transparent hover:bg-black motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-content]]:translate-x-0.5';
-const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-black';
+const DETAILS_PANEL_TRIGGER_CLASS = 'w-full px-(--size-xs) bg-transparent hover:bg-neutral-950 motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-content]]:translate-x-0.5';
+const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-neutral-950';
 
 export default function DetailsPanel({
   title,
@@ -105,11 +105,10 @@ export default function DetailsPanel({
                 className={twMerge(DETAILS_PANEL_CONTENT_CLASS, option.checked === false && 'opacity-40')}
               >
                 <span className={DETAILS_PANEL_AVATAR_CLASS}>
-                  {option.colorClassName ? (
-                    <span className={twMerge('h-full w-full rounded-full', option.colorClassName)} />
-                  ) : (
-                    <Image name={option.label} className={DETAILS_PANEL_IMAGE_CLASS} />
-                  )}
+                  <Image
+                    name={option.label}
+                    className={twMerge(DETAILS_PANEL_IMAGE_CLASS, option.colorClassName)}
+                  />
                 </span>
                 <span className={DETAILS_PANEL_LABEL_CLASS}>{option.label}</span>
               </div>

@@ -16,7 +16,7 @@ interface ScheduleProps {
   className?: string;
 }
 
-const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-3xl bg-neutral-50 shadow-xl';
+const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-3xl bg-neutral-900 shadow-xl';
 
 const SCHEDULE_SCROLL_CLASS = 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
 
@@ -24,21 +24,21 @@ const SCHEDULE_CONTENT_CLASS = 'relative';
 
 const SCHEDULE_TABLE_CLASS = '';
 
-const SCHEDULE_TABLE_HEADER_CLASS = 'bg-neutral-50';
+const SCHEDULE_TABLE_HEADER_CLASS = 'bg-neutral-900';
 
 const SCHEDULE_ROW_HEIGHT_CLASS = 'h-(--size-2xl)';
 
 const SCHEDULE_LABEL_CELL_CLASS = 'relative w-(--size-4xl) text-center';
 
-const SCHEDULE_LABEL_TEXT_CLASS = 'absolute inset-x-0 -top-[5%] -translate-y-1/2 font-thin text-neutral-600 leading-none';
+const SCHEDULE_LABEL_TEXT_CLASS = 'absolute inset-x-0 -top-[5%] -translate-y-1/2 font-thin text-neutral-400 leading-none';
 
 const SCHEDULE_LABEL_HEADER_CLASS = 'sr-only';
 
-const SCHEDULE_SLOT_CELL_CLASS = 'border-t border-neutral-200/60';
+const SCHEDULE_SLOT_CELL_CLASS = 'border-t border-neutral-800/60';
 
-const SCHEDULE_MEMBER_HEADER_CLASS = 'text-center text-sm font-medium truncate text-neutral-600';
+const SCHEDULE_MEMBER_HEADER_CLASS = 'text-center text-sm font-medium truncate text-neutral-300';
 
-const SCHEDULE_EMPTY_CLASS = 'absolute inset-0 flex items-center justify-center pointer-events-none text-neutral-400 text-sm';
+const SCHEDULE_EMPTY_CLASS = 'absolute inset-0 flex items-center justify-center pointer-events-none text-neutral-500 text-sm';
 
 export default function Schedule({
   selectedDate,

@@ -13,14 +13,15 @@ interface DropdownMenuProps {
   items: ReactNode[];
   position: { top: number; left: number };
   menuRef: RefObject<HTMLDivElement | null>;
+  onClose: () => void;
 }
 
 const DROPDOWN_CLASS = 'relative';
 
-const DROPDOWN_MENU_CLASS = 'fixed z-[9999] p-(--size-s) overflow-hidden bg-black shadow-2xl rounded-2xl';
+const DROPDOWN_MENU_CLASS = 'fixed z-[9999] p-(--size-s) overflow-hidden bg-neutral-950 shadow-2xl rounded-2xl';
 
 /* DropdownMenu: es el panel del dropdown */
-function DropdownMenu({ items, position, menuRef }: DropdownMenuProps) {
+function DropdownMenu({ items, position, menuRef, onClose }: DropdownMenuProps) {
   return createPortal(
     <div
       ref={menuRef}
@@ -30,6 +31,7 @@ function DropdownMenu({ items, position, menuRef }: DropdownMenuProps) {
         top: `${position.top}px`,
         left: `${position.left}px`,
       }}
+      onClick={onClose}
     >
       {items.map((item, index) => (
         <div key={index}>{item}</div>
@@ -155,7 +157,7 @@ export default function Dropdown({
         {content}
       </Button>
 
-      {isOpen && <DropdownMenu items={items} position={menuPosition} menuRef={menuRef} />}
+      {isOpen && <DropdownMenu items={items} position={menuPosition} menuRef={menuRef} onClose={() => setIsOpen(false)} />}
     </div>
   );
 }

@@ -1,11 +1,13 @@
-﻿import { ChevronLeft } from 'lucide-react';
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { getservices } from '../../database/data';
 import type { service } from '../../database/types';
+import TwoColumnView from './TwoColumnView';
 import FormAddService from '../widgets/serviceWidgets/FormAddService';
-import MainContent from '../layout/MainContent';
-import Button from '../interface/Button';
-import MainHeader from '../interface/MainHeader';
+import ServicePreviewCard from '../widgets/serviceWidgets/ServicePreviewCard';
+import { SERVICE_COLOR_BY_ID, SERVICE_COLORS } from '../widgets/serviceWidgets/serviceColors';
+import CancelButton from '../buttons/CancelButton';
+import ConfirmButton from '../buttons/ConfirmButton';
+import DeleteButton from '../buttons/DeleteButton';
 
 export const ADD_SERVICE_VIEW_TITLE = 'Agregar un nuevo servicio';
 
@@ -122,38 +124,42 @@ export default function AddServiceView({
   const cancelLabel = mode === 'view' ? 'Volver' : 'Cancelar';
   const isConfirmDisabled = mode === 'create' && !isFormValid;
 
+  const previewColor = SERVICE_COLOR_BY_ID[draftValues.colorId] ?? SERVICE_COLORS[0];
+  const previewDuration = draftValues.duration.replace(/\s*min$/i, '');
+
   return (
-    <MainContent>
-      <MainHeader
-        title={title}
-        action={
-          <Button
-            className="h-(--size-2xl) w-(--size-2xl) p-0 text-neutral-900 bg-transparent"
-            onClick={handleBack}
-            icon={<ChevronLeft size="var(--size-l)" />}
-            aria-label="Volver"
-          />
-        }
-      />
-      <div className="flex min-h-0 w-full flex-1 flex-col">
+    <TwoColumnView
+      title={title}
+      onBack={handleBack}
+      left={
         <FormAddService
           mode={mode}
           initialValues={formValues}
           onValidityChange={setIsFormValid}
           onValuesChange={setDraftValues}
         />
-      </div>
-      <div className="flex justify-end gap-3 pt-(--size-m)">
-        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-50 text-neutral-900" onClick={handleCancel} text={cancelLabel} />
-        <Button className="px-(--size-l) py-(--size-s) rounded-2xl bg-neutral-900 text-white" onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
-        {mode === 'view' && onDelete ? (
-          <Button
-            className="px-(--size-l) py-(--size-s) rounded-2xl bg-red-500 text-white"
-            onClick={onDelete}
-            text="Eliminar"
+      }
+      right={
+        <div className="flex flex-1 flex-col items-center justify-center rounded-4xl">
+          <ServicePreviewCard
+            name={draftValues.name}
+            description={draftValues.description}
+            duration={previewDuration}
+            price={draftValues.price}
+            colorClassName={previewColor.className}
+            selectedPhotoIndex={draftValues.photoIndex}
           />
-        ) : null}
-      </div>
-    </MainContent>
+        </div>
+      }
+      footer={
+        <>
+          <CancelButton onClick={handleCancel} text={cancelLabel} />
+          <ConfirmButton onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
+          {mode === 'view' && onDelete ? (
+            <DeleteButton onClick={onDelete} text="Eliminar" />
+          ) : null}
+        </>
+      }
+    />
   );
 }

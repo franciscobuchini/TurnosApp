@@ -16,15 +16,15 @@ type Props = {
 
 
 
-const GRID_CLASS = 'grid grid-cols-[repeat(auto-fill,80px)] justify-center gap-(--size-s)';
+const GRID_CLASS = 'grid grid-cols-[repeat(auto-fill,80px)] justify-center gap-(--size-xs)';
 
-const PHOTO_CLASS = 'h-(--size-5xl) w-(--size-5xl) overflow-hidden rounded-lg border-1 bg-white';
+const PHOTO_CLASS = 'h-(--size-5xl) w-(--size-5xl) overflow-hidden rounded-2xl border border-neutral-700 bg-neutral-800';
 
-const PHOTO_ACTIVE_CLASS = 'border-neutral-500';
+const PHOTO_ACTIVE_CLASS = 'border border-neutral-300';
 
-const PHOTO_INACTIVE_CLASS = 'border-transparent border-neutral-200';
+const PHOTO_INACTIVE_CLASS = '';
 
-const NO_PHOTO_LABEL_CLASS = 'flex h-full w-full items-center justify-center text-neutral-500';
+const NO_PHOTO_LABEL_CLASS = 'flex h-full w-full items-center justify-center text-neutral-300';
 
 
 
