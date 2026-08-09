@@ -52,8 +52,6 @@ export default function AddClientView({
   onCancel,
   onDelete,
 }: AddClientViewProps) {
-  if (!open) return null;
-
   const [isFormValid, setIsFormValid] = useState(false);
   const [draftValues, setDraftValues] = useState<ClientDraftValues>({
     fullName: '',
@@ -88,6 +86,8 @@ export default function AddClientView({
       });
     }
   }, [mode, selectedClient]);
+
+  if (!open) return null;
 
   const formValues = {
     fullName: selectedClient?.name ?? '',

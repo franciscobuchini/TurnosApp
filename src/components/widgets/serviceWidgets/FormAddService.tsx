@@ -196,7 +196,6 @@ export default function FormAddService({
           <p className={FIELD_LABEL_CLASS}>Foto del servicio</p>
 
           <PhotoPicker
-            count={17}
             value={selectedPhotoIndex}
             onChange={setSelectedPhotoIndex}
             disabled={readOnly}

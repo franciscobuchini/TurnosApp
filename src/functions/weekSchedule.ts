@@ -55,6 +55,12 @@ function timeToMinutes(time: string): number {
   return hours * 60 + minutes;
 }
 
+const pad = (n: number) => n.toString().padStart(2, '0');
+
+export function minutesToTime(minutes: number): string {
+  return `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
+}
+
 // Un rango es válido si, con ambos horarios cargados, "desde" es estrictamente
 // menor a "hasta". Un rango incompleto (todavía sin terminar de cargar) no se
 // considera inválido para no mostrar error mientras el usuario está eligiendo.
@@ -184,11 +190,82 @@ export function clampRangeToLimits(
     return null;
   }
 
-  const pad = (n: number) => n.toString().padStart(2, '0');
+  const padLocal = (n: number) => n.toString().padStart(2, '0');
   return {
-    startTime: `${pad(Math.floor(clampedFrom / 60))}:${pad(clampedFrom % 60)}`,
-    endTime: `${pad(Math.floor(clampedTo / 60))}:${pad(clampedTo % 60)}`,
+    startTime: `${padLocal(Math.floor(clampedFrom / 60))}:${padLocal(clampedFrom % 60)}`,
+    endTime: `${padLocal(Math.floor(clampedTo / 60))}:${padLocal(clampedTo % 60)}`,
   };
+}
+
+/* ── Restricciones por horario del local ──────────────────── */
+
+// Devuelve, por día, la lista de tramos en los que el local está
+// abierto (OpeningHoursEntry[] → Record<dayOfWeek, TimeRange[]>). Los días
+// sin tramos (cerrados) quedan con una lista vacía: se interpretan como día
+// entero bloqueado.
+export function getBusinessHoursByDay(
+  businessHours?: OpeningHoursEntry[],
+): Record<number, TimeRange[]> {
+  const byDay: Record<number, TimeRange[]> = {};
+
+  for (const entry of businessHours ?? []) {
+    if (typeof entry.startTime !== 'string' || typeof entry.endTime !== 'string') {
+      continue;
+    }
+    (byDay[entry.dayOfWeek] ??= []).push({
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+    });
+  }
+
+  return byDay;
+}
+
+// Verdadero si `totalMinutes` cae dentro de alguno de los tramos en que el
+// local está abierto ese día. `undefined` (día sin datos) no restringe; una
+// lista vacía significa día cerrado y bloquea todos los horarios.
+export function isTimeWithinBusinessHours(
+  totalMinutes: number,
+  businessHours?: TimeRange[],
+): boolean {
+  if (businessHours === undefined) {
+    return true;
+  }
+
+  return businessHours.some(
+    (hours) =>
+      totalMinutes >= timeToMinutes(hours.startTime) &&
+      totalMinutes <= timeToMinutes(hours.endTime),
+  );
+}
+
+// Límites por día (Record<dayOfWeek, TimeRange>) usados para recortar
+// automáticamente los turnos editados: la ventana es desde la apertura más
+// temprana hasta el cierre más tardío del día.
+export function getBusinessDayLimits(
+  businessHours?: OpeningHoursEntry[],
+): Record<number, TimeRange> {
+  const byDay = getBusinessHoursByDay(businessHours);
+  const limits: Record<number, TimeRange> = {};
+
+  for (const dayOfWeek of Object.keys(byDay)) {
+    const ranges = byDay[Number(dayOfWeek)];
+    if (ranges.length === 0) {
+      continue;
+    }
+    limits[Number(dayOfWeek)] = {
+      startTime: ranges.reduce(
+        (min, hours) =>
+          timeToMinutes(hours.startTime) < timeToMinutes(min.startTime) ? hours : min,
+      ).startTime,
+      endTime: ranges.reduce(
+        (max, hours) =>
+          timeToMinutes(hours.endTime) > timeToMinutes(max.endTime) ? hours : max,
+      ).endTime,
+    };
+  }
+
+  return limits;
 }
 
 export interface UseWeekScheduleOptions {

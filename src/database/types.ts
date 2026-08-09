@@ -10,6 +10,20 @@ export type OpeningHoursEntry = {
   endTime: string | null;
 };
 
+export type Business = {
+  name: string;
+  image: string;
+  url: string;
+  location: string;
+  // Horario del local (las 3 vistas de ajustes comparten este único JSON).
+  schedule: OpeningHoursEntry[] | string;
+  managerName: string;
+  email: string;
+  password: string;
+  // Anticipación (en horas) que necesita el cliente para reservar desde la web.
+  advanceHours: number;
+};
+
 export type TeamMember = {
   name: string;
   photo?: string;

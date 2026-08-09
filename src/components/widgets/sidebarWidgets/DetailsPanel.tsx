@@ -27,6 +27,7 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   action?: ReactNode;
   actionLabel?: string;
   onActionClick?: () => void;
+  hideHeader?: boolean;
 }
 
 const FILTER_PANEL_CLASS = 'group w-full cursor-pointer p-(--size-xs) shrink-0 bg-neutral-900 rounded-3xl text-white [interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-translate-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:translate-y-0';
@@ -52,6 +53,7 @@ export default function DetailsPanel({
   onActionClick,
   className,
   name,
+  hideHeader = false,
   ...props
 }: DetailsPanelProps) {
   /* Si no se pasa un name explícito, usa el del contenedor (sidebar/maincontent)
@@ -62,6 +64,7 @@ export default function DetailsPanel({
     <details
       {...props}
       data-filter-panel
+      data-panel-title={title}
       name={name ?? groupName}
       onToggle={(e) => {
         props.onToggle?.(e);
@@ -90,7 +93,7 @@ export default function DetailsPanel({
       }}
       className={twMerge(FILTER_PANEL_CLASS, className)}
     >
-      <summary>
+      <summary hidden={hideHeader}>
         <ContentHeader title={title} action={<SummaryButton />} />
       </summary>
 

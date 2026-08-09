@@ -140,6 +140,7 @@ export default function AddEntityView({
           value={schedule}
           onChange={setSchedule}
           readOnly={resolvedMode === 'view'}
+          businessHours={getOpeningHours()}
         />
       }
       footer={

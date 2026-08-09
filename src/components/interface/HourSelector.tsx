@@ -1,6 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
-
 /*
   src/components/interface/HourSelector.tsx
   Selector de hora en formato 24h (HH:mm). Los minutos sólo pueden ser
@@ -11,13 +8,27 @@ import { twMerge } from 'tailwind-merge';
   Los límites min/max (en formato "HH:mm") deshabilitan las opciones que
   quedan fuera del rango, para guiar al usuario sin permitir rangos que se
   crucen (misma idea que los atributos nativos min/max del input time).
+
+  `businessHours` es la lista de tramos en los que el local está abierto ese
+  día (de weekSchedule.ts): cualquier hora/minuto fuera de esos tramos queda
+  deshabilitado, porque el local está cerrado. "00:00" debe leerse como
+  medianoche; el cierre a las 00:00 del día siguiente se expresa "24:00".
 */
+
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { twMerge } from 'tailwind-merge';
+import {
+  isTimeWithinBusinessHours,
+  type TimeRange,
+} from '../../functions/weekSchedule';
 
 interface HourSelectorProps {
   value?: string;
   onChange?: (value: string) => void;
   min?: string;
   max?: string;
+  businessHours?: TimeRange[];
   readOnly?: boolean;
   className?: string;
 }
@@ -35,10 +46,10 @@ function toMinutes(time?: string): number | null {
 }
 
 const SELECTOR_CLASS =
-  'flex w-full min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800 px-(--size-m) py-(--size-s) text-sm text-neutral-100 outline-none transition focus:border-neutral-400';
+  'flex min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800 px-(--size-m) py-(--size-xs) text-sm text-neutral-100 outline-none transition focus:border-neutral-400';
 
 const POPOVER_CLASS =
-  'absolute left-0 top-full z-50 mt-2 flex gap-(--size-m) rounded-2xl border border-neutral-700 bg-neutral-900 p-(--size-m) shadow-2xl';
+  'fixed z-[9999]  flex gap-(--size-m) rounded-2xl border border-neutral-700 bg-neutral-900 p-(--size-m) shadow-2xl';
 
 const LIST_CLASS = 'flex max-h-56 flex-col gap-1 overflow-y-auto pr-1';
 
@@ -51,11 +62,25 @@ function optionClass(selected: boolean, disabled: boolean): string {
   return `${OPTION_CLASS} text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100`;
 }
 
-export default function HourSelector({ value, onChange, min, max, readOnly = false, className }: HourSelectorProps) {
+export default function HourSelector({
+  value,
+  onChange,
+  min,
+  max,
+  businessHours,
+  readOnly = false,
+  className,
+}: HourSelectorProps) {
   const [open, setOpen] = useState(false);
   const [draftHour, setDraftHour] = useState(0);
   const [draftMinute, setDraftMinute] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [popoverPosition, setPopoverPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const hour = value ? Number(value.split(':')[0]) : null;
   const minute = value ? Number(value.split(':')[1]) : null;
@@ -63,25 +88,52 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
   const maxTotal = toMinutes(max);
 
   const isMinuteEnabled = (m: number) => {
-    if (minTotal == null && maxTotal == null) return true;
     const total = draftHour * 60 + m;
-    return (minTotal == null || total >= minTotal) && (maxTotal == null || total <= maxTotal);
+    if (minTotal != null && total < minTotal) return false;
+    if (maxTotal != null && total > maxTotal) return false;
+    return isTimeWithinBusinessHours(total, businessHours);
   };
 
   const isHourEnabled = (h: number) =>
     MINUTES.some((m) => {
-      if (minTotal == null && maxTotal == null) return true;
+      if (minTotal == null && maxTotal == null) {
+        return isTimeWithinBusinessHours(h * 60 + m, businessHours);
+      }
       const total = h * 60 + m;
-      return (minTotal == null || total >= minTotal) && (maxTotal == null || total <= maxTotal);
+      return (
+        (minTotal == null || total >= minTotal) &&
+        (maxTotal == null || total <= maxTotal) &&
+        isTimeWithinBusinessHours(total, businessHours)
+      );
     });
 
   const openPanel = () => {
     setDraftHour(hour ?? 0);
     setDraftMinute(minute);
+    updatePopoverPosition();
     setOpen(true);
   };
 
   const closePanel = () => setOpen(false);
+
+  // Ubica el popover (renderizado en un portal sobre document.body, ajeno a
+  // cualquier overflow-hidden de los ancestros) en la posición del botón y lo
+  // mantiene dentro de la ventana.
+  const updatePopoverPosition = () => {
+    const anchor = buttonRef.current;
+    if (!anchor) return;
+
+    const rect = anchor.getBoundingClientRect();
+    const estimatedHeight = 340;
+
+    const left = Math.min(
+      Math.max(rect.left, 8),
+      window.innerWidth - 8,
+    );
+    const top = Math.min(rect.bottom + 12, Math.max(8, window.innerHeight - estimatedHeight));
+
+    setPopoverPosition({ top, left });
+  };
 
   const confirmSelection = (h: number, m: number) => {
     if (!isMinuteEnabled(m)) return;
@@ -98,7 +150,11 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
     if (!open) return;
 
     const handlePointerDown = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const insideContainer =
+        containerRef.current?.contains(target) ?? false;
+      const insidePopover = popoverRef.current?.contains(target) ?? false;
+      if (!insideContainer && !insidePopover) {
         closePanel();
       }
     };
@@ -109,12 +165,46 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
       }
     };
 
+    const handleViewportChange = () => {
+      updatePopoverPosition();
+    };
+
     document.addEventListener('mousedown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('resize', handleViewportChange);
+    document.addEventListener('scroll', handleViewportChange, true);
+
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('resize', handleViewportChange);
+      document.removeEventListener('scroll', handleViewportChange, true);
     };
+  }, [open]);
+
+  // Ajusta el popover a la ventana una vez medido (sin reponerse en bucle:
+  // el efecto corre solo al abrir y el set funcional devuelve el mismo objeto
+  // si el clamp no cambió).
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    const popover = popoverRef.current;
+    if (!popover) return;
+
+    const rect = popover.getBoundingClientRect();
+    setPopoverPosition((current) => {
+      if (!current) return current;
+
+      const top = Math.max(8, window.innerHeight - rect.height - 8);
+      const left = Math.max(8, window.innerWidth - rect.width - 8);
+      const nextTop = Math.min(current.top, top);
+      const nextLeft = Math.min(current.left, left);
+
+      if (nextTop === current.top && nextLeft === current.left) {
+        return current;
+      }
+      return { top: nextTop, left: nextLeft };
+    });
   }, [open]);
 
   const displayValue = open
@@ -134,6 +224,7 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
   return (
     <div ref={containerRef} className="relative flex min-w-0 flex-1">
       <button
+        ref={buttonRef}
         type="button"
         className={twMerge(SELECTOR_CLASS, className)}
         onClick={openPanel}
@@ -141,47 +232,54 @@ export default function HourSelector({ value, onChange, min, max, readOnly = fal
         {displayValue}
       </button>
 
-      {open ? (
-        <div className={POPOVER_CLASS}>
-          <div>
-            <div className={LIST_CLASS}>
-              {HOURS.map((h) => {
-                const enabled = isHourEnabled(h);
-                return (
-                  <button
-                    key={h}
-                    type="button"
-                    disabled={!enabled}
-                    className={optionClass(h === draftHour, !enabled)}
-                    onClick={() => setDraftHour(h)}
-                    onDoubleClick={() => confirmSelection(h, draftMinute ?? 0)}
-                  >
-                    {pad(h)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+      {open && popoverPosition
+        ? createPortal(
+            <div
+              ref={popoverRef}
+              className={POPOVER_CLASS}
+              style={{ top: popoverPosition.top, left: popoverPosition.left }}
+            >
+              <div>
+                <div className={LIST_CLASS}>
+                  {HOURS.map((h) => {
+                    const enabled = isHourEnabled(h);
+                    return (
+                      <button
+                        key={h}
+                        type="button"
+                        disabled={!enabled}
+                        className={optionClass(h === draftHour, !enabled)}
+                        onClick={() => setDraftHour(h)}
+                        onDoubleClick={() => confirmSelection(h, draftMinute ?? 0)}
+                      >
+                        {pad(h)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-          <div className="grid grid-cols-1 gap-1">
-              {MINUTES.map((m) => {
-                const enabled = isMinuteEnabled(m);
-                return (
-                  <button
-                    key={m}
-                    type="button"
-                    disabled={!enabled}
-                    className={optionClass(m === draftMinute, !enabled)}
-                    onClick={() => pickMinute(m)}
-                    onDoubleClick={() => confirmSelection(draftHour, m)}
-                  >
-                    {pad(m)}
-                  </button>
-                );
-              })}
-            </div>
-        </div>
-      ) : null}
+              <div className="grid grid-cols-1 gap-1">
+                {MINUTES.map((m) => {
+                  const enabled = isMinuteEnabled(m);
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      disabled={!enabled}
+                      className={optionClass(m === draftMinute, !enabled)}
+                      onClick={() => pickMinute(m)}
+                      onDoubleClick={() => confirmSelection(draftHour, m)}
+                    >
+                      {pad(m)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

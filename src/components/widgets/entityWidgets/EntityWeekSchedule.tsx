@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Plus, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import type { OpeningHoursEntry } from '../../../database/types';
@@ -8,6 +9,8 @@ import Table, { type TableColumn } from '../../interface/Table';
 import {
   DAYS,
   getDayError,
+  getBusinessHoursByDay,
+  getBusinessDayLimits,
   isRangeOrderValid,
   rangesOverlap,
   useWeekSchedule,
@@ -36,11 +39,16 @@ export interface EntityWeekScheduleProps {
   value?: OpeningHoursEntry[];
   onChange?: (schedule: OpeningHoursEntry[]) => void;
   readOnly?: boolean;
+  title?: string;
+  // Horario del local (apertura por día). Cuando se pasa, los selectores de
+  // hora del trabajador bloquean los horarios en los que el local está
+  // cerrado y los turnos editados se recortan a la ventana de apertura.
+  businessHours?: OpeningHoursEntry[];
 }
 
 const SCHEDULE_FIELD_CLASS = 'flex flex-col gap-(--size-s) w-full min-h-0';
 const SCHEDULE_LABEL_CLASS = 'text-md text-neutral-300';
-const SCHEDULE_LIST_CLASS = 'flex flex-col gap-(--size-s) w-full min-h-0 overflow-y-auto';
+const SCHEDULE_LIST_CLASS = 'flex flex-col gap-(--size-xs) w-full min-h-0 overflow-y-auto';
 const SCHEDULE_TABLE_CLASS = 'table-auto border-separate border-spacing-x-0';
 const TABLE_ROW_HEIGHT_CLASS = 'h-(--size-5xl)';
 
@@ -48,14 +56,14 @@ const CHECKBOX_COLUMN_WIDTH = '2.5rem';
 const DAY_COLUMN_WIDTH = '7rem';
 
 const CELL_BASE_CLASS = 'min-h-(--size-5xl) h-full align-middle border-y border-neutral-700 bg-neutral-800 px-(--size-xs)';
-const SCHEDULE_CELL_CLASS = `${CELL_BASE_CLASS} py-(--size-s)`;
+const SCHEDULE_CELL_CLASS = `${CELL_BASE_CLASS} py-(--size-2xs)`;
 
-const DAY_CELL_CONTENT_CLASS = 'flex h-full items-center w-28';
-const SCHEDULE_CELL_CONTENT_CLASS = 'flex h-full flex-col justify-center gap-(--size-s)';
+const DAY_CELL_CONTENT_CLASS = 'flex h-full items-center w-(--size-6xl)';
+const SCHEDULE_CELL_CONTENT_CLASS = 'flex h-full flex-col justify-center gap-(--size-2xs)';
 const DAY_NAME_CLASS = 'shrink-0 text-sm font-medium text-neutral-100';
-const DAY_OPEN_CLASS = 'flex shrink-0 items-center gap-2 text-sm text-neutral-300';
+const DAY_OPEN_CLASS = 'flex shrink-0 items-center text-sm text-neutral-300';
 
-const RANGE_LINE_CLASS = 'flex w-full shrink-0 items-center gap-(--size-s)';
+const RANGE_LINE_CLASS = 'flex w-full shrink-0 items-center gap-(--size-l)';
 const RANGE_ERROR_CLASS = 'shrink-0 text-xs text-red-400';
 const TIME_INPUT_ERROR_CLASS = 'border-red-400 focus:border-red-400';
 const DAYS_OFF_CLASS = 'text-sm text-neutral-500 w-full flex justify-center';
@@ -82,8 +90,26 @@ function withPillEdges(columns: TableColumn<DayRow>[]): TableColumn<DayRow>[] {
   }));
 }
 
-export default function EntityWeekSchedule({ value, onChange, readOnly = false }: EntityWeekScheduleProps) {
-  const { days, toggleWorks, addRange, removeRange, updateRange } = useWeekSchedule({ value, onChange });
+export default function EntityWeekSchedule({
+  value,
+  onChange,
+  readOnly = false,
+  title = 'Días y horarios de trabajo',
+  businessHours,
+}: EntityWeekScheduleProps) {
+  const businessHoursByDay = useMemo(
+    () => getBusinessHoursByDay(businessHours),
+    [businessHours],
+  );
+  const businessLimits = useMemo(
+    () => getBusinessDayLimits(businessHours),
+    [businessHours],
+  );
+  const { days, toggleWorks, addRange, removeRange, updateRange } = useWeekSchedule({
+    value,
+    onChange,
+    limits: businessLimits,
+  });
 
   const columns: TableColumn<DayRow>[] = withPillEdges([
     {
@@ -146,6 +172,7 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
                     value={range.startTime}
                     min={prevRange?.endTime || undefined}
                     max={range.endTime || undefined}
+                    businessHours={businessHoursByDay[row.dayOfWeek]}
                     onChange={(time) => updateRange(row.dayOfWeek, index, { startTime: time })}
                     readOnly={readOnly}
                     className={invalid ? TIME_INPUT_ERROR_CLASS : ''}
@@ -155,6 +182,7 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
                     value={range.endTime}
                     min={range.startTime || undefined}
                     max={nextRange?.startTime || undefined}
+                    businessHours={businessHoursByDay[row.dayOfWeek]}
                     onChange={(time) => updateRange(row.dayOfWeek, index, { endTime: time })}
                     readOnly={readOnly}
                     className={invalid ? TIME_INPUT_ERROR_CLASS : ''}
@@ -192,7 +220,7 @@ export default function EntityWeekSchedule({ value, onChange, readOnly = false }
 
   return (
     <div className={SCHEDULE_FIELD_CLASS}>
-      <p className={SCHEDULE_LABEL_CLASS}>Días y horarios de trabajo</p>
+      <p className={SCHEDULE_LABEL_CLASS}>{title}</p>
       <div className={SCHEDULE_LIST_CLASS}>
         {DAYS.map((day) => (
           <Table

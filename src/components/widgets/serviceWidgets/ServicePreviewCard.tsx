@@ -1,4 +1,5 @@
 import { twMerge } from 'tailwind-merge';
+import servicePhotos from '../../../database/servicePhotos.json';
 
 type Props = {
   name: string;
@@ -14,6 +15,8 @@ const PREVIEW_CARD_CLASS =
 
 const PREVIEW_IMAGE_CLASS =
   'flex h-full w-(--size-5xl) shrink-0 items-center justify-center text-neutral-500';
+
+const PREVIEW_IMAGE_IMG_CLASS = 'h-full w-full object-cover';
 
 const PREVIEW_IMAGE_WITH_COLOR_CLASS =
   'flex h-full w-(--size-m) shrink-0 text-neutral-100';
@@ -47,7 +50,8 @@ export default function ServicePreviewCard({
   colorClassName,
   selectedPhotoIndex,
 }: Props) {
-  const hasPhoto = selectedPhotoIndex !== null;
+const hasPhoto =
+    selectedPhotoIndex !== null && selectedPhotoIndex < servicePhotos.length;
 
   return (
       <div className={PREVIEW_CARD_CLASS}>
@@ -59,7 +63,14 @@ export default function ServicePreviewCard({
             hasPhoto ? 'bg-neutral-800' : colorClassName
           )}
         >
-          {hasPhoto ? `Foto #${selectedPhotoIndex + 1}` : ''}
+          {hasPhoto ? (
+            <img
+              src={servicePhotos[selectedPhotoIndex as number]}
+              alt={`Foto #${selectedPhotoIndex as number + 1}`}
+              loading="lazy"
+              className={PREVIEW_IMAGE_IMG_CLASS}
+            />
+          ) : ''}
         </div>
 
         <div className={PREVIEW_DETAILS_CLASS}>

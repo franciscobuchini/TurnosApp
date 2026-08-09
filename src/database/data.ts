@@ -5,15 +5,41 @@
   de modo que lo creado/guardado sobrevive a recargas.
 */
 
-import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry } from './types.ts';
+import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry, Business } from './types.ts';
 import teamMembersJson from './teamMembers.json';
 import servicesJson from './service.json';
 import clientsJson from './client.json';
-import openingHoursJson from './openingHours.json';
+import businessJson from './business.json';
 
 const CLIENTS_STORAGE_KEY = 'turnosapp.clients';
 const SERVICES_STORAGE_KEY = 'turnosapp.services';
 const TEAM_MEMBERS_STORAGE_KEY = 'turnosapp.teamMembers';
+const BUSINESS_STORAGE_KEY = 'turnosapp.business';
+
+function readObject<T>(key: string, seed: T): T {
+  if (typeof localStorage === 'undefined') {
+    return seed;
+  }
+
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      return JSON.parse(raw) as T;
+    }
+  } catch {
+    // ignorar datos corruptos y usar el seed
+  }
+
+  return seed;
+}
+
+function writeObject<T>(key: string, value: T) {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+
+  localStorage.setItem(key, JSON.stringify(value));
+}
 
 function readCollection<T>(key: string, seed: T[]): T[] {
   if (typeof localStorage === 'undefined') {
@@ -194,7 +220,21 @@ export function removeClient(name: string): Client[] {
 }
 
 export function getOpeningHours(): OpeningHoursEntry[] {
-  return openingHoursJson as OpeningHoursEntry[];
+  return normalizeOpeningHours(getBusiness().schedule);
+}
+
+export function saveOpeningHours(schedule: OpeningHoursEntry[]) {
+  saveBusiness({ ...getBusiness(), schedule });
+}
+
+/* ── Datos del negocio (Ajustes: Negocio, Horarios, Seguridad) ── */
+
+export function getBusiness(): Business {
+  return readObject(BUSINESS_STORAGE_KEY, businessJson as Business);
+}
+
+export function saveBusiness(business: Business) {
+  writeObject(BUSINESS_STORAGE_KEY, business);
 }
 
 /* ── Getters de filtros (derivados de los datos) ──────────── */
