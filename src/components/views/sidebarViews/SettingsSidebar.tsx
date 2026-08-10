@@ -1,5 +1,5 @@
 /*
-  src/components/widgets/sidebarWidgets/SettingsSidebar.tsx
+  src/components/views/sidebarViews/SettingsSidebar.tsx
   Sidebar de Ajustes: título "Ajustes" + opciones de sección (Negocio, Horarios,
   Seguridad) que navegan a la vista correspondiente.
 */
@@ -18,9 +18,9 @@ interface SettingsSection {
 }
 
 const SETTINGS_SECTIONS: SettingsSection[] = [
-  { id: 'negocio', label: 'Negocio', icon: <Settings size={20} />, path: '/SettingsView' },
-  { id: 'horarios', label: 'Horarios', icon: <Clock size={20} />, path: '/SettingsView/horarios' },
-  { id: 'seguridad', label: 'Seguridad', icon: <Lock size={20} />, path: '/SettingsView/seguridad' },
+  { id: 'negocio', label: 'Negocio', icon: <Settings size={20} />, path: '/admin/ajustes' },
+  { id: 'horarios', label: 'Horarios', icon: <Clock size={20} />, path: '/admin/ajustes/horarios' },
+  { id: 'seguridad', label: 'Seguridad', icon: <Lock size={20} />, path: '/admin/ajustes/seguridad' },
 ];
 
 interface SettingsSidebarProps {

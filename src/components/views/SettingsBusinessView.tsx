@@ -1,13 +1,11 @@
 /*
   src/components/views/SettingsBusinessView.tsx
-  Vista de Ajustes > Negocio: nombre del negocio, imagen (cargable desde el
-  dispositivo), url y ubicación. Se abre al entrar a Ajustes (/SettingsView).
+  Vista de Ajustes > Negocio (/admin/ajustes): nombre del negocio, imagen
+  (cargable desde el dispositivo), url y ubicación.
 */
 
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../layout/Layout';
-import SettingsSidebar from './sidebarViews/SettingsSidebar';
 import ViewLayout from '../layout/ViewLayout';
 import Form from '../interface/Form';
 import Input from '../interface/Input';
@@ -74,8 +72,7 @@ export default function SettingsBusinessView() {
   };
 
   return (
-    <Layout sidebar={<SettingsSidebar activeId="negocio" />}>
-      <ViewLayout
+    <ViewLayout
         title="Negocio"
         onBack={goBack}
         left={
@@ -161,6 +158,5 @@ export default function SettingsBusinessView() {
           </>
         }
       />
-    </Layout>
   );
 }

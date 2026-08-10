@@ -5,8 +5,6 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../layout/Layout';
-import SettingsSidebar from './sidebarViews/SettingsSidebar';
 import ViewLayout from '../layout/ViewLayout';
 import Form from '../interface/Form';
 import Input from '../interface/Input';
@@ -46,10 +44,9 @@ export default function SettingsSecurityView() {
   };
 
   return (
-    <Layout sidebar={<SettingsSidebar activeId="seguridad" />}>
-      <ViewLayout
-        title="Seguridad"
-        onBack={goBack}
+    <ViewLayout
+      title="Seguridad"
+      onBack={goBack}
         left={
           <Form className="flex flex-col gap-(--size-m)">
             <Input
@@ -87,6 +84,5 @@ export default function SettingsSecurityView() {
           </>
         }
       />
-    </Layout>
   );
 }

@@ -1,13 +1,11 @@
 /*
   src/components/views/SettingsScheduleView.tsx
-  Vista de Ajustes > Horarios (/SettingsView/horarios). Define el horario del
+  Vista de Ajustes > Horarios (/admin/ajustes/horarios). Define el horario del
   local (reutiliza EntityWeekSchedule, que también se usa por trabajador).
 */
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../layout/Layout';
-import SettingsSidebar from './sidebarViews/SettingsSidebar';
 import ViewLayout from '../layout/ViewLayout';
 import Form from '../interface/Form';
 import Input from '../interface/Input';
@@ -35,10 +33,9 @@ export default function SettingsScheduleView() {
   };
 
   return (
-    <Layout sidebar={<SettingsSidebar activeId="horarios" />}>
-      <ViewLayout
-        title="Horarios"
-        onBack={goBack}
+    <ViewLayout
+      title="Horarios"
+      onBack={goBack}
         left={
           <Form className="flex flex-col gap-(--size-m)">
             <EntityWeekSchedule title="Horario del local" value={businessHours} onChange={setBusinessHours} />
@@ -63,6 +60,5 @@ export default function SettingsScheduleView() {
           </>
         }
       />
-    </Layout>
   );
 }

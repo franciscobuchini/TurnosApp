@@ -28,9 +28,6 @@
   --size-9xl: 512px; /* Sidebar Desktop */
 }
 
-/*
-  Dark Mode: Colores del tema oscuro 
-*/
 :root {
 --primary-01: #e4f77a; /* lima */
 --primary-02: #C5BDF6; /* lavanda */

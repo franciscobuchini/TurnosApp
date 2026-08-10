@@ -7,7 +7,13 @@
 */
 
 import { useMemo, useState } from 'react';
-import { type NavigateFunction, Outlet, useNavigate, useOutletContext } from 'react-router-dom';
+import {
+  type NavigateFunction,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useOutletContext,
+} from 'react-router-dom';
 import { useAgendaDate } from '../../functions/agendaDate';
 import Layout from '../../components/layout/Layout';
 import {
@@ -30,6 +36,7 @@ import { SERVICE_COLOR_BY_ID } from '../../components/widgets/serviceWidgets/ser
 import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';
 import AddShiftSidebar from '../../components/views/sidebarViews/AddShiftSidebar';
+import SettingsSidebar from '../../components/views/sidebarViews/SettingsSidebar';
 
 export interface AdminContext {
   teamFilters: FiltersOption[];
@@ -61,6 +68,7 @@ export interface AdminContext {
 
 function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { teamFilters, selectedMembers, toggleTeamFilter, removeTeamFilter } = useTeamFilters(getTeamFilters);
   const [serviceFilters, setServiceFilters] = useState<DetailsPanelOption[]>(() =>
     getservices().map((service) => ({
@@ -182,6 +190,13 @@ function Dashboard() {
     deleteClient,
   };
 
+  const settingsSection =
+    location.pathname === '/admin/ajustes/horarios'
+      ? 'horarios'
+      : location.pathname === '/admin/ajustes/seguridad'
+        ? 'seguridad'
+        : 'negocio';
+
   return (
     <Layout
       sidebar={
@@ -191,6 +206,8 @@ function Dashboard() {
             toggleServiceFilter={toggleServiceFilter}
             onClose={closeAddShift}
           />
+        ) : location.pathname.startsWith('/admin/ajustes') ? (
+          <SettingsSidebar activeId={settingsSection} />
         ) : (
           <AdminSidebar
             selectedDate={selectedDate}
@@ -200,7 +217,7 @@ function Dashboard() {
             serviceFilters={serviceFilters}
             toggleServiceFilter={toggleServiceFilter}
             clientFilters={clientFilters}
-            onOpenSettings={() => navigate('/SettingsView')}
+            onOpenSettings={() => navigate('/admin/ajustes')}
           />
         )
       }

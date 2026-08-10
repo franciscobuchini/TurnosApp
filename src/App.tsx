@@ -125,13 +125,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/site" element={<Site />} />
+        <Route path="/site" element={<Site />} />
         <Route path="/personalizacion" element={<Personalizacion />} />
-        <Route path="/SettingsView" element={<SettingsBusinessView />} />
-        <Route path="/SettingsView/horarios" element={<SettingsScheduleView />} />
-        <Route path="/SettingsView/seguridad" element={<SettingsSecurityView />} />
 
         <Route path="/admin" element={<Dashboard />}>
           <Route index element={<SchedulePage />} />
+          <Route path="ajustes" element={<SettingsBusinessView />} />
+          <Route path="ajustes/horarios" element={<SettingsScheduleView />} />
+          <Route path="ajustes/seguridad" element={<SettingsSecurityView />} />
           <Route path="miembro" element={<EntityPage mode="create" />} />
           <Route path="miembro/:name" element={<EntityPage mode="view" />} />
           <Route path="servicio" element={<ServicePage mode="create" />} />
