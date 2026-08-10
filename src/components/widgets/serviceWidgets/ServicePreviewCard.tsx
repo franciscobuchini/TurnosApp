@@ -11,18 +11,18 @@ type Props = {
 };
 
 const PREVIEW_CARD_CLASS =
-  'flex h-(--size-5xl) w-full max-w-sm overflow-hidden rounded-2xl border border-neutral-700 bg-neutral-900';
+  'flex h-20 w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card';
 
 const PREVIEW_IMAGE_CLASS =
-  'flex h-full w-(--size-5xl) shrink-0 items-center justify-center text-neutral-500';
+  'flex h-full w-20 shrink-0 items-center justify-center text-neutral-500';
 
 const PREVIEW_IMAGE_IMG_CLASS = 'h-full w-full object-cover';
 
 const PREVIEW_IMAGE_WITH_COLOR_CLASS =
-  'flex h-full w-(--size-m) shrink-0 text-neutral-100';
+  'flex h-full w-4 shrink-0 text-neutral-100';
 
 const PREVIEW_DETAILS_CLASS =
-  'flex min-w-0 flex-1 flex-col justify-center gap-(--size-2xs) px-(--size-s)';
+  'flex min-w-0 flex-1 flex-col justify-center gap-1 px-3';
 
 const PREVIEW_TITLE_ROW_CLASS =
   'flex min-w-0 items-center gap-2';

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import Button from '../interface/Button';
+import { Button } from '@/components/ui/button';
 
 interface HideButtonProps {
   text?: ReactNode;
@@ -17,7 +17,7 @@ interface HideButtonProps {
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const HIDE_BUTTON_CLASS = 'justify-between w-full h-(--size-xl) p-(--size-s) gap-(--size-l) bg-transparent text-neutral-400 hover:text-white';
+const HIDE_BUTTON_CLASS = 'justify-between w-full h-8 p-3 gap-6 bg-transparent text-neutral-400 hover:text-white';
 
 export default function HideButton({
   text,
@@ -60,9 +60,10 @@ export default function HideButton({
   return (
     <Button
       {...props}
+      variant="ghost"
       onClick={handleToggle}
       text={text ?? resolvedText}
-      icon={icon ?? (resolvedVisible ? <EyeOff size={"var(--size-m)"} /> : <Eye size={"var(--size-m)"} />)}
+      icon={icon ?? (resolvedVisible ? <EyeOff size={16} /> : <Eye size={16} />)}
       disabled={disabled}
       className={twMerge(HIDE_BUTTON_CLASS, className)}
     />

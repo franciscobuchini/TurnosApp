@@ -12,12 +12,13 @@ import DetailsPanel, {
   type DetailsPanelOption,
 } from '../../widgets/sidebarWidgets/DetailsPanel';
 import type { FiltersOption } from '../../../database/types';
-import AddEntityButton from '../../buttons/AddEntityButton';
-import AddServiceButton from '../../buttons/AddServiceButton';
-import AddClientButton from '../../buttons/AddClientButton';
+import AddEntityLauncherButton from '../../buttons/AddEntityLauncherButton';
 import TeamFilterButton from '../../buttons/TeamFilterButton';
 import ServiceFilterButton from '../../buttons/ServiceFilterButton';
 import ClientFilterButton from '../../buttons/ClientFilterButton';
+import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../EntityView';
+import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../ServiceView';
+import AddClientView, { ADD_CLIENT_VIEW_TITLE } from '../ClientView';
 
 interface AdminSidebarProps {
   selectedDate: Date;
@@ -48,7 +49,7 @@ export default function AdminSidebar({
         <button
           type="button"
           aria-label="Ajustes"
-          className="flex h-(--size-2xl) w-(--size-2xl) cursor-pointer items-center justify-center rounded-full text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-50"
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-neutral-400 hover:bg-muted hover:text-neutral-50"
           onClick={onOpenSettings}
         >
           <MoreVertical size={18} />
@@ -67,7 +68,15 @@ export default function AdminSidebar({
             onOpenDetails={() => navigate(`/admin/miembro/${encodeURIComponent(option.label)}`)}
           />,
         ]}
-        action={<AddEntityButton onOpen={() => navigate('/admin/miembro')} />}
+        action={
+          <AddEntityLauncherButton
+            title={ADD_ENTITY_VIEW_TITLE}
+            onOpen={() => navigate('/admin/miembro')}
+            renderView={({ open, onClose }) => (
+              <AddEntityView open={open} onClose={onClose} title={ADD_ENTITY_VIEW_TITLE} />
+            )}
+          />
+        }
       />
       <DetailsPanel
         title="Servicios"
@@ -80,7 +89,15 @@ export default function AdminSidebar({
             onOpenDetails={() => navigate(`/admin/servicio/${encodeURIComponent(option.label)}`)}
           />,
         ]}
-        action={<AddServiceButton onOpen={() => navigate('/admin/servicio')} />}
+        action={
+          <AddEntityLauncherButton
+            title={ADD_SERVICE_VIEW_TITLE}
+            onOpen={() => navigate('/admin/servicio')}
+            renderView={({ open, onClose }) => (
+              <AddServiceView open={open} onClose={onClose} title={ADD_SERVICE_VIEW_TITLE} />
+            )}
+          />
+        }
       />
       <DetailsPanel
         title="Clientes"
@@ -92,7 +109,15 @@ export default function AdminSidebar({
             onOpenDetails={() => navigate(`/admin/cliente/${encodeURIComponent(option.label)}`)}
           />,
         ]}
-        action={<AddClientButton onOpen={() => navigate('/admin/cliente')} />}
+        action={
+          <AddEntityLauncherButton
+            title={ADD_CLIENT_VIEW_TITLE}
+            onOpen={() => navigate('/admin/cliente')}
+            renderView={({ open, onClose }) => (
+              <AddClientView open={open} onClose={onClose} title={ADD_CLIENT_VIEW_TITLE} />
+            )}
+          />
+        }
       />
     </Sidebar>
   );

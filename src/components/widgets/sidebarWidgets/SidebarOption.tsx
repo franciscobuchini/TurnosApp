@@ -5,7 +5,7 @@
 
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import ContentHeader from '../../interface/ContentHeader';
+import ContentHeader from '@/components/ui/content-header';
 
 interface SidebarOptionProps {
   id?: string;
@@ -17,7 +17,7 @@ interface SidebarOptionProps {
 }
 
 const PANEL_CLASS =
-  'h-(--size-4xl) flex w-full shrink-0 items-center rounded-3xl bg-transparent text-white p-(--size-xs) ';
+  'h-16 flex w-full shrink-0 items-center rounded-3xl bg-transparent text-white p-2 ';
 
 const PANEL_SELECTED_CLASS = 'bg-neutral-900';
 
@@ -41,7 +41,7 @@ export default function SidebarOption({
         className,
       )}
     >
-      {icon && <span className="pl-(--size-s)">{icon}</span>}
+      {icon && <span className="pl-3">{icon}</span>}
       <ContentHeader title={title} className="w-full text-left" />
     </button>
   );

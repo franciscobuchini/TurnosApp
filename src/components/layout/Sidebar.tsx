@@ -5,7 +5,7 @@
 
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { FiltersGroupProvider } from '../../functions/detailPanelColapseFunction';
+import { FiltersGroupProvider } from '@/hooks/useFiltersGroup';
 import SidebarHeader from '../widgets/sidebarWidgets/SidebarHeader';
 
 interface SidebarProps {
@@ -16,9 +16,9 @@ interface SidebarProps {
   headerAction?: ReactNode;
 }
 
-const SIDEBAR_CLASS = 'flex flex-col h-full min-w-0 shrink-0 gap-(--size-l) w-md overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
+const SIDEBAR_CLASS = 'flex flex-col h-full min-w-0 shrink-0 gap-6 w-90 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
 
-const SIDEBAR_INNER_CLASS = 'flex min-h-0 flex-1 flex-col gap-(--size-m)';
+const SIDEBAR_INNER_CLASS = 'flex min-h-0 flex-1 flex-col gap-2';
 
 export default function Sidebar({ children, className, title = 'minube.site', hideHeader = false, headerAction }: SidebarProps) {
   return (

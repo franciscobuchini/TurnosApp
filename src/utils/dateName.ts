@@ -1,5 +1,5 @@
 /*
-  src/functions/dateName.ts
+  src/utils/dateName.ts
   Nombres de días y meses en español, y helpers de fecha compartidos
   por los componentes de calendario/agenda.
 */

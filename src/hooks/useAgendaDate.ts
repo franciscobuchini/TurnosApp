@@ -1,5 +1,5 @@
 /*
-  src/functions/agendaDate.ts
+  src/hooks/useAgendaDate.ts
   Estado y acciones compartidas para la fecha visible/seleccionada de la agenda.
 */
 

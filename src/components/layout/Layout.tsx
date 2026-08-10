@@ -11,7 +11,7 @@ interface LayoutProps {
   sidebar?: ReactNode;
 }
 
-const LAYOUT_CONTENT_CLASS = 'h-dvh w-dvw flex flex-1 overflow-hidden p-(--size-m) gap-(--size-m) bg-neutral-950';
+const LAYOUT_CONTENT_CLASS = 'h-dvh w-dvw flex flex-1 overflow-hidden p-2 gap-4 bg-background';
 
 const MAIN_AREA_CLASS = 'flex flex-1 min-h-0 min-w-0 h-full w-full';
 

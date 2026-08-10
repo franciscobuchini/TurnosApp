@@ -1,5 +1,5 @@
 /*
-  src/functions/teamFilters.ts
+  src/hooks/useTeamFilters.ts
   Helpers para derivar datos del filtro de equipo.
 */
 

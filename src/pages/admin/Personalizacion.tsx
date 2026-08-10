@@ -5,9 +5,9 @@
 
 import Layout from '../../components/layout/Layout';
 import Sidebar from '../../components/layout/Sidebar';
-import MainHeader from '../../components/interface/MainHeader';
+import MainHeader from '@/components/ui/main-header';
 import MainContent from '../../components/layout/MainContent';
-import Button from '../../components/interface/Button';
+import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 
 function Personalizacion() {

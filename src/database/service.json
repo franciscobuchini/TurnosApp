@@ -88,14 +88,6 @@
     "duration": "75 min"
   },
   {
-    "name": "Masaje Capilar Relajante",
-    "photo": "",
-    "colorId": "arena",
-    "description": "Masaje con aceites esenciales para estimular la circulación y relajar el cuero cabelludo.",
-    "price": 5000,
-    "duration": "25 min"
-  },
-  {
     "name": "Decoloración Completa",
     "photo": "",
     "colorId": "durazno",

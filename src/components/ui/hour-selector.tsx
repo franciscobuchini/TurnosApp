@@ -1,5 +1,5 @@
 /*
-  src/components/interface/HourSelector.tsx
+  src/components/ui/hour-selector.tsx
   Selector de hora en formato 24h (HH:mm). Los minutos sólo pueden ser
   00, 15, 30 o 45 y el valor predeterminado al abrir sin hora cargada
   es 00:00. Reemplaza al <input type="time"> nativo (que usaba el picker
@@ -21,7 +21,7 @@ import { twMerge } from 'tailwind-merge';
 import {
   isTimeWithinBusinessHours,
   type TimeRange,
-} from '../../functions/weekSchedule';
+} from '@/hooks/useWeekSchedule';
 
 interface HourSelectorProps {
   value?: string;
@@ -46,15 +46,15 @@ function toMinutes(time?: string): number | null {
 }
 
 const SELECTOR_CLASS =
-  'flex min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800 px-(--size-m) py-(--size-xs) text-sm text-neutral-100 outline-none transition focus:border-neutral-400';
+  'flex h-9 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-input bg-input px-4 py-2 text-sm text-neutral-100 outline-none focus:border-neutral-400';
 
 const POPOVER_CLASS =
-  'fixed z-[9999]  flex gap-(--size-m) rounded-2xl border border-neutral-700 bg-neutral-900 p-(--size-m) shadow-2xl';
+  'fixed z-[9999] flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-2xl';
 
 const LIST_CLASS = 'flex max-h-56 flex-col gap-1 overflow-y-auto pr-1';
 
 const OPTION_CLASS =
-  'flex h-9 min-w-14 shrink-0 items-center justify-center rounded-lg text-sm transition';
+  'flex h-9 min-w-14 shrink-0 items-center justify-center rounded-lg text-sm';
 
 function optionClass(selected: boolean, disabled: boolean): string {
   if (disabled) return `${OPTION_CLASS} cursor-not-allowed text-neutral-700`;

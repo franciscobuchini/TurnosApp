@@ -5,10 +5,10 @@
 
 import type { DetailsHTMLAttributes, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Dropdown from '../../interface/Dropdown';
-import Image from '../../interface/Image';
-import ContentHeader from '../../interface/ContentHeader';
-import { useFiltersGroup } from '../../../functions/detailPanelColapseFunction';
+import { Dropdown } from '@/components/ui/dropdown';
+import Image from '@/components/ui/image';
+import ContentHeader from '@/components/ui/content-header';
+import { useFiltersGroup } from '@/hooks/useFiltersGroup';
 import AddButton from '../../buttons/AddButton';
 import SummaryButton from '../../buttons/SummaryButton';
 
@@ -30,18 +30,18 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   hideHeader?: boolean;
 }
 
-const FILTER_PANEL_CLASS = 'group w-full cursor-pointer p-(--size-xs) shrink-0 bg-neutral-900 rounded-3xl text-white [interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-translate-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:translate-y-0';
+const FILTER_PANEL_CLASS = 'group w-full cursor-pointer overflow-hidden p-2 shrink-0 bg-card rounded-3xl text-white';
 
-const FILTER_PANEL_BODY_CLASS = 'flex flex-col flex-1 min-h-0 gap-(--size-2xs) overflow-y-auto motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out';
+const FILTER_PANEL_BODY_CLASS = 'flex flex-col flex-1 min-h-0 overflow-y-auto pt-1 ';
 
-const DETAILS_PANEL_CONTENT_CLASS = 'flex items-center align-center gap-(--size-s) h-(--size-2xl) w-full text-left';
+const DETAILS_PANEL_CONTENT_CLASS = 'flex items-center align-center  gap-3 h-12 w-full text-left';
 
-const DETAILS_PANEL_AVATAR_CLASS = 'h-(--size-xl) w-(--size-xl) shrink-0';
+const DETAILS_PANEL_AVATAR_CLASS = 'h-8 w-8 shrink-0';
 const DETAILS_PANEL_IMAGE_CLASS = 'h-full w-full';
 
 const DETAILS_PANEL_LABEL_CLASS = '';
 
-const DETAILS_PANEL_TRIGGER_CLASS = 'w-full px-(--size-xs) bg-transparent hover:bg-neutral-950 motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out hover:[&_[data-details-panel-content]]:translate-x-0.5';
+const DETAILS_PANEL_TRIGGER_CLASS = 'w-full h-12 gap-4 shrink-0 justify-center text-neutral-400 hover:text-white';
 const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-neutral-950';
 
 export default function DetailsPanel({

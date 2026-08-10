@@ -1,6 +1,6 @@
 import { twMerge } from 'tailwind-merge';
-import Button from '../interface/Button';
-import { getDayName, isSameDay } from '../../functions/dateName';
+import { Button } from '@/components/ui/button';
+import { getDayName, isSameDay } from '@/utils/dateName';
 
 interface DaySelectorButtonsProps {
   weekDays: Date[];
@@ -8,11 +8,13 @@ interface DaySelectorButtonsProps {
   onSelectDate: (date: Date) => void;
 }
 
-const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-(--size-6xl) flex-1 p-(--size-s) shrink-0 justify-center items-center bg-transparent';
+const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-24 flex-1 p-3 shrink-0 justify-center items-center bg-transparent';
 
-const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-neutral-900 text-white';
+const WEEK_SELECTOR_DAY_DEFAULT_CLASS = 'hover:bg-transparent';
 
-const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-white';
+const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-card text-white hover:bg-card';
+
+const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-white hover:bg-white';
 
 const WEEK_SELECTOR_DAY_VISIBILITY_0_CLASS = '';
 const WEEK_SELECTOR_DAY_VISIBILITY_1_CLASS = 'hidden @min-[380px]:flex';
@@ -29,7 +31,7 @@ const WEEK_SELECTOR_DAY_COLUMN_CLASS = 'flex flex-col items-center';
 
 const WEEK_SELECTOR_DAY_LABEL_CLASS = 'text-l';
 
-const WEEK_SELECTOR_DAY_NUMBER_CLASS = 'text-4xl font-semibold px-(--size-2xs)';
+const WEEK_SELECTOR_DAY_NUMBER_CLASS = 'text-5xl px-1';
 
 export default function DaySelectorButtons({
   weekDays,
@@ -72,7 +74,7 @@ export default function DaySelectorButtons({
                 ? WEEK_SELECTOR_DAY_SELECTED_CLASS
                 : isToday
                   ? WEEK_SELECTOR_DAY_TODAY_CLASS
-                  : '',
+                  : WEEK_SELECTOR_DAY_DEFAULT_CLASS,
             )}
           >
             <span className={WEEK_SELECTOR_DAY_COLUMN_CLASS}>

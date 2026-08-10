@@ -6,8 +6,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ViewLayout from '../layout/ViewLayout';
-import Form from '../interface/Form';
-import Input from '../interface/Input';
+import Form from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import CancelButton from '../buttons/CancelButton';
 import ConfirmButton from '../buttons/ConfirmButton';
 import { getBusiness, saveBusiness } from '../../database/data';
@@ -16,6 +16,7 @@ interface SecurityDraft {
   name: string;
   email: string;
   password: string;
+  adminPin: string;
 }
 
 export default function SettingsSecurityView() {
@@ -28,10 +29,16 @@ export default function SettingsSecurityView() {
     name: business.managerName ?? '',
     email: business.email ?? '',
     password: business.password ?? '',
+    adminPin: business.adminPin ?? '',
   });
 
   const setValue = (key: keyof SecurityDraft) => (value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));
+
+  const handleAdminPinChange = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 4);
+    setDraft((prev) => ({ ...prev, adminPin: digits }));
+  };
 
   const handleSave = () => {
     saveBusiness({
@@ -39,6 +46,7 @@ export default function SettingsSecurityView() {
       managerName: draft.name.trim(),
       email: draft.email.trim(),
       password: draft.password,
+      adminPin: draft.adminPin,
     });
     goBack();
   };
@@ -48,7 +56,7 @@ export default function SettingsSecurityView() {
       title="Seguridad"
       onBack={goBack}
         left={
-          <Form className="flex flex-col gap-(--size-m)">
+          <Form className="flex flex-col gap-4">
             <Input
               label="Nombre del encargado"
               placeholder="Ej: Juan Pérez"
@@ -68,6 +76,15 @@ export default function SettingsSecurityView() {
               placeholder="••••••••"
               value={draft.password}
               onChange={(e) => setValue('password')(e.target.value)}
+            />
+            <Input
+              label="Pin de administrador"
+              type="password"
+              inputMode="numeric"
+              placeholder="0000"
+              maxLength={4}
+              value={draft.adminPin}
+              onChange={(e) => handleAdminPinChange(e.target.value)}
             />
           </Form>
         }

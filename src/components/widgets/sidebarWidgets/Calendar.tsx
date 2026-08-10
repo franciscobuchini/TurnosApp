@@ -5,12 +5,12 @@
 
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Table, { type TableColumn } from '../../interface/Table';
-import ContentHeader from '../../interface/ContentHeader';
+import { Table, type TableColumn } from '@/components/ui/table';
+import ContentHeader from '@/components/ui/content-header';
 import CalendarNavigationButtons from '../../buttons/CalendarNavigationButtons';
 import SummaryButton from '../../buttons/SummaryButton';
-import { DAY_NAMES, MONTH_NAMES, isSameDay } from '../../../functions/dateName';
-import { useFiltersGroup } from '../../../functions/detailPanelColapseFunction';
+import { DAY_NAMES, MONTH_NAMES, isSameDay } from '@/utils/dateName';
+import { useFiltersGroup } from '@/hooks/useFiltersGroup';
 
 interface CalendarProps {
   weekDaysNames?: string[];
@@ -19,23 +19,24 @@ interface CalendarProps {
   className?: string;
 }
 
-const CALENDAR_CLASS = 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-(--size-xs) p-(--size-xs) bg-neutral-900 rounded-3xl [interpolate-size:allow-keywords] [&::details-content]:overflow-hidden [&::details-content]:[block-size:0] [&::details-content]:opacity-0 [&::details-content]:-tranneutral-y-1 motion-safe:[&::details-content]:transition-[block-size,content-visibility,opacity,transform] motion-safe:[&::details-content]:duration-200 motion-safe:[&::details-content]:ease-out motion-safe:[&::details-content]:[transition-behavior:allow-discrete] open:[&::details-content]:[block-size:auto] open:[&::details-content]:opacity-100 open:[&::details-content]:tranneutral-y-0';
+const CALENDAR_CLASS = 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-2 p-2 bg-card rounded-3xl';
 
-const CALENDAR_ACTIONS_CLASS = 'flex gap-(--size-s) motion-safe:transition-opacity motion-safe:duration-150 motion-safe:ease-out';
+const CALENDAR_ACTIONS_CLASS = 'flex gap-3';
 
-const CALENDAR_TABLE_CLASS = 'text-white motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-safe:ease-out';
+const CALENDAR_TABLE_CLASS = 'text-white';
 
 const CALENDAR_TABLE_HEADER_CLASS = 'bg-transparent';
 
-const CALENDAR_DAY_CIRCLE_CLASS = 'flex items-center justify-center w-(--size-xl) h-(--size-xl) mx-auto text-sm cursor-pointer rounded-full motion-safe:transition-[background-color,color,box-shadow,opacity,transform] motion-safe:duration-150 motion-safe:ease-out hover:scale-105 active:scale-95';
+const CALENDAR_DAY_CIRCLE_CLASS = 'flex items-center justify-center w-8 h-8 mx-auto text-sm cursor-pointer rounded-full';
+const CALENDAR_DAY_CIRCLE_DEFAULT_CLASS = 'hover:bg-muted';
 const CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS = 'opacity-30';
 const CALENDAR_DAY_CELL_CLASS = 'flex items-center justify-center cursor-pointer';
 
-const CALENDAR_TODAY_CIRCLE_CLASS = 'bg-(--primary-03) text-neutral-800 font-medium rounded-full motion-safe:transition-shadow motion-safe:duration-150 motion-safe:ease-out';
+const CALENDAR_TODAY_CIRCLE_CLASS = 'bg-(--palette-03) text-neutral-800 font-medium rounded-full';
 
-const CALENDAR_SELECTED_CIRCLE_CLASS = 'bg-(--primary-01) text-neutral-800 font-medium rounded-full motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out';
+const CALENDAR_SELECTED_CIRCLE_CLASS = 'bg-(--palette-01) text-neutral-800 font-medium rounded-full';
 
-const CALENDAR_COLUMN_ALIGN_CLASS = 'align-middle p-(--size-xs) text-center';
+const CALENDAR_COLUMN_ALIGN_CLASS = 'align-middle px-2 py-1 text-center';
 const CALENDAR_SUMMARY_CLASS = 'list-none outline-none [&::-webkit-details-marker]:hidden';
 const CALENDAR_TITLE_CLOSED_CLASS = 'group-open:hidden';
 const CALENDAR_TITLE_OPEN_CLASS = 'hidden group-open:block';
@@ -167,7 +168,7 @@ export default function Calendar({
                 ? CALENDAR_SELECTED_CIRCLE_CLASS
                 : isToday
                   ? CALENDAR_TODAY_CIRCLE_CLASS
-                  : '',
+                  : CALENDAR_DAY_CIRCLE_DEFAULT_CLASS,
               !cell.isCurrentMonth ? CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS : '',
             )}
           >

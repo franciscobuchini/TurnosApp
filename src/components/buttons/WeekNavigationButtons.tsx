@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import Button from '../interface/Button';
+import { Button } from '@/components/ui/button';
 
 interface WeekNavigationButtonProps {
   onClick: () => void;
@@ -8,9 +8,9 @@ interface WeekNavigationButtonProps {
   isSelected?: boolean;
 }
 
-const WEEK_SELECTOR_NAV_BUTTON_CLASS = 'h-(--size-6xl) w-(--size-4xl) shrink-0 justify-center items-center rounded-2xl bg-transparent';
+const WEEK_SELECTOR_NAV_BUTTON_CLASS = 'h-24 w-16 shrink-0 justify-center items-center rounded-2xl bg-transparent hover:bg-transparent';
 
-const WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS = 'bg-neutral-900 text-white';
+const WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS = 'bg-card text-white';
 
 export function PrevWeekButton({ onClick, className, isSelected = false }: WeekNavigationButtonProps) {
   return (

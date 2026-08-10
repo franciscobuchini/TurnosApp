@@ -20,8 +20,10 @@ export type Business = {
   managerName: string;
   email: string;
   password: string;
-  // Anticipación (en horas) que necesita el cliente para reservar desde la web.
-  advanceHours: number;
+  // PIN de 4 dígitos para acceder al panel del administrador.
+  adminPin: string;
+  // Anticipación (en minutos) que necesita el cliente para reservar desde la web.
+  advanceMinutes: number;
 };
 
 export type TeamMember = {

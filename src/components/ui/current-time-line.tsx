@@ -1,19 +1,19 @@
 /* 
-  src/components/interface/CurrentTimeLine.tsx
+  src/components/ui/current-time-line.tsx
   Línea que marca la hora actual, superpuesta sobre la columna de contenido del Schedule.
   Solo se muestra si selectedDate es el día de hoy; se actualiza sola con el paso del tiempo.
 */
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { isSameDay } from '../../functions/dateName';
+import { isSameDay } from '@/utils/dateName';
 
 interface CurrentTimeLineProps {
   selectedDate: Date;
   className?: string;
 }
 
-const CURRENT_TIME_LINE_CLASS = 'absolute left-(--size-4xl) right-0 h-0.5 scroll-mt-(--size-m) pointer-events-none bg-neutral-400 rounded-full shadow-[0_-4px_12px_rgba(250,250,250,0.5)]';
+const CURRENT_TIME_LINE_CLASS = 'absolute left-16 right-0 h-0.5 scroll-mt-4 pointer-events-none bg-neutral-400 rounded-full shadow-[0_-4px_12px_rgba(250,250,250,0.5)]';
 
 export default function CurrentTimeLine({
   selectedDate,

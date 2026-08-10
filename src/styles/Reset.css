@@ -220,7 +220,8 @@ input[type="radio"] {
   width: auto;
 }
 
-/* Quitar estilos de autofill en Chrome (fondo amarillo/azul) */
+/* Quitar estilos de autofill en Chrome (fondo amarillo/azul + texto negro
+   forzado): fondo transparente y texto/caret con el color claro de la app. */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -231,6 +232,8 @@ select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: oklch(0.985 0 0);
+  caret-color: oklch(0.985 0 0);
   transition: background-color 5000s ease-in-out 0s;
 }
 

@@ -1,5 +1,5 @@
 /* 
-  src/functions/getInitials.ts
+  src/utils/getInitials.ts
   Extrae las iniciales de la primera y última palabra de un nombre.
   Si el nombre tiene una sola palabra, devuelve solo la primera letra.
   Ejemplo: "Juan Ignacio Rossi" → "JR", "Balayage" → "B"

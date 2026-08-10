@@ -5,13 +5,13 @@
 
 import { isValidElement, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { FiltersGroupProvider } from '../../functions/detailPanelColapseFunction';
+import { FiltersGroupProvider } from '@/hooks/useFiltersGroup';
 import ScheduleView from '../views/ScheduleView';
-import { GRADIENT_CLASS } from '../interface/GradientBackground';
+import { GRADIENT_CLASS } from '@/components/ui/gradient-background';
 
 const MAIN_CONTENT_CLASS =
-  'rounded-4xl h-full w-full flex flex-1 flex-col overflow-hidden gap-(--size-l)';
-const DEFAULT_BACKGROUND_CLASS = 'bg-neutral-900';
+  'rounded-4xl h-full w-full flex flex-1 flex-col overflow-hidden gap-6';
+const DEFAULT_BACKGROUND_CLASS = 'bg-card';
 
 interface MainContentProps {
   children?: ReactNode;

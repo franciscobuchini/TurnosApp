@@ -1,5 +1,5 @@
 /* 
-  src/components/interface/Badge.tsx
+  src/components/ui/badge.tsx
   Componente de etiqueta (badge) para mostrar estados, categorías o etiquetas.
 */
 
@@ -11,7 +11,7 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   className?: string;
 }
 
-const BADGE_CLASS = 'inline-flex items-center justify-center px-(--size-l) py-(--size-xs) rounded-full text-sm  ';
+const BADGE_CLASS = 'inline-flex items-center justify-center px-6 py-2 rounded-full text-sm  ';
 
 export default function Badge({ children, className, ...props }: BadgeProps) {
   return (

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import Box from './Box';
+import Box from './box';
 
 interface ContentHeaderProps {
   title: ReactNode;
@@ -9,9 +9,9 @@ interface ContentHeaderProps {
   className?: string;
 }
 
-const CONTENT_HEADER_CLASS = 'flex items-center justify-between px-(--size-l)';
+const CONTENT_HEADER_CLASS = 'flex items-center justify-between px-6';
 
-const CONTENT_HEADER_TITLE_COLUMN_CLASS = 'flex flex-1 flex-col gap-(--size-2xs)';
+const CONTENT_HEADER_TITLE_COLUMN_CLASS = 'flex flex-1 flex-col gap-1';
 
 const CONTENT_HEADER_TITLE_CLASS = 'text-xl text-white tracking-tight';
 

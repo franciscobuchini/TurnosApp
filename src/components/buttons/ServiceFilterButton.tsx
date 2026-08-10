@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 import { PowerOff, Power } from 'lucide-react';
 import HideButton from './HideButton';
-import ViewServiceButton from './ViewServiceButton';
+import ViewEntityDetailsButton from './ViewEntityDetailsButton';
+import ServiceView from '@/components/views/ServiceView';
 
 const SERVICE_FILTER_BUTTON_CLASS = 'w-full justify-between';
 
@@ -25,13 +26,21 @@ export default function ServiceFilterButton({ option, onToggle, onOpenDetails, c
         onToggle={(visible) => onToggle?.(option.id, visible)}
         activeText="Desactivar"
         inactiveText="Activar"
-        icon={option.checked === false ? <Power size="var(--size-m)" /> : <PowerOff size="var(--size-m)" />}
+        icon={option.checked === false ? <Power size={16} /> : <PowerOff size={16} />}
         className={className ?? SERVICE_FILTER_BUTTON_CLASS}
       />
-      <ViewServiceButton
-        label={option.label}
+      <ViewEntityDetailsButton
         className={SERVICE_FILTER_BUTTON_CLASS}
         onOpen={onOpenDetails}
+        renderView={({ open, onClose }) => (
+          <ServiceView
+            open={open}
+            onClose={onClose}
+            title={`Detalles de ${option.label}`}
+            mode="view"
+            serviceName={option.label}
+          />
+        )}
       />
     </>
   );

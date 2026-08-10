@@ -14,7 +14,7 @@ import {
   useNavigate,
   useOutletContext,
 } from 'react-router-dom';
-import { useAgendaDate } from '../../functions/agendaDate';
+import { useAgendaDate } from '@/hooks/useAgendaDate';
 import Layout from '../../components/layout/Layout';
 import {
   getClients,
@@ -31,7 +31,7 @@ import {
   removeTeamMember,
 } from '../../database/data';
 import type { Client, FiltersOption, service, TeamMember } from '../../database/types';
-import { useTeamFilters } from '../../functions/teamFilters';
+import { useTeamFilters } from '@/hooks/useTeamFilters';
 import { SERVICE_COLOR_BY_ID } from '../../components/widgets/serviceWidgets/serviceColors';
 import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';

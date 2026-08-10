@@ -1,6 +1,6 @@
 import { type ChangeEvent, type FocusEvent, type MouseEvent, useEffect, useState } from 'react';
-import Form from '../../interface/Form';
-import Input from '../../interface/Input';
+import Form from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import ServiceSelector from './ServiceSelector';
 
 interface FormAddEntityProps {
@@ -22,8 +22,8 @@ interface FormAddEntityProps {
   onValidityChange?: (isValid: boolean) => void;
 }
 
-const FORM_CLASS = 'flex flex-col gap-(--size-4xl)';
-const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
+const FORM_CLASS = 'flex flex-col gap-6';
+const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
 
 const whatsappPrefix = '+54 9 ';
 

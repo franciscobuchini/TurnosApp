@@ -2,10 +2,11 @@ import { useMemo } from 'react';
 import { Plus, X } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import type { OpeningHoursEntry } from '../../../database/types';
-import HourSelector from '../../interface/HourSelector';
-import Checkbox from '../../interface/Checkbox';
-import Button from '../../interface/Button';
-import Table, { type TableColumn } from '../../interface/Table';
+import HourSelector from '@/components/ui/hour-selector';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Table, type TableColumn } from '@/components/ui/table';
 import {
   DAYS,
   getDayError,
@@ -15,13 +16,13 @@ import {
   rangesOverlap,
   useWeekSchedule,
   type DayRow,
-} from '../../../functions/weekSchedule';
+} from '@/hooks/useWeekSchedule';
 
 /*
   src/components/widgets/entityWidgets/EntityWeekSchedule.tsx
   Selector semanal (lunes a domingo) para elegir los horarios en los que se
   trabaja. Solo contiene la UI; la lógica (estado, validaciones, serialización)
-  vive en src/functions/weekSchedule.ts y la comparte con otros selectores de
+  vive en src/hooks/useWeekSchedule.ts y la comparte con otros selectores de
   horarios (por ejemplo, el horario del local).
 
   Cada día de la semana se renderiza como su propia <Table> de UNA sola fila
@@ -46,29 +47,28 @@ export interface EntityWeekScheduleProps {
   businessHours?: OpeningHoursEntry[];
 }
 
-const SCHEDULE_FIELD_CLASS = 'flex flex-col gap-(--size-s) w-full min-h-0';
-const SCHEDULE_LABEL_CLASS = 'text-md text-neutral-300';
-const SCHEDULE_LIST_CLASS = 'flex flex-col gap-(--size-xs) w-full min-h-0 overflow-y-auto';
+const SCHEDULE_FIELD_CLASS = 'flex flex-col gap-3 w-full min-h-0';
+const SCHEDULE_LIST_CLASS = 'flex flex-col gap-2 w-full min-h-0 overflow-y-auto';
 const SCHEDULE_TABLE_CLASS = 'table-auto border-separate border-spacing-x-0';
-const TABLE_ROW_HEIGHT_CLASS = 'h-(--size-5xl)';
+const TABLE_ROW_HEIGHT_CLASS = 'h-20';
 
 const CHECKBOX_COLUMN_WIDTH = '2.5rem';
 const DAY_COLUMN_WIDTH = '7rem';
 
-const CELL_BASE_CLASS = 'min-h-(--size-5xl) h-full align-middle border-y border-neutral-700 bg-neutral-800 px-(--size-xs)';
-const SCHEDULE_CELL_CLASS = `${CELL_BASE_CLASS} py-(--size-2xs)`;
+const CELL_BASE_CLASS = 'min-h-20 h-full align-middle border-y border-input bg-input px-2';
+const SCHEDULE_CELL_CLASS = `${CELL_BASE_CLASS} py-1`;
 
-const DAY_CELL_CONTENT_CLASS = 'flex h-full items-center w-(--size-6xl)';
-const SCHEDULE_CELL_CONTENT_CLASS = 'flex h-full flex-col justify-center gap-(--size-2xs)';
+const DAY_CELL_CONTENT_CLASS = 'flex h-full items-center w-24';
+const SCHEDULE_CELL_CONTENT_CLASS = 'flex h-full flex-col justify-center gap-1';
 const DAY_NAME_CLASS = 'shrink-0 text-sm font-medium text-neutral-100';
 const DAY_OPEN_CLASS = 'flex shrink-0 items-center text-sm text-neutral-300';
 
-const RANGE_LINE_CLASS = 'flex w-full shrink-0 items-center gap-(--size-l)';
+const RANGE_LINE_CLASS = 'flex w-full shrink-0 items-center gap-6';
 const RANGE_ERROR_CLASS = 'shrink-0 text-xs text-red-400';
 const TIME_INPUT_ERROR_CLASS = 'border-red-400 focus:border-red-400';
 const DAYS_OFF_CLASS = 'text-sm text-neutral-500 w-full flex justify-center';
-const ADD_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center bg-transparent text-neutral-300';
-const REMOVE_TURN_BUTTON_CLASS = 'flex h-(--size-l) w-(--size-l) shrink-0 items-center justify-center bg-transparent text-neutral-500';
+const ADD_TURN_BUTTON_CLASS = 'flex h-6 w-6 p-0 shrink-0 items-center justify-center bg-transparent hover:bg-transparent text-neutral-300';
+const REMOVE_TURN_BUTTON_CLASS = 'flex h-6 w-6 p-0 shrink-0 items-center justify-center bg-transparent hover:bg-transparent text-neutral-500';
 
 function getEdgeClassName(index: number, total: number): string {
   const isFirst = index === 0;
@@ -126,7 +126,7 @@ export default function EntityWeekSchedule({
               id={`week-day-${row.dayOfWeek}`}
               checked={day.works}
               disabled={readOnly}
-              onChange={(_, checked) => toggleWorks(row.dayOfWeek, checked)}
+              onCheckedChange={(checked) => toggleWorks(row.dayOfWeek, checked === true)}
             />
           </span>
         );
@@ -190,19 +190,21 @@ export default function EntityWeekSchedule({
                   {!readOnly && index > 0 ? (
                     <Button
                       type="button"
+                      variant="ghost"
                       className={REMOVE_TURN_BUTTON_CLASS}
                       onClick={() => removeRange(row.dayOfWeek, index)}
-                      icon={<X size="var(--size-m)" />}
+                      icon={<X size={16} />}
                       aria-label="Quitar turno"
                     />
                   ) : null}
                   {index === 0 && !readOnly ? (
                     <Button
                       type="button"
+                      variant="ghost"
                       className={ADD_TURN_BUTTON_CLASS}
                       disabled={day.ranges.length >= 2}
                       onClick={() => addRange(row.dayOfWeek)}
-                      icon={<Plus size="var(--size-m)" />}
+                      icon={<Plus size={16} />}
                       aria-label="Agregar turno"
                     />
                   ) : null}
@@ -220,7 +222,7 @@ export default function EntityWeekSchedule({
 
   return (
     <div className={SCHEDULE_FIELD_CLASS}>
-      <p className={SCHEDULE_LABEL_CLASS}>{title}</p>
+      <Label>{title}</Label>
       <div className={SCHEDULE_LIST_CLASS}>
         {DAYS.map((day) => (
           <Table

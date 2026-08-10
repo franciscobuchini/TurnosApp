@@ -1,12 +1,12 @@
 /* 
-  src/components/interface/Image.tsx
+  src/components/ui/image.tsx
   Componente para mostrar imágenes o un contenedor de reserva (placeholder).
   Cuando no hay imagen y se provee un `name`, muestra las iniciales
   de la primera y última palabra (estilo WhatsApp).
 */
 
 import { twMerge } from 'tailwind-merge';
-import getInitials from '../../functions/getInitials';
+import getInitials from '@/utils/getInitials';
 
 interface ImageProps {
   src?: string;

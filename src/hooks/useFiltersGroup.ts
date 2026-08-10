@@ -1,5 +1,5 @@
 /*
-  src/components/interface/FiltersGroupContext.tsx
+  src/hooks/useFiltersGroup.ts
   Contexto que agrupa los Filters de un mismo contenedor (sidebar, maincontent, etc.)
   para que abrir uno cierre los demás del mismo grupo. Usa el atributo nativo `name`
   de <details>, que hace que el navegador se encargue de la exclusividad — no hace

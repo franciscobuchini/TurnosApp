@@ -1,6 +1,6 @@
 import { type ChangeEvent, type FocusEvent, type MouseEvent, useEffect, useState } from 'react';
-import Form from '../../interface/Form';
-import Input from '../../interface/Input';
+import Form from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 interface FormAddClientProps {
   mode?: 'create' | 'view' | 'edit';
@@ -19,7 +19,7 @@ interface FormAddClientProps {
   }) => void;
 }
 
-const FORM_CLASS = 'flex flex-1 flex-col gap-(--size-xl)';
+const FORM_CLASS = 'flex flex-1 flex-col gap-8';
 
 const whatsappPrefix = '+54 9 ';
 

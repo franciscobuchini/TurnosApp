@@ -28,9 +28,9 @@ type Props = {
 
 
 
-const WRAPPER_CLASS = 'flex flex-wrap justify-center gap-(--size-s)';
+const WRAPPER_CLASS = 'flex flex-wrap justify-start gap-3';
 
-const SWATCH_CLASS = 'h-(--size-xl) w-(--size-xl) rounded-full border border-neutral-700 transition';
+const SWATCH_CLASS = 'h-8 w-8 rounded-full border border-border';
 
 const SWATCH_ACTIVE_CLASS = 'border-4 border-neutral-50';
 

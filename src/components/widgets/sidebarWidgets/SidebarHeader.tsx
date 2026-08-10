@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import MainHeader from '../../interface/MainHeader';
-import Logo from '../../interface/Logo';
+import MainHeader from '@/components/ui/main-header';
+import Logo from '@/components/ui/logo';
 
 interface SidebarHeaderProps {
   title?: string;
@@ -11,14 +11,14 @@ interface SidebarHeaderProps {
   onClick?: () => void;
 }
 
-const SIDEBAR_HEADER_CLASS = 'flex h-(--size-6xl) w-full shrink-0 bg-transparent';
+const SIDEBAR_HEADER_CLASS = 'flex h-24 w-full shrink-0 bg-transparent';
 
 const SIDEBAR_HEADER_BUTTON_CLASS = 'flex w-full cursor-pointer border-none bg-transparent p-0 text-left';
 
 export default function SidebarHeader({
   title = 'minube.site',
   className,
-  leading = <Logo className="h-(--size-4xl) w-auto" />,
+  leading = <Logo className="h-16 w-auto" />,
   action,
   onClick,
 }: SidebarHeaderProps) {

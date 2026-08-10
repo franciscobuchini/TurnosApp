@@ -1,5 +1,5 @@
 /*
-  src/functions/weekSchedule.ts
+  src/hooks/useWeekSchedule.ts
   Lógica compartida para trabajar con horarios semanales (lunes a domingo),
   independiente de la UI. La usa EntityWeekSchedule (horarios del trabajador)
   y servirá para otros selectores de horarios (por ejemplo, el horario del

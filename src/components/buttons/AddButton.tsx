@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Plus } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import Button from '../interface/Button';
+import { Button } from '@/components/ui/button';
 
 interface AddButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClick'> {
   text?: string;
@@ -10,7 +10,7 @@ interface AddButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClic
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const ADD_BUTTON_CLASS = 'w-full h-(--size-2xl) gap-(--size-m) shrink-0 justify-center bg-transparent text-neutral-400 hover:text-white';
+const ADD_BUTTON_CLASS = 'w-full h-12 gap-4 shrink-0 justify-center text-neutral-400 hover:text-white';
 
 export default function AddButton({
   text,
@@ -22,8 +22,9 @@ export default function AddButton({
   return (
     <Button
       {...props}
+      variant="ghost"
       onClick={onClick}
-      icon={icon !== undefined ? icon : <Plus size={"var(--size-m)"} />}
+      icon={icon !== undefined ? icon : <Plus size={16} />}
       text={text ?? 'Agregar'}
       className={twMerge(ADD_BUTTON_CLASS, className)}
     />

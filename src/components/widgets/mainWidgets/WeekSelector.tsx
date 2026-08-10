@@ -18,7 +18,7 @@ interface WeekSelectorProps {
 
 const WEEK_SELECTOR_CLASS = 'flex w-full items-center justify-between';
 
-const WEEK_SELECTOR_DAYS_CLASS = '@container flex flex-1 justify-around gap-(--size-xs) px-(--size-xs)';
+const WEEK_SELECTOR_DAYS_CLASS = '@container flex flex-1 justify-around gap-2 px-2';
 
 /* getWeekDays: dado un día, devuelve 7 fechas centradas en él (3 antes, el día, 3 después) */
 const getWeekDays = (date: Date): Date[] => {

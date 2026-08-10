@@ -3,13 +3,13 @@
   Pantalla de bienvenida del sitio web.
 */
 
-import Logo from '../../components/interface/Logo';
+import Logo from '@/components/ui/logo';
 
 const HOME_CLASS = 'flex h-dvh w-dvw items-center justify-center bg-neutral-950';
 
-const HOME_CONTENT_CLASS = 'flex flex-col items-center gap-(--size-xl)';
+const HOME_CONTENT_CLASS = 'flex flex-col items-center gap-8';
 
-const HOME_LOGO_CLASS = 'h-(--size-7xl) w-auto';
+const HOME_LOGO_CLASS = 'h-64 w-auto';
 
 export default function Home() {
   return (

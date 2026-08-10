@@ -1,5 +1,5 @@
 /*
-  src/components/interface/Box.tsx
+  src/components/ui/box.tsx
   Contenedor simple para agrupar contenido con borde y padding.
 */
 
@@ -11,7 +11,7 @@ interface BoxProps {
   className?: string;
 }
 
-const BOX_CLASS = 'w-full p-(--size-s)';
+const BOX_CLASS = 'w-full p-3';
 
 export default function Box({ children, className }: BoxProps) {
   return (

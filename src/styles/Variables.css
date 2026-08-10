@@ -1,45 +1,29 @@
-/* 
-  src/styles/database.css
-  database pre-establecidas para toda la aplicación.
+/*
+  src/styles/Variables.css
+  Variables pre-establecidas para toda la aplicación.
 */
 @theme {
   /* Breakpoints */
   --breakpoint-mobile: 480px;
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
-
-  /* Spacing */
-  --size-3xs: 2px; /* Gap servicios */
-  --size-2xs: 4px; 
-  --size-xs: 8px;
-  --size-s: 12px; /* Gap y Margin Sidebar */
-  --size-m: 16px; /* Icons */
-  /* hay que agregar 20px para icons */
-  --size-l: 24px;
-  --size-xl: 32px;
-  /* hay que agregar 40px para tabla de filters */
-  --size-2xl: 48px; /* Button height y Table Height Default */
-  --size-3xl: 56px; /* Header, Sidebar Tablet */
-  --size-4xl: 64px; /* Image */
-  --size-5xl: 80px; /* Sidebar Tablet */
-  --size-6xl: 96px; /* Sidebar Tablet */
-  --size-7xl: 256px;
-  --size-8xl: 420px; /* Sidebar*/
-  --size-9xl: 512px; /* Sidebar Desktop */
 }
 
 :root {
---primary-01: #e4f77a; /* lima */
---primary-02: #C5BDF6; /* lavanda */
---primary-03: #C4DEEB; /* celeste */
---primary-04: #F6C6D0; /* rosa */
---primary-05: #FFD9A8; /* durazno */
---primary-06: #B8E8D4; /* menta */
---primary-07: #FFB4A8; /* coral */
---primary-08: #D9C2F0; /* violeta */
---primary-09: #FFF3B0; /* manteca */
---primary-10: #BFD8FF; /* azul pastel */
---primary-11: #F9C8A9; /* salmón claro */
---primary-12: #D6F5C3; /* verde lima suave */
---primary-13: #F5D6B8; /* arena */
+/* Paleta pastel decorativa: colores de servicio (ColorPicker), resaltados del
+   Calendar (hoy/seleccionado) y el gradiente de fondo (GradientBackground).
+   No confundir con --primary de shadcn, que es el color de marca/acción de
+   los componentes interactivos. */
+--palette-01: #e4f77a; /* lima */
+--palette-02: #C5BDF6; /* lavanda */
+--palette-03: #C4DEEB; /* celeste */
+--palette-04: #F6C6D0; /* rosa */
+--palette-05: #FFD9A8; /* durazno */
+--palette-06: #B8E8D4; /* menta */
+--palette-07: #FFB4A8; /* coral */
+--palette-08: #D9C2F0; /* violeta */
+--palette-09: #FFF3B0; /* manteca */
+--palette-10: #BFD8FF; /* azul pastel */
+--palette-11: #F9C8A9; /* salmón claro */
+--palette-12: #D6F5C3; /* verde lima suave */
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import ViewClientButton from './ViewClientButton';
+import ViewEntityDetailsButton from './ViewEntityDetailsButton';
+import AddClientView from '@/components/views/ClientView';
 
 const CLIENT_FILTER_BUTTON_CLASS = 'w-full justify-between';
 
@@ -16,10 +17,18 @@ interface ClientFilterButtonProps {
 
 export default function ClientFilterButton({ option, onOpenDetails, className }: ClientFilterButtonProps): ReactNode {
   return (
-    <ViewClientButton
-      label={option.label}
+    <ViewEntityDetailsButton
       className={className ?? CLIENT_FILTER_BUTTON_CLASS}
       onOpen={onOpenDetails}
+      renderView={({ open, onClose }) => (
+        <AddClientView
+          open={open}
+          onClose={onClose}
+          title={`Detalles de ${option.label}`}
+          mode="view"
+          clientName={option.label}
+        />
+      )}
     />
   );
 }

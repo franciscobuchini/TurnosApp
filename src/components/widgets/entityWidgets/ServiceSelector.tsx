@@ -1,12 +1,12 @@
-import Badge from '../../interface/Badge';
+import { Label } from '@/components/ui/label';
+import Badge from '@/components/ui/badge';
 import { getservices } from '../../../database/data';
 import { SERVICE_COLOR_BY_ID } from '../serviceWidgets/serviceColors';
 
-const SERVICE_SELECTOR_CLASS = 'flex flex-wrap gap-(--size-m)';
-const SERVICE_FIELD_CLASS = 'flex flex-col gap-(--size-m)';
+const SERVICE_SELECTOR_CLASS = 'flex flex-wrap gap-4';
+const SERVICE_FIELD_CLASS = 'flex flex-col gap-4';
 const SERVICE_BADGE_CLASS = 'cursor-pointer border-none bg-neutral-950 text-neutral-500';
 const SERVICE_BADGE_ACTIVE_CLASS = 'text-neutral-900';
-const SERVICE_LABEL_CLASS = 'text-md text-neutral-300 px-(--size-s)';
 
 interface ServiceSelectorProps {
   value: string[];
@@ -23,32 +23,38 @@ export default function ServiceSelector({ value, onChange, disabled = false, sho
 
   return (
     <div className={SERVICE_FIELD_CLASS}>
-      <label className={SERVICE_LABEL_CLASS}>Servicios que presta</label>
-      <div className={SERVICE_SELECTOR_CLASS}>
-        {visibleServices.map((service) => {
-          const isActive = value.includes(service.name);
-          const colorClassName = SERVICE_COLOR_BY_ID[service.colorId ?? '']?.className ?? '';
+      <Label>Servicios que presta</Label>
+      {visibleServices.length === 0 ? (
+        <p className="text-neutral-500 text-sm px-3">
+          Este miembro no presta ningún servicio
+        </p>
+      ) : (
+        <div className={SERVICE_SELECTOR_CLASS}>
+          {visibleServices.map((service) => {
+            const isActive = value.includes(service.name);
+            const colorClassName = SERVICE_COLOR_BY_ID[service.colorId ?? '']?.className ?? '';
 
-          return (
-            <Badge
-              key={service.name}
-              className={`${SERVICE_BADGE_CLASS} ${isActive ? `${SERVICE_BADGE_ACTIVE_CLASS} ${colorClassName}` : ''}`.trim()}
-              onClick={() => {
-                if (disabled) {
-                  return;
-                }
-                onChange(
-                  value.includes(service.name)
-                    ? value.filter((item) => item !== service.name)
-                    : [...value, service.name],
-                );
-              }}
-            >
-              {service.name}
-            </Badge>
-          );
-        })}
-      </div>
+            return (
+              <Badge
+                key={service.name}
+                className={`${SERVICE_BADGE_CLASS} ${isActive ? `${SERVICE_BADGE_ACTIVE_CLASS} ${colorClassName}` : ''}`.trim()}
+                onClick={() => {
+                  if (disabled) {
+                    return;
+                  }
+                  onChange(
+                    value.includes(service.name)
+                      ? value.filter((item) => item !== service.name)
+                      : [...value, service.name],
+                  );
+                }}
+              >
+                {service.name}
+              </Badge>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

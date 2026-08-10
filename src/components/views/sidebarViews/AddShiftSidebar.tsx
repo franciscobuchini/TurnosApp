@@ -10,8 +10,9 @@ import Sidebar from '../../layout/Sidebar';
 import DetailsPanel, {
   type DetailsPanelOption,
 } from '../../widgets/sidebarWidgets/DetailsPanel';
-import AddServiceButton from '../../buttons/AddServiceButton';
+import AddEntityLauncherButton from '../../buttons/AddEntityLauncherButton';
 import ServiceFilterButton from '../../buttons/ServiceFilterButton';
+import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../ServiceView';
 
 interface AddShiftSidebarProps {
   serviceFilters: DetailsPanelOption[];
@@ -39,7 +40,15 @@ export default function AddShiftSidebar({
             onOpenDetails={() => navigate(`/admin/servicio/${encodeURIComponent(option.label)}`)}
           />,
         ]}
-        action={<AddServiceButton onOpen={() => navigate('/admin/servicio')} />}
+        action={
+          <AddEntityLauncherButton
+            title={ADD_SERVICE_VIEW_TITLE}
+            onOpen={() => navigate('/admin/servicio')}
+            renderView={({ open, onClose }) => (
+              <AddServiceView open={open} onClose={onClose} title={ADD_SERVICE_VIEW_TITLE} />
+            )}
+          />
+        }
         open
         hideHeader
         onToggle={(e) => {

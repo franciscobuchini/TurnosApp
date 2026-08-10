@@ -7,11 +7,12 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ViewLayout from '../layout/ViewLayout';
-import Form from '../interface/Form';
-import Input from '../interface/Input';
-import Box from '../interface/Box';
-import Image from '../interface/Image';
-import Button from '../interface/Button';
+import Form from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import Box from '@/components/ui/box';
+import Image from '@/components/ui/image';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import CancelButton from '../buttons/CancelButton';
 import ConfirmButton from '../buttons/ConfirmButton';
 import { getBusiness, saveBusiness } from '../../database/data';
@@ -76,35 +77,35 @@ export default function SettingsBusinessView() {
         title="Negocio"
         onBack={goBack}
         left={
-          <Form className="flex flex-col gap-(--size-m)">
+          <Form className="flex flex-col gap-4">
             <Input
               label="Nombre del negocio"
               placeholder="Ej: Barbería Studio"
               value={draft.name}
               onChange={(e) => setValue('name')(e.target.value)}
             />
-            <div className="flex flex-col gap-(--size-s)">
-              <span className="px-(--size-s) text-md text-neutral-300">
+            <div className="flex flex-col gap-3">
+              <Label>
                 Imagen del negocio
-              </span>
+              </Label>
               {draft.imageUrl ? (
-                <div className="flex items-center gap-(--size-m)">
+                <div className="flex items-center gap-4">
                   <Image
                     src={draft.imageUrl}
                     name={draft.name}
                     alt="Imagen del negocio"
-                    className="h-(--size-4xl) w-(--size-4xl) shrink-0"
+                    className="h-16 w-16 shrink-0"
                   />
                   <span className="min-w-0 flex-1 truncate text-sm text-neutral-500">
                     {imageName}
                   </span>
-                  <Button text="Quitar" onClick={handleRemoveImage} className="h-(--size-3xl) px-(--size-m)" />
+                  <Button text="Quitar" onClick={handleRemoveImage} className="h-14 px-4" />
                 </div>
               ) : (
                 <Button
                   text="Cargar imagen"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-(--size-3xl) w-full rounded-2xl bg-neutral-600 text-neutral-50"
+                  className="h-14 w-full rounded-2xl bg-neutral-600 text-neutral-50"
                 />
               )}
               <input
@@ -117,7 +118,8 @@ export default function SettingsBusinessView() {
             </div>
             <Input
               label="URL del negocio"
-              placeholder="https://mituweb.com"
+              prefix="https://minube.site/"
+              placeholder="tu-negocio"
               value={draft.url}
               onChange={(e) => setValue('url')(e.target.value)}
             />
@@ -127,13 +129,13 @@ export default function SettingsBusinessView() {
               value={draft.location}
               onChange={(e) => setValue('location')(e.target.value)}
             />
-            <Box className="flex shrink-0 flex-row items-center gap-(--size-m) p-(--size-l)">
+            <Box className="flex shrink-0 flex-row items-center gap-4 p-6">
               <Image
                 src={draft.imageUrl || undefined}
                 name={draft.name}
-                className="h-(--size-4xl) w-(--size-4xl) shrink-0 text-lg"
+                className="h-16 w-16 shrink-0 text-lg"
               />
-              <div className="flex min-w-0 flex-col gap-(--size-2xs)">
+              <div className="flex min-w-0 flex-col gap-1">
                 <h2 className="truncate text-lg text-white">{draft.name || 'Nombre del negocio'}</h2>
                 <span className="truncate text-sm text-neutral-500">
                   {draft.url || 'https://tuweb.com'}

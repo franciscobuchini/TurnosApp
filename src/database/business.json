@@ -20,5 +20,6 @@
   "managerName": "Juan Pérez",
   "email": "encargado@barberiastudio.com",
   "password": "",
-  "advanceHours": 0
+  "adminPin": "",
+  "advanceMinutes": 0
 }

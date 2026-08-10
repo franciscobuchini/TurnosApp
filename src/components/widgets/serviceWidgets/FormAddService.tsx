@@ -1,17 +1,17 @@
 import { type ChangeEvent, useEffect, useState } from 'react';
 
-import Form from '../../interface/Form';
-import Input from '../../interface/Input';
+import Form from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import ColorPicker from './ColorPicker';
 import PhotoPicker from './PhotoPicker';
 
 import { SERVICE_COLORS } from './serviceColors';
 
-const FORM_CLASS = 'flex flex-1 flex-col gap-(--size-xl)';
-const FIELD_GROUP_CLASS = 'flex flex-col gap-(--size-m)';
-const FIELD_LABEL_CLASS = 'px-(--size-s) text-md text-neutral-300';
-const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-(--size-m) sm:grid-cols-2';
+const FORM_CLASS = 'flex flex-1 flex-col gap-8';
+const FIELD_GROUP_CLASS = 'flex flex-col gap-4';
+const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
 
 function formatCapitalizedWords(value: string) {
   const trimmed = value.trim();
@@ -182,7 +182,7 @@ export default function FormAddService({
         />
 
         <div className={FIELD_GROUP_CLASS}>
-          <p className={FIELD_LABEL_CLASS}>Color del servicio</p>
+          <Label>Color del servicio</Label>
 
           <ColorPicker
             colors={SERVICE_COLORS}
@@ -193,7 +193,7 @@ export default function FormAddService({
         </div>
 
         <div className={FIELD_GROUP_CLASS}>
-          <p className={FIELD_LABEL_CLASS}>Foto del servicio</p>
+          <Label>Foto del servicio</Label>
 
           <PhotoPicker
             value={selectedPhotoIndex}
