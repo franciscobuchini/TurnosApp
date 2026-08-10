@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Home from './pages/landing/Home';
 import Dashboard, { useAdminContext } from './pages/admin/Dashboard';
 import Personalizacion from './pages/admin/Personalizacion';
@@ -127,6 +127,10 @@ function App() {
         <Route path="/site" element={<Site />} />
         <Route path="/site" element={<Site />} />
         <Route path="/personalizacion" element={<Personalizacion />} />
+
+        <Route path="/SettingsView" element={<Navigate to="/admin/ajustes" replace />} />
+        <Route path="/SettingsView/horarios" element={<Navigate to="/admin/ajustes/horarios" replace />} />
+        <Route path="/SettingsView/seguridad" element={<Navigate to="/admin/ajustes/seguridad" replace />} />
 
         <Route path="/admin" element={<Dashboard />}>
           <Route index element={<SchedulePage />} />
