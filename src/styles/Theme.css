@@ -1,0 +1,26 @@
+/*
+  src/styles/Theme.css
+  Colores de la app, en un solo lugar y en hexadecimal. Para cambiar un color
+  se edita acá — el resto de los archivos (Index.css, los componentes de
+  shadcn en components/ui/) ya están armados para tomar el valor de estas
+  variables, no hace falta tocar nada más.
+
+  No es la paleta de colores de servicios (esa vive en Variables.css,
+  --palette-01..12): esto es el tema de la interfaz (fondos, texto, bordes).
+*/
+
+:root {
+  /* Superficies, de más oscuro a más claro */
+  --color-bg: #0a0a0a;         /* fondo general de la app */
+  --color-surface: #171717;    /* tarjetas, sidebar, popovers, footers */
+  --color-field: #262626;      /* inputs, pills, celdas, hover sutil */
+  --color-border: #404040;     /* bordes de inputs y tarjetas */
+
+  /* Texto */
+  --color-text: #fafafa;       /* texto principal sobre fondo oscuro */
+  --color-text-muted: #a3a3a3; /* texto secundario (labels, descripciones) */
+
+  /* Acento */
+  --color-accent: #e5e5e5;     /* botón "primary": claro, con texto oscuro encima */
+  --color-danger: #ef4444;     /* eliminar, errores */
+}

@@ -10,7 +10,7 @@ interface AddButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClic
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const ADD_BUTTON_CLASS = 'w-full h-12 gap-4 shrink-0 justify-center text-neutral-400 hover:text-white';
+const ADD_BUTTON_CLASS = 'w-full h-12 gap-4 shrink-0 justify-center text-neutral-400 hover:text-white rounded-2xl';
 
 export default function AddButton({
   text,

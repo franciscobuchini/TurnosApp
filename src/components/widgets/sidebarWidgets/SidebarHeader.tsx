@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
-import MainHeader from '@/components/ui/main-header';
 import Logo from '@/components/ui/logo';
 
 interface SidebarHeaderProps {
@@ -11,26 +10,35 @@ interface SidebarHeaderProps {
   onClick?: () => void;
 }
 
-const SIDEBAR_HEADER_CLASS = 'flex h-24 w-full shrink-0 bg-transparent';
-
-const SIDEBAR_HEADER_BUTTON_CLASS = 'flex w-full cursor-pointer border-none bg-transparent p-0 text-left';
+const SIDEBAR_HEADER_CLASS = 'flex h-24 w-full shrink-0 bg-transparent items-center gap-2 px-3';
 
 export default function SidebarHeader({
   title = 'minube.site',
   className,
-  leading = <Logo className="h-16 w-auto" />,
+  leading = <Logo className="h-12 w-auto" />,
   action,
   onClick,
 }: SidebarHeaderProps) {
   const header = (
-    <MainHeader
-      title={title}
-      leading={leading}
-      actionsRight={action}
-      titleClassName="text-neutral-50"
-      gradient={false}
-      className={twMerge(SIDEBAR_HEADER_CLASS, className)}
-    />
+    <div className={twMerge(SIDEBAR_HEADER_CLASS, className)}>
+      {leading && (
+        <div className="flex shrink-0 items-center self-center">
+          {leading}
+        </div>
+      )}
+
+      <div className="flex min-w-0 flex-1 items-center">
+        <h1 className="text-3xl font-semibold tracking-tight leading-none text-neutral-50 truncate">
+          {title}
+        </h1>
+      </div>
+
+      {action && (
+        <div className="gap-3 self-center shrink-0 flex">
+          {action}
+        </div>
+      )}
+    </div>
   );
 
   if (!onClick) {
@@ -38,7 +46,7 @@ export default function SidebarHeader({
   }
 
   return (
-    <button type="button" onClick={onClick} className={SIDEBAR_HEADER_BUTTON_CLASS}>
+    <button type="button" onClick={onClick}>
       {header}
     </button>
   );

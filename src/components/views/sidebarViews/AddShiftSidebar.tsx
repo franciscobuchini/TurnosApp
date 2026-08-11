@@ -11,7 +11,7 @@ import DetailsPanel, {
   type DetailsPanelOption,
 } from '../../widgets/sidebarWidgets/DetailsPanel';
 import AddEntityLauncherButton from '../../buttons/AddEntityLauncherButton';
-import ServiceFilterButton from '../../buttons/ServiceFilterButton';
+import { ServiceFilterButton } from '../../widgets/sidebarWidgets/DropdownRowActions';
 import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../ServiceView';
 
 interface AddShiftSidebarProps {

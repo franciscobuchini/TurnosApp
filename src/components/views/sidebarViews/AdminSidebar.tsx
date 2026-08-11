@@ -13,9 +13,7 @@ import DetailsPanel, {
 } from '../../widgets/sidebarWidgets/DetailsPanel';
 import type { FiltersOption } from '../../../database/types';
 import AddEntityLauncherButton from '../../buttons/AddEntityLauncherButton';
-import TeamFilterButton from '../../buttons/TeamFilterButton';
-import ServiceFilterButton from '../../buttons/ServiceFilterButton';
-import ClientFilterButton from '../../buttons/ClientFilterButton';
+import { TeamFilterButton, ServiceFilterButton, ClientFilterButton } from '../../widgets/sidebarWidgets/DropdownRowActions';
 import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../EntityView';
 import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../ServiceView';
 import AddClientView, { ADD_CLIENT_VIEW_TITLE } from '../ClientView';

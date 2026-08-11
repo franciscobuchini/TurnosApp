@@ -19,7 +19,7 @@ interface CalendarProps {
   className?: string;
 }
 
-const CALENDAR_CLASS = 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-2 p-2 bg-card rounded-3xl';
+const CALENDAR_CLASS = 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-2 p-1 bg-card rounded-3xl';
 
 const CALENDAR_ACTIONS_CLASS = 'flex gap-3';
 
@@ -28,7 +28,7 @@ const CALENDAR_TABLE_CLASS = 'text-white';
 const CALENDAR_TABLE_HEADER_CLASS = 'bg-transparent';
 
 const CALENDAR_DAY_CIRCLE_CLASS = 'flex items-center justify-center w-8 h-8 mx-auto text-sm cursor-pointer rounded-full';
-const CALENDAR_DAY_CIRCLE_DEFAULT_CLASS = 'hover:bg-muted';
+const CALENDAR_DAY_CIRCLE_DEFAULT_CLASS = 'hover:bg-neutral-700';
 const CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS = 'opacity-30';
 const CALENDAR_DAY_CELL_CLASS = 'flex items-center justify-center cursor-pointer';
 

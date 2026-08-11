@@ -4,9 +4,6 @@ import { getOpeningHours, getTeamMembers } from '../../database/data';
 import type { OpeningHoursEntry, TeamMember } from '../../database/types';
 
 import ViewLayout from '../layout/ViewLayout';
-import CancelButton from '../buttons/CancelButton';
-import ConfirmButton from '../buttons/ConfirmButton';
-import DeleteButton from '../buttons/DeleteButton';
 
 import FormAddEntity from '../widgets/entityWidgets/FormAddEntity';
 import EntityWeekSchedule from '../widgets/entityWidgets/EntityWeekSchedule';
@@ -143,21 +140,12 @@ export default function AddEntityView({
           businessHours={getOpeningHours()}
         />
       }
-      footer={
-        <>
-          {editing && onDelete && (
-            <DeleteButton className="mr-auto" onClick={onDelete} text="Eliminar" />
-          )}
-
-          <CancelButton onClick={handleCancel} text={cancelLabel} />
-
-          <ConfirmButton
-            onClick={handleConfirm}
-            text={actionLabel}
-            disabled={mode === 'create' && !isFormValid}
-          />
-        </>
-      }
+      cancelText={cancelLabel}
+      onCancel={handleCancel}
+      confirmText={actionLabel}
+      onConfirm={handleConfirm}
+      confirmDisabled={mode === 'create' && !isFormValid}
+      onDelete={editing ? onDelete : undefined}
     />
   );
 }

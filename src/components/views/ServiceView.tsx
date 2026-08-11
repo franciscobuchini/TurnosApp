@@ -5,9 +5,6 @@ import ViewLayout from '../layout/ViewLayout';
 import FormAddService from '../widgets/serviceWidgets/FormAddService';
 import ServicePreviewCard from '../widgets/serviceWidgets/ServicePreviewCard';
 import { SERVICE_COLOR_BY_ID, SERVICE_COLORS } from '../widgets/serviceWidgets/serviceColors';
-import CancelButton from '../buttons/CancelButton';
-import ConfirmButton from '../buttons/ConfirmButton';
-import DeleteButton from '../buttons/DeleteButton';
 
 export const ADD_SERVICE_VIEW_TITLE = 'Agregar un nuevo servicio';
 
@@ -151,15 +148,12 @@ export default function AddServiceView({
           />
         </div>
       }
-      footer={
-        <>
-          {mode === 'edit' && onDelete ? (
-            <DeleteButton className="mr-auto" onClick={onDelete} text="Eliminar" />
-          ) : null}
-          <CancelButton onClick={handleCancel} text={cancelLabel} />
-          <ConfirmButton onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
-        </>
-      }
+      cancelText={cancelLabel}
+      onCancel={handleCancel}
+      confirmText={actionLabel}
+      onConfirm={handleConfirm}
+      confirmDisabled={isConfirmDisabled}
+      onDelete={mode === 'edit' ? onDelete : undefined}
     />
   );
 }

@@ -17,9 +17,9 @@ interface SidebarOptionProps {
 }
 
 const PANEL_CLASS =
-  'h-16 flex w-full shrink-0 items-center rounded-3xl bg-transparent text-white p-2 ';
+  'h-12 flex w-full shrink-0 items-center rounded-2xl bg-transparent text-white p-4 ';
 
-const PANEL_SELECTED_CLASS = 'bg-neutral-900';
+const PANEL_SELECTED_CLASS = 'bg-white/10';
 
 export default function SidebarOption({
   id,
@@ -41,7 +41,7 @@ export default function SidebarOption({
         className,
       )}
     >
-      {icon && <span className="pl-3">{icon}</span>}
+      {icon && <span>{icon}</span>}
       <ContentHeader title={title} className="w-full text-left" />
     </button>
   );

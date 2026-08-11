@@ -13,8 +13,6 @@ import { Input } from '@/components/ui/input';
 import EntityWeekSchedule from '../widgets/entityWidgets/EntityWeekSchedule';
 import { getBusiness, getOpeningHours, saveBusiness, saveOpeningHours } from '../../database/data';
 import type { OpeningHoursEntry } from '../../database/types';
-import CancelButton from '../buttons/CancelButton';
-import ConfirmButton from '../buttons/ConfirmButton';
 
 type AdvanceUnit = 'minutos' | 'horas';
 
@@ -22,7 +20,7 @@ const UNIT_OPTIONS: AdvanceUnit[] = ['minutos', 'horas'];
 
 const UNIT_SELECTOR_CLASS = 'flex shrink-0 items-center gap-1 rounded-2xl border border-neutral-700 bg-neutral-800 p-1';
 
-const UNIT_OPTION_CLASS = 'cursor-pointer rounded-xl px-3 py-1 text-md text-neutral-400 hover:text-neutral-100';
+const UNIT_OPTION_CLASS = 'cursor-pointer rounded-xl px-3 py-1 text-sm text-neutral-400 hover:text-neutral-100';
 
 const UNIT_OPTION_ACTIVE_CLASS = 'bg-neutral-950 text-neutral-50';
 
@@ -55,7 +53,6 @@ export default function SettingsScheduleView() {
   return (
     <ViewLayout
       title="Horarios"
-      onBack={goBack}
         left={
           <Form className="flex flex-col gap-4">
             <EntityWeekSchedule title="Horario del local" value={businessHours} onChange={setBusinessHours} />
@@ -88,12 +85,9 @@ export default function SettingsScheduleView() {
             </div>
           </Form>
         }
-        footer={
-          <>
-            <CancelButton onClick={goBack} text="Cancelar" />
-            <ConfirmButton onClick={handleSave} text="Guardar" />
-          </>
-        }
+        confirmText="Guardar"
+        onCancel={goBack}
+        onConfirm={handleSave}
       />
   );
 }

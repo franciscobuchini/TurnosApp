@@ -5,7 +5,7 @@
 
 import Logo from '@/components/ui/logo';
 
-const HOME_CLASS = 'flex h-dvh w-dvw items-center justify-center bg-neutral-950';
+const HOME_CLASS = 'flex h-dvh w-dvw items-center justify-center';
 
 const HOME_CONTENT_CLASS = 'flex flex-col items-center gap-8';
 

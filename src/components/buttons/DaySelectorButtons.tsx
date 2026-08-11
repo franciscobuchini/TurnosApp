@@ -29,7 +29,7 @@ const WEEK_SELECTOR_DAY_VISIBILITY_CLASS: Record<number, string> = {
 
 const WEEK_SELECTOR_DAY_COLUMN_CLASS = 'flex flex-col items-center';
 
-const WEEK_SELECTOR_DAY_LABEL_CLASS = 'text-l';
+const WEEK_SELECTOR_DAY_LABEL_CLASS = 'text-l font-normal';
 
 const WEEK_SELECTOR_DAY_NUMBER_CLASS = 'text-5xl px-1';
 

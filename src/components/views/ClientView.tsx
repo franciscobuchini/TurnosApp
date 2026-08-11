@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import { getClients } from '../../database/data';
 import type { Client } from '../../database/types';
 import ViewLayout from '../layout/ViewLayout';
-import CancelButton from '../buttons/CancelButton';
-import ConfirmButton from '../buttons/ConfirmButton';
-import DeleteButton from '../buttons/DeleteButton';
+import ComingSoonPanel from '../layout/ComingSoonPanel';
 import FormAddClient from '../widgets/clientWidgets/FormAddClient';
 
 export const ADD_CLIENT_VIEW_TITLE = 'Agregar un nuevo cliente';
@@ -36,8 +34,6 @@ export interface AddClientViewProps {
   onCancel?: () => void;
   onDelete?: () => void;
 }
-
-const RIGHT_PANEL_CLASS = 'flex flex-1 flex-col items-center justify-center gap-2 rounded-4xl border-1 border-dashed border-neutral-500 text-neutral-400';
 
 export default function AddClientView({
   open = true,
@@ -153,21 +149,13 @@ export default function AddClientView({
       left={
         <FormAddClient mode={resolvedMode} initialValues={formValues} onValidityChange={setIsFormValid} onValuesChange={setDraftValues} />
       }
-      right={
-        <div className={RIGHT_PANEL_CLASS}>
-          <p>Proximamente...</p>
-          <p>Sistema de fidelización de clientes</p>
-        </div>
-      }
-      footer={
-        <>
-          {mode === 'edit' && onDelete ? (
-            <DeleteButton className="mr-auto" onClick={onDelete} text="Eliminar" />
-          ) : null}
-          <CancelButton onClick={handleCancel} text={cancelLabel} />
-          <ConfirmButton onClick={handleConfirm} text={actionLabel} disabled={isConfirmDisabled} />
-        </>
-      }
+      right={<ComingSoonPanel subtitle="Sistema de fidelización de clientes" />}
+      cancelText={cancelLabel}
+      onCancel={handleCancel}
+      confirmText={actionLabel}
+      onConfirm={handleConfirm}
+      confirmDisabled={isConfirmDisabled}
+      onDelete={mode === 'edit' ? onDelete : undefined}
     />
   );
 }

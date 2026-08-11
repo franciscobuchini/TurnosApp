@@ -6,11 +6,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ViewLayout from '../layout/ViewLayout';
+import ComingSoonPanel from '../layout/ComingSoonPanel';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import CancelButton from '../buttons/CancelButton';
-import ConfirmButton from '../buttons/ConfirmButton';
 import { getBusiness, saveBusiness } from '../../database/data';
+
+const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
 
 interface SecurityDraft {
   name: string;
@@ -54,52 +55,47 @@ export default function SettingsSecurityView() {
   return (
     <ViewLayout
       title="Seguridad"
-      onBack={goBack}
         left={
           <Form className="flex flex-col gap-4">
-            <Input
-              label="Nombre del encargado"
-              placeholder="Ej: Juan Pérez"
-              value={draft.name}
-              onChange={(e) => setValue('name')(e.target.value)}
-            />
-            <Input
-              label="Mail"
-              type="email"
-              placeholder="encargado@mail.com"
-              value={draft.email}
-              onChange={(e) => setValue('email')(e.target.value)}
-            />
-            <Input
-              label="Contraseña"
-              type="password"
-              placeholder="••••••••"
-              value={draft.password}
-              onChange={(e) => setValue('password')(e.target.value)}
-            />
-            <Input
-              label="Pin de administrador"
-              type="password"
-              inputMode="numeric"
-              placeholder="0000"
-              maxLength={4}
-              value={draft.adminPin}
-              onChange={(e) => handleAdminPinChange(e.target.value)}
-            />
+            <div className={TWO_COLUMN_GRID_CLASS}>
+              <Input
+                label="Nombre del encargado"
+                placeholder="Ej: Juan Pérez"
+                value={draft.name}
+                onChange={(e) => setValue('name')(e.target.value)}
+              />
+              <Input
+                label="Mail"
+                type="email"
+                placeholder="encargado@mail.com"
+                value={draft.email}
+                onChange={(e) => setValue('email')(e.target.value)}
+              />
+            </div>
+            <div className={TWO_COLUMN_GRID_CLASS}>
+              <Input
+                label="Contraseña"
+                type="password"
+                placeholder="••••••••"
+                value={draft.password}
+                onChange={(e) => setValue('password')(e.target.value)}
+              />
+              <Input
+                label="Pin de administrador"
+                type="password"
+                inputMode="numeric"
+                placeholder="0000"
+                maxLength={4}
+                value={draft.adminPin}
+                onChange={(e) => handleAdminPinChange(e.target.value)}
+              />
+            </div>
           </Form>
         }
-        right={
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-4xl border-1 border-dashed border-neutral-500 text-neutral-400">
-            <p>Próximamente...</p>
-            <p>Funciones de seguridad avanzada</p>
-          </div>
-        }
-        footer={
-          <>
-            <CancelButton onClick={goBack} text="Cancelar" />
-            <ConfirmButton onClick={handleSave} text="Guardar" />
-          </>
-        }
+        right={<ComingSoonPanel subtitle="Funciones de seguridad avanzada" />}
+        confirmText="Guardar"
+        onCancel={goBack}
+        onConfirm={handleSave}
       />
   );
 }

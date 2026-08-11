@@ -8,9 +8,11 @@ interface WeekNavigationButtonProps {
   isSelected?: boolean;
 }
 
-const WEEK_SELECTOR_NAV_BUTTON_CLASS = 'h-24 w-16 shrink-0 justify-center items-center rounded-2xl bg-transparent hover:bg-transparent';
+const WEEK_SELECTOR_NAV_BUTTON_CLASS = 'h-24 w-16 shrink-0 justify-center items-center rounded-2xl bg-transparent';
 
-const WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS = 'bg-card text-white';
+const WEEK_SELECTOR_NAV_BUTTON_DEFAULT_CLASS = 'hover:bg-transparent';
+
+const WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS = 'bg-card text-white hover:bg-card';
 
 export function PrevWeekButton({ onClick, className, isSelected = false }: WeekNavigationButtonProps) {
   return (
@@ -18,7 +20,7 @@ export function PrevWeekButton({ onClick, className, isSelected = false }: WeekN
       onClick={onClick}
       icon={<ChevronLeft />}
       className={twMerge(WEEK_SELECTOR_NAV_BUTTON_CLASS,
-        isSelected ? WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS : '',
+        isSelected ? WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS : WEEK_SELECTOR_NAV_BUTTON_DEFAULT_CLASS,
         className,
       )}
     />
@@ -31,7 +33,7 @@ export function NextWeekButton({ onClick, className, isSelected = false }: WeekN
       onClick={onClick}
       icon={<ChevronRight />}
       className={twMerge(WEEK_SELECTOR_NAV_BUTTON_CLASS,
-        isSelected ? WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS : '',
+        isSelected ? WEEK_SELECTOR_NAV_BUTTON_SELECTED_CLASS : WEEK_SELECTOR_NAV_BUTTON_DEFAULT_CLASS,
         className,
       )}
     />

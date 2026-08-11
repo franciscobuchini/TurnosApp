@@ -1,7 +1,7 @@
 {
   "name": "Barbería Studio",
   "image": "",
-  "url": "https://barberiastudio.com",
+  "url": "barberiastudio",
   "location": "Buenos Aires, Argentina",
   "schedule": [
     { "dayOfWeek": 0, "startTime": null, "endTime": null },

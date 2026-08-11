@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import Background from './components/layout/Background';
 import Home from './pages/landing/Home';
 import Dashboard, { useAdminContext } from './pages/admin/Dashboard';
 import Personalizacion from './pages/admin/Personalizacion';
@@ -122,6 +123,8 @@ function ClientPage({ mode }: { mode: CrudMode }) {
 function App() {
   return (
     <BrowserRouter>
+      <div className="relative isolate min-h-dvh">
+      <Background />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/site" element={<Site />} />
@@ -147,6 +150,7 @@ function App() {
           <Route path="cliente/:name" element={<ClientPage mode="view" />} />
         </Route>
       </Routes>
+      </div>
     </BrowserRouter>
   );
 }

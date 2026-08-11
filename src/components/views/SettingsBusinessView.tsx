@@ -6,15 +6,12 @@
 
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Plus, X } from 'lucide-react';
 import ViewLayout from '../layout/ViewLayout';
+import ComingSoonPanel from '../layout/ComingSoonPanel';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import Box from '@/components/ui/box';
-import Image from '@/components/ui/image';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import CancelButton from '../buttons/CancelButton';
-import ConfirmButton from '../buttons/ConfirmButton';
 import { getBusiness, saveBusiness } from '../../database/data';
 
 interface BusinessDraft {
@@ -31,7 +28,6 @@ export default function SettingsBusinessView() {
   const business = getBusiness();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imageName, setImageName] = useState('');
 
   const [draft, setDraft] = useState<BusinessDraft>({
     name: business.name ?? '',
@@ -50,14 +46,12 @@ export default function SettingsBusinessView() {
     const reader = new FileReader();
     reader.onload = () => {
       setDraft((prev) => ({ ...prev, imageUrl: String(reader.result ?? '') }));
-      setImageName(file.name);
     };
     reader.readAsDataURL(file);
   };
 
   const handleRemoveImage = () => {
     setDraft((prev) => ({ ...prev, imageUrl: '' }));
-    setImageName('');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -75,39 +69,74 @@ export default function SettingsBusinessView() {
   return (
     <ViewLayout
         title="Negocio"
-        onBack={goBack}
         left={
-          <Form className="flex flex-col gap-4">
-            <Input
-              label="Nombre del negocio"
-              placeholder="Ej: Barbería Studio"
-              value={draft.name}
-              onChange={(e) => setValue('name')(e.target.value)}
-            />
-            <div className="flex flex-col gap-3">
-              <Label>
-                Imagen del negocio
-              </Label>
-              {draft.imageUrl ? (
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={draft.imageUrl}
-                    name={draft.name}
-                    alt="Imagen del negocio"
-                    className="h-16 w-16 shrink-0"
-                  />
-                  <span className="min-w-0 flex-1 truncate text-sm text-neutral-500">
-                    {imageName}
-                  </span>
-                  <Button text="Quitar" onClick={handleRemoveImage} className="h-14 px-4" />
-                </div>
-              ) : (
-                <Button
-                  text="Cargar imagen"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-14 w-full rounded-2xl bg-neutral-600 text-neutral-50"
-                />
-              )}
+          <Form className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
+            {/* Columna 1 */}
+            <div className="flex flex-col gap-4">
+              <Input
+                label="Nombre del negocio"
+                placeholder="Ej: Barbería Studio"
+                value={draft.name}
+                onChange={(e) => setValue('name')(e.target.value)}
+              />
+              <Input
+                label="URL del negocio"
+                prefix="minube.site/"
+                placeholder="tu-negocio"
+                value={draft.url}
+                onChange={(e) => setValue('url')(e.target.value)}
+              />
+              <Input
+                label="Ubicación"
+                placeholder="Ciudad, dirección"
+                value={draft.location}
+                onChange={(e) => setValue('location')(e.target.value)}
+              />
+            </div>
+
+            {/* Columna 2 */}
+            <div className="flex flex-col gap-3 h-full">
+              <Label>Imagen del negocio</Label>
+              <div
+                onClick={() => {
+                  if (!draft.imageUrl) {
+                    fileInputRef.current?.click();
+                  }
+                }}
+                className="group relative flex aspect-square w-full items-center justify-center rounded-4xl border-2 border-dashed border-neutral-700 bg-neutral-900/30 overflow-hidden cursor-pointer hover:border-neutral-500 transition-colors"
+              >
+                {draft.imageUrl ? (
+                  <>
+                    <img
+                      src={draft.imageUrl}
+                      alt="Imagen del negocio"
+                      className="h-full w-full object-cover rounded-4xl"
+                    />
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage();
+                        }}
+                        className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 text-white hover:bg-neutral-700 transition-colors cursor-pointer"
+                        aria-label="Quitar imagen"
+                      >
+                        <X size={24} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-neutral-400">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 text-neutral-400 group-hover:bg-neutral-700 group-hover:text-white transition-all">
+                      <Plus size={24} />
+                    </div>
+                    <span className="mt-2 text-sm text-neutral-500 group-hover:text-neutral-400 transition-colors">
+                      Cargar imagen
+                    </span>
+                  </div>
+                )}
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -116,49 +145,12 @@ export default function SettingsBusinessView() {
                 onChange={handleImageSelect}
               />
             </div>
-            <Input
-              label="URL del negocio"
-              prefix="https://minube.site/"
-              placeholder="tu-negocio"
-              value={draft.url}
-              onChange={(e) => setValue('url')(e.target.value)}
-            />
-            <Input
-              label="Ubicación"
-              placeholder="Ciudad, dirección"
-              value={draft.location}
-              onChange={(e) => setValue('location')(e.target.value)}
-            />
-            <Box className="flex shrink-0 flex-row items-center gap-4 p-6">
-              <Image
-                src={draft.imageUrl || undefined}
-                name={draft.name}
-                className="h-16 w-16 shrink-0 text-lg"
-              />
-              <div className="flex min-w-0 flex-col gap-1">
-                <h2 className="truncate text-lg text-white">{draft.name || 'Nombre del negocio'}</h2>
-                <span className="truncate text-sm text-neutral-500">
-                  {draft.url || 'https://tuweb.com'}
-                </span>
-                <span className="truncate text-sm text-neutral-500">
-                  {draft.location || 'Ubicación'}
-                </span>
-              </div>
-            </Box>
           </Form>
         }
-        right={
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-4xl border-1 border-dashed border-neutral-500 text-neutral-400">
-            <p>Próximamente...</p>
-            <p>Ajustes avanzados</p>
-          </div>
-        }
-        footer={
-          <>
-            <CancelButton onClick={goBack} text="Cancelar" />
-            <ConfirmButton onClick={handleSave} text="Guardar" />
-          </>
-        }
+        right={<ComingSoonPanel subtitle="Ajustes avanzados" />}
+        confirmText="Guardar"
+        onCancel={goBack}
+        onConfirm={handleSave}
       />
   );
 }
