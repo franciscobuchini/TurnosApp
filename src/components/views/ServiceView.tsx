@@ -127,7 +127,6 @@ export default function AddServiceView({
   return (
     <ViewLayout
       title={title}
-      onBack={handleBack}
       left={
         <FormAddService
           mode={mode}

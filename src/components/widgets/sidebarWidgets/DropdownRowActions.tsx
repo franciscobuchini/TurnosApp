@@ -25,7 +25,7 @@ import ServiceView from '@/components/views/ServiceView';
 // el texto. Antes cada uno traía su propia clase (una completa, la otra
 // vacía) y por eso se veían distintos.
 
-const DROPDOWN_ROW_ITEM_CLASS = 'justify-between w-full h-8 p-3 gap-6 bg-transparent text-neutral-400 hover:text-white';
+const DROPDOWN_ROW_ITEM_CLASS = 'justify-between w-full h-8 p-3 gap-6 bg-transparent text-muted-foreground hover:text-foreground';
 
 // ── Ver detalles ────────────────────────────────────────────────────────
 // Abre la View de la entidad en modo lectura. Si se pasa onOpen (caso real

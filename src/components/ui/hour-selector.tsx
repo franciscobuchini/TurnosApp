@@ -46,7 +46,7 @@ function toMinutes(time?: string): number | null {
 }
 
 const SELECTOR_CLASS =
-  'flex h-9 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-input bg-input px-4 py-2 text-sm text-neutral-100 outline-none focus:border-neutral-400';
+  'flex h-9 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-input bg-input px-4 py-2 text-sm text-foreground outline-none focus:border-foreground';
 
 const POPOVER_CLASS =
   'fixed z-[9999] flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-2xl';
@@ -57,9 +57,9 @@ const OPTION_CLASS =
   'flex h-9 min-w-14 shrink-0 items-center justify-center rounded-lg text-sm';
 
 function optionClass(selected: boolean, disabled: boolean): string {
-  if (disabled) return `${OPTION_CLASS} cursor-not-allowed text-neutral-700`;
-  if (selected) return `${OPTION_CLASS} bg-white/15 text-neutral-50`;
-  return `${OPTION_CLASS} text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100`;
+  if (disabled) return `${OPTION_CLASS} cursor-not-allowed text-muted-foreground`;
+  if (selected) return `${OPTION_CLASS} bg-foreground/15 text-foreground`;
+  return `${OPTION_CLASS} text-muted-foreground hover:bg-muted hover:text-foreground`;
 }
 
 export default function HourSelector({
@@ -234,51 +234,51 @@ export default function HourSelector({
 
       {open && popoverPosition
         ? createPortal(
-            <div
-              ref={popoverRef}
-              className={POPOVER_CLASS}
-              style={{ top: popoverPosition.top, left: popoverPosition.left }}
-            >
-              <div>
-                <div className={LIST_CLASS}>
-                  {HOURS.map((h) => {
-                    const enabled = isHourEnabled(h);
-                    return (
-                      <button
-                        key={h}
-                        type="button"
-                        disabled={!enabled}
-                        className={optionClass(h === draftHour, !enabled)}
-                        onClick={() => setDraftHour(h)}
-                        onDoubleClick={() => confirmSelection(h, draftMinute ?? 0)}
-                      >
-                        {pad(h)}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-1">
-                {MINUTES.map((m) => {
-                  const enabled = isMinuteEnabled(m);
+          <div
+            ref={popoverRef}
+            className={POPOVER_CLASS}
+            style={{ top: popoverPosition.top, left: popoverPosition.left }}
+          >
+            <div>
+              <div className={LIST_CLASS}>
+                {HOURS.map((h) => {
+                  const enabled = isHourEnabled(h);
                   return (
                     <button
-                      key={m}
+                      key={h}
                       type="button"
                       disabled={!enabled}
-                      className={optionClass(m === draftMinute, !enabled)}
-                      onClick={() => pickMinute(m)}
-                      onDoubleClick={() => confirmSelection(draftHour, m)}
+                      className={optionClass(h === draftHour, !enabled)}
+                      onClick={() => setDraftHour(h)}
+                      onDoubleClick={() => confirmSelection(h, draftMinute ?? 0)}
                     >
-                      {pad(m)}
+                      {pad(h)}
                     </button>
                   );
                 })}
               </div>
-            </div>,
-            document.body,
-          )
+            </div>
+
+            <div className="grid grid-cols-1 gap-1">
+              {MINUTES.map((m) => {
+                const enabled = isMinuteEnabled(m);
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    disabled={!enabled}
+                    className={optionClass(m === draftMinute, !enabled)}
+                    onClick={() => pickMinute(m)}
+                    onDoubleClick={() => confirmSelection(draftHour, m)}
+                  >
+                    {pad(m)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>,
+          document.body,
+        )
         : null}
     </div>
   );

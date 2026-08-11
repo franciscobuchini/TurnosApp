@@ -9,9 +9,9 @@ interface CalendarNavigationButtonsProps {
   buttonClassName?: string;
 }
 
-const CALENDAR_NAVIGATION_BUTTONS_CLASS = 'hidden group-open:flex gap-3';
+const CALENDAR_NAVIGATION_BUTTONS_CLASS = 'flex gap-3';
 
-const CALENDAR_ACTION_BUTTON_CLASS = 'h-8 w-8 p-0 justify-center items-center bg-transparent hover:bg-transparent text-white';
+const CALENDAR_ACTION_BUTTON_CLASS = 'h-8 w-8 p-0 justify-center items-center bg-transparent hover:bg-transparent text-foreground';
 
 export default function CalendarNavigationButtons({
   onPrevMonth,

@@ -5,7 +5,7 @@ import Dashboard, { useAdminContext } from './pages/admin/Dashboard';
 import Personalizacion from './pages/admin/Personalizacion';
 import SettingsBusinessView from './components/views/SettingsBusinessView';
 import SettingsScheduleView from './components/views/SettingsScheduleView';
-import SettingsSecurityView from './components/views/SettingsSecurityView';
+import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Site from './pages/clients/Site';
 
 import ScheduleView from './components/views/ScheduleView';
@@ -26,9 +26,6 @@ function SchedulePage() {
       onViewDateChange={ctx.setViewDate}
       onSelectDate={ctx.setSelectedDate}
       selectedClientName={ctx.selectedClientName ?? undefined}
-      onAddShiftClick={ctx.openAddShift}
-      onCancelAddShift={ctx.closeAddShift}
-      addShiftOpen={ctx.addShiftOpen}
     />
   );
 }
@@ -133,13 +130,15 @@ function App() {
 
         <Route path="/SettingsView" element={<Navigate to="/admin/ajustes" replace />} />
         <Route path="/SettingsView/horarios" element={<Navigate to="/admin/ajustes/horarios" replace />} />
-        <Route path="/SettingsView/seguridad" element={<Navigate to="/admin/ajustes/seguridad" replace />} />
+        <Route path="/SettingsView/seguridad" element={<Navigate to="/admin/ajustes" replace />} />
 
         <Route path="/admin" element={<Dashboard />}>
           <Route index element={<SchedulePage />} />
           <Route path="ajustes" element={<SettingsBusinessView />} />
           <Route path="ajustes/horarios" element={<SettingsScheduleView />} />
-          <Route path="ajustes/seguridad" element={<SettingsSecurityView />} />
+
+          <Route path="metricas" element={<AdminPlaceholderPage subtitle="Métricas del negocio" />} />
+          <Route path="marketing" element={<AdminPlaceholderPage subtitle="Herramientas de marketing" />} />
           <Route path="miembro" element={<EntityPage mode="create" />} />
           <Route path="miembro/:name" element={<EntityPage mode="view" />} />
           <Route path="servicio" element={<ServicePage mode="create" />} />

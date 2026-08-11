@@ -9,15 +9,17 @@ import type { ReactNode } from 'react';
 interface LayoutProps {
   children: ReactNode;
   sidebar?: ReactNode;
+  menubar?: ReactNode;
 }
 
 const LAYOUT_CONTENT_CLASS = 'h-dvh w-dvw flex flex-1 overflow-hidden p-3 gap-4';
 
 const MAIN_AREA_CLASS = 'flex flex-1 min-h-0 min-w-0 h-full w-full';
 
-export default function Layout({ children, sidebar }: LayoutProps) {
+export default function Layout({ children, sidebar, menubar }: LayoutProps) {
   return (
       <div className={LAYOUT_CONTENT_CLASS}>
+        {menubar}
         {sidebar}
         <div className={MAIN_AREA_CLASS}>{children}</div>
       </div>

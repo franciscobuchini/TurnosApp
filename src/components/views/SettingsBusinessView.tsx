@@ -1,14 +1,13 @@
 /*
   src/components/views/SettingsBusinessView.tsx
-  Vista de Ajustes > Negocio (/admin/ajustes): nombre del negocio, imagen
-  (cargable desde el dispositivo), url y ubicación.
+  Vista de Ajustes > Negocio (/admin/ajustes): datos del negocio a la izquierda
+  y datos de seguridad de la cuenta a la derecha, en la misma pantalla.
 */
 
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, X } from 'lucide-react';
 import ViewLayout from '../layout/ViewLayout';
-import ComingSoonPanel from '../layout/ComingSoonPanel';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +19,15 @@ interface BusinessDraft {
   url: string;
   location: string;
 }
+
+interface SecurityDraft {
+  name: string;
+  email: string;
+  password: string;
+  adminPin: string;
+}
+
+const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
 
 export default function SettingsBusinessView() {
   const navigate = useNavigate();
@@ -36,8 +44,23 @@ export default function SettingsBusinessView() {
     location: business.location ?? '',
   });
 
+  const [securityDraft, setSecurityDraft] = useState<SecurityDraft>({
+    name: business.managerName ?? '',
+    email: business.email ?? '',
+    password: business.password ?? '',
+    adminPin: business.adminPin ?? '',
+  });
+
   const setValue = (key: keyof BusinessDraft) => (value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));
+
+  const setSecurityValue = (key: keyof SecurityDraft) => (value: string) =>
+    setSecurityDraft((prev) => ({ ...prev, [key]: value }));
+
+  const handleAdminPinChange = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 4);
+    setSecurityDraft((prev) => ({ ...prev, adminPin: digits }));
+  };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -62,95 +85,135 @@ export default function SettingsBusinessView() {
       image: draft.imageUrl,
       url: draft.url.trim(),
       location: draft.location.trim(),
+      managerName: securityDraft.name.trim(),
+      email: securityDraft.email.trim(),
+      password: securityDraft.password,
+      adminPin: securityDraft.adminPin,
     });
     goBack();
   };
 
   return (
     <ViewLayout
-        title="Negocio"
-        left={
-          <Form className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
-            {/* Columna 1 */}
-            <div className="flex flex-col gap-4">
-              <Input
-                label="Nombre del negocio"
-                placeholder="Ej: Barbería Studio"
-                value={draft.name}
-                onChange={(e) => setValue('name')(e.target.value)}
-              />
-              <Input
-                label="URL del negocio"
-                prefix="minube.site/"
-                placeholder="tu-negocio"
-                value={draft.url}
-                onChange={(e) => setValue('url')(e.target.value)}
-              />
-              <Input
-                label="Ubicación"
-                placeholder="Ciudad, dirección"
-                value={draft.location}
-                onChange={(e) => setValue('location')(e.target.value)}
-              />
-            </div>
+      title="Ajustes y Seguridad"
+      left={
+        <Form className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
+          {/* Columna 1 */}
+          <div className="flex flex-1 flex-col gap-4">
+            <Input
+              label="Nombre del negocio"
+              placeholder="Ej: Barbería Studio"
+              value={draft.name}
+              onChange={(e) => setValue('name')(e.target.value)}
+            />
+            <Input
+              label="URL del negocio"
+              prefix="minube.site/"
+              placeholder="tu-negocio"
+              value={draft.url}
+              onChange={(e) => setValue('url')(e.target.value)}
+            />
+            <Input
+              label="Ubicación"
+              placeholder="Ciudad, dirección"
+              value={draft.location}
+              onChange={(e) => setValue('location')(e.target.value)}
+            />
+          </div>
 
-            {/* Columna 2 */}
-            <div className="flex flex-col gap-3 h-full">
-              <Label>Imagen del negocio</Label>
-              <div
-                onClick={() => {
-                  if (!draft.imageUrl) {
-                    fileInputRef.current?.click();
-                  }
-                }}
-                className="group relative flex aspect-square w-full items-center justify-center rounded-4xl border-2 border-dashed border-neutral-700 bg-neutral-900/30 overflow-hidden cursor-pointer hover:border-neutral-500 transition-colors"
-              >
-                {draft.imageUrl ? (
-                  <>
-                    <img
-                      src={draft.imageUrl}
-                      alt="Imagen del negocio"
-                      className="h-full w-full object-cover rounded-4xl"
-                    />
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage();
-                        }}
-                        className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 text-white hover:bg-neutral-700 transition-colors cursor-pointer"
-                        aria-label="Quitar imagen"
-                      >
-                        <X size={24} />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-neutral-400">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-800 text-neutral-400 group-hover:bg-neutral-700 group-hover:text-white transition-all">
-                      <Plus size={24} />
-                    </div>
-                    <span className="mt-2 text-sm text-neutral-500 group-hover:text-neutral-400 transition-colors">
-                      Cargar imagen
-                    </span>
+          {/* Columna 2 */}
+          <div className="flex flex-col gap-3">
+            <Label>Imagen del negocio</Label>
+            <div
+              onClick={() => {
+                if (!draft.imageUrl) {
+                   fileInputRef.current?.click();
+                }
+              }}
+              className="group relative flex aspect-square h-55 items-center justify-center rounded-4xl border-1 border-dashed border-border bg-card/30 overflow-hidden cursor-pointer hover:border-muted-foreground transition-colors"
+            >
+              {draft.imageUrl ? (
+                <>
+                  <img
+                    src={draft.imageUrl}
+                    alt="Imagen del negocio"
+                    className="h-full w-full object-cover rounded-4xl"
+                  />
+                  <div className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveImage();
+                      }}
+                      className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
+                      aria-label="Quitar imagen"
+                    >
+                      <X size={24} />
+                    </button>
                   </div>
-                )}
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageSelect}
-              />
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-muted/80 group-hover:text-foreground transition-all">
+                    <Plus size={24} />
+                  </div>
+                  <span className="mt-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                    Cargar imagen
+                  </span>
+                </div>
+              )}
             </div>
-          </Form>
-        }
-        right={<ComingSoonPanel subtitle="Ajustes avanzados" />}
-        confirmText="Guardar"
-        onCancel={goBack}
-        onConfirm={handleSave}
-      />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImageSelect}
+            />
+          </div>
+        </Form>
+      }
+      right={
+        <Form className="flex flex-col gap-4">
+          <div className={TWO_COLUMN_GRID_CLASS}>
+            <Input
+              label="Nombre del encargado"
+              placeholder="Ej: Juan Pérez"
+              value={securityDraft.name}
+              onChange={(e) => setSecurityValue('name')(e.target.value)}
+            />
+            <Input
+              label="Mail"
+              type="email"
+              placeholder="encargado@mail.com"
+              value={securityDraft.email}
+              onChange={(e) => setSecurityValue('email')(e.target.value)}
+            />
+          </div>
+          <div className={TWO_COLUMN_GRID_CLASS}>
+            <Input
+              label="Contraseña"
+              type="password"
+              placeholder="••••••••"
+              value={securityDraft.password}
+              onChange={(e) => setSecurityValue('password')(e.target.value)}
+            />
+            <Input
+              label="Pin de administrador"
+              type="password"
+              inputMode="numeric"
+              placeholder="0000"
+              maxLength={4}
+              value={securityDraft.adminPin}
+              onChange={(e) => handleAdminPinChange(e.target.value)}
+            />
+          </div>
+        </Form>
+      }
+      confirmText="Guardar"
+      onCancel={goBack}
+      onConfirm={handleSave}
+    />
   );
 }

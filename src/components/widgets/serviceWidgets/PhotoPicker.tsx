@@ -9,9 +9,9 @@ type Props = {
 
 const GRID_CLASS = 'grid grid-cols-[repeat(auto-fill,80px)] justify-center gap-2';
 const PHOTO_CLASS = 'h-20 w-20 overflow-hidden rounded-2xl border border-input bg-input';
-const PHOTO_ACTIVE_CLASS = 'border border-neutral-300';
+const PHOTO_ACTIVE_CLASS = 'border border-border';
 const PHOTO_INACTIVE_CLASS = '';
-const NO_PHOTO_LABEL_CLASS = 'flex h-full w-full items-center justify-center text-neutral-300';
+const NO_PHOTO_LABEL_CLASS = 'flex h-full w-full items-center justify-center text-muted-foreground';
 const PHOTO_IMAGE_CLASS = 'h-full w-full object-cover';
 
 export default function PhotoPicker({

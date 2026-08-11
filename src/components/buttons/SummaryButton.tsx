@@ -6,7 +6,7 @@ interface SummaryButtonProps {
   iconClassName?: string;
 }
 
-const SUMMARY_BUTTON_CLASS = 'group-open:rotate-180 text-white';
+const SUMMARY_BUTTON_CLASS = 'group-open:rotate-180 text-foreground';
 
 export default function SummaryButton({
   className,

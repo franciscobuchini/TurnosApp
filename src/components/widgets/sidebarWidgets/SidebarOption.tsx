@@ -17,9 +17,9 @@ interface SidebarOptionProps {
 }
 
 const PANEL_CLASS =
-  'h-12 flex w-full shrink-0 items-center rounded-2xl bg-transparent text-white p-4 ';
+  'h-12 flex w-full shrink-0 items-center rounded-2xl bg-transparent text-foreground p-4 ';
 
-const PANEL_SELECTED_CLASS = 'bg-white/10';
+const PANEL_SELECTED_CLASS = 'bg-foreground/10';
 
 export default function SidebarOption({
   id,

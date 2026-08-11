@@ -5,8 +5,8 @@ import { SERVICE_COLOR_BY_ID } from '../serviceWidgets/serviceColors';
 
 const SERVICE_SELECTOR_CLASS = 'flex flex-wrap gap-4';
 const SERVICE_FIELD_CLASS = 'flex flex-col gap-4';
-const SERVICE_BADGE_CLASS = 'cursor-pointer border-none bg-neutral-950 text-neutral-500';
-const SERVICE_BADGE_ACTIVE_CLASS = 'text-neutral-900';
+const SERVICE_BADGE_CLASS = 'cursor-pointer border-none bg-background text-muted-foreground';
+const SERVICE_BADGE_ACTIVE_CLASS = 'text-black';
 
 interface ServiceSelectorProps {
   value: string[];
@@ -25,7 +25,7 @@ export default function ServiceSelector({ value, onChange, disabled = false, sho
     <div className={SERVICE_FIELD_CLASS}>
       <Label>Servicios que presta</Label>
       {visibleServices.length === 0 ? (
-        <p className="text-neutral-500 text-sm px-3">
+        <p className="text-muted-foreground text-sm px-3">
           Este miembro no presta ningún servicio
         </p>
       ) : (

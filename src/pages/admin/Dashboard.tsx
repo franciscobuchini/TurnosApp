@@ -6,7 +6,7 @@
   src/components/views y tienen ruta propia.
 */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   type NavigateFunction,
   Outlet,
@@ -16,6 +16,7 @@ import {
 } from 'react-router-dom';
 import { useAgendaDate } from '@/hooks/useAgendaDate';
 import Layout from '../../components/layout/Layout';
+import AppMenubar from '../../components/layout/AppMenubar';
 import {
   getClients,
   getTeamFilters,
@@ -36,7 +37,6 @@ import { SERVICE_COLOR_BY_ID } from '../../components/widgets/serviceWidgets/ser
 import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';
 import AddShiftSidebar from '../../components/views/sidebarViews/AddShiftSidebar';
-import SettingsSidebar from '../../components/views/sidebarViews/SettingsSidebar';
 
 export interface AdminContext {
   teamFilters: FiltersOption[];
@@ -87,6 +87,14 @@ function Dashboard() {
   const [addShiftOpen, setAddShiftOpen] = useState(false);
   const openAddShift = () => setAddShiftOpen(true);
   const closeAddShift = () => setAddShiftOpen(false);
+
+  useEffect(() => {
+    const state = location.state as { openAddShift?: boolean } | null;
+    if (state?.openAddShift) {
+      setAddShiftOpen(true);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state, location.pathname, navigate]);
   const { viewDate, selectedDate, setViewDate, setSelectedDate, selectDate } = useAgendaDate();
   const [clients, setClients] = useState<Client[]>(() => getClients());
   const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
@@ -190,15 +198,13 @@ function Dashboard() {
     deleteClient,
   };
 
-  const settingsSection =
-    location.pathname === '/admin/ajustes/horarios'
-      ? 'horarios'
-      : location.pathname === '/admin/ajustes/seguridad'
-        ? 'seguridad'
-        : 'negocio';
+  const isSidebarlessPage =
+    location.pathname.startsWith('/admin/ajustes') ||
+    ['/admin/metricas', '/admin/marketing'].includes(location.pathname);
 
   return (
     <Layout
+      menubar={<AppMenubar addShiftOpen={addShiftOpen} onCloseAddShift={closeAddShift} />}
       sidebar={
         addShiftOpen ? (
           <AddShiftSidebar
@@ -206,9 +212,7 @@ function Dashboard() {
             toggleServiceFilter={toggleServiceFilter}
             onClose={closeAddShift}
           />
-        ) : location.pathname.startsWith('/admin/ajustes') ? (
-          <SettingsSidebar activeId={settingsSection} />
-        ) : (
+        ) : isSidebarlessPage ? null : (
           <AdminSidebar
             selectedDate={selectedDate}
             onSelectDate={selectDate}
@@ -217,7 +221,6 @@ function Dashboard() {
             serviceFilters={serviceFilters}
             toggleServiceFilter={toggleServiceFilter}
             clientFilters={clientFilters}
-            onOpenSettings={() => navigate('/admin/ajustes')}
           />
         )
       }

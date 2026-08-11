@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 
 import { getOpeningHours, getTeamMembers } from '../../database/data';
 import type { OpeningHoursEntry, TeamMember } from '../../database/types';
@@ -6,7 +6,7 @@ import type { OpeningHoursEntry, TeamMember } from '../../database/types';
 import ViewLayout from '../layout/ViewLayout';
 
 import FormAddEntity from '../widgets/entityWidgets/FormAddEntity';
-import EntityWeekSchedule from '../widgets/entityWidgets/EntityWeekSchedule';
+import WeekSchedule from '../widgets/entityWidgets/WeekSchedule';
 
 export const ADD_ENTITY_VIEW_TITLE = 'Agregar un nuevo miembro';
 
@@ -122,7 +122,6 @@ export default function AddEntityView({
   return (
     <ViewLayout
       title={title}
-      onBack={handleBack}
       left={
         <FormAddEntity
           key={mode === 'create' ? 'create' : member?.name}
@@ -133,7 +132,7 @@ export default function AddEntityView({
         />
       }
       right={
-        <EntityWeekSchedule
+        <WeekSchedule
           value={schedule}
           onChange={setSchedule}
           readOnly={resolvedMode === 'view'}

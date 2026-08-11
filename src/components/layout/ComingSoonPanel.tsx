@@ -4,7 +4,7 @@
   que todavía no tienen esa función implementada (antes copiado en cada vista).
 */
 
-const COMING_SOON_CLASS = 'flex flex-1 flex-col items-center justify-center gap-2 rounded-4xl border-1 border-dashed border-neutral-500 text-neutral-400';
+const COMING_SOON_CLASS = 'flex flex-1 flex-col items-center justify-center gap-2 rounded-4xl text-muted-foreground';
 
 interface ComingSoonPanelProps {
   title?: string;

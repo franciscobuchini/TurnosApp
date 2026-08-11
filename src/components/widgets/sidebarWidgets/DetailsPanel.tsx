@@ -30,7 +30,7 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   hideHeader?: boolean;
 }
 
-const FILTER_PANEL_CLASS = 'group w-full cursor-pointer overflow-hidden p-1 shrink-0 bg-card rounded-3xl text-white';
+const FILTER_PANEL_CLASS = 'group w-full cursor-pointer overflow-hidden shrink-0 rounded-4xl text-foreground p-2 bg-card border border-border';
 
 const FILTER_PANEL_BODY_CLASS = 'flex flex-col flex-1 min-h-0 overflow-y-auto pt-1 ';
 
@@ -41,8 +41,8 @@ const DETAILS_PANEL_IMAGE_CLASS = 'h-full w-full';
 
 const DETAILS_PANEL_LABEL_CLASS = '';
 
-const DETAILS_PANEL_TRIGGER_CLASS = 'w-full h-12 gap-4 shrink-0 justify-center text-neutral-400 hover:text-white rounded-2xl';
-const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-neutral-950';
+const DETAILS_PANEL_TRIGGER_CLASS = 'w-full h-12 gap-4 shrink-0 justify-center text-muted-foreground hover:text-foreground rounded-3xl';
+const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-background';
 
 export default function DetailsPanel({
   title,

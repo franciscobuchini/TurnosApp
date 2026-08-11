@@ -145,7 +145,6 @@ export default function AddClientView({
   return (
     <ViewLayout
       title={title}
-      onBack={handleBack}
       left={
         <FormAddClient mode={resolvedMode} initialValues={formValues} onValidityChange={setIsFormValid} onValuesChange={setDraftValues} />
       }

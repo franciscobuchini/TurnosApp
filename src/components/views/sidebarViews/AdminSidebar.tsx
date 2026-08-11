@@ -5,7 +5,6 @@
 */
 
 import { useNavigate } from 'react-router-dom';
-import { MoreVertical } from 'lucide-react';
 import Sidebar from '../../layout/Sidebar';
 import Calendar from '../../widgets/sidebarWidgets/Calendar';
 import DetailsPanel, {
@@ -26,7 +25,6 @@ interface AdminSidebarProps {
   serviceFilters: DetailsPanelOption[];
   toggleServiceFilter: (id: string, checked: boolean) => void;
   clientFilters: FiltersOption[];
-  onOpenSettings: () => void;
 }
 
 export default function AdminSidebar({
@@ -37,23 +35,11 @@ export default function AdminSidebar({
   serviceFilters,
   toggleServiceFilter,
   clientFilters,
-  onOpenSettings,
 }: AdminSidebarProps) {
   const navigate = useNavigate();
 
   return (
-    <Sidebar
-      headerAction={
-        <button
-          type="button"
-          aria-label="Ajustes"
-          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full text-neutral-400 hover:bg-muted hover:text-neutral-50"
-          onClick={onOpenSettings}
-        >
-          <MoreVertical size={18} />
-        </button>
-      }
-    >
+    <Sidebar>
       <Calendar selectedDate={selectedDate} onSelectDate={onSelectDate} />
       <DetailsPanel
         title="Equipo"

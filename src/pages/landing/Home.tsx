@@ -16,7 +16,7 @@ export default function Home() {
     <div className={HOME_CLASS}>
       <div className={HOME_CONTENT_CLASS}>
         <Logo className={HOME_LOGO_CLASS} />
-        <p className="text-2xl font-semibold tracking-tight text-neutral-50">
+        <p className="text-2xl font-semibold tracking-tight text-foreground">
           minube.site próximamente
         </p>
       </div>

@@ -59,7 +59,7 @@ function Table<T>({
               <TableHead
                 key={column.key}
                 className={cn(
-                  "text-center bg-neutral-50",
+                  "text-center bg-card",
                   stickyHeader && "sticky top-0 z-20",
                   column.alignClassName,
                   column.className,

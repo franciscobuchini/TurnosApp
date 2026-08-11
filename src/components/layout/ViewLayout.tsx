@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import MainContent from '../layout/MainContent';
 import MainHeader from '@/components/ui/main-header';
-import BackButton from '../buttons/BackButton';
 import ViewFooter from './ViewFooter';
 
 /*
@@ -9,14 +8,14 @@ import ViewFooter from './ViewFooter';
   Shell de dos columnas (left/right) + footer, compartido por todas las
   vistas salvo Schedule (que es de una sola columna). El footer ya no se
   arma a mano en cada vista: ViewLayout recibe los props de acción y
-  renderiza siempre el mismo ViewFooter.
+  renderiza siempre el mismo ViewFooter. El header (MainHeader) no tiene
+  botón de volver en ninguna vista.
 */
 
 interface ViewLayoutProps {
   title: string;
   left: ReactNode;
   right: ReactNode;
-  onBack?: () => void;
   cancelText?: string;
   onCancel: () => void;
   confirmText?: string;
@@ -27,10 +26,10 @@ interface ViewLayoutProps {
 }
 
 const VIEW_LAYOUT_CLASS =
-  'flex min-h-0 w-full flex-1 flex-col p-3 gap-3';
+  'flex min-h-0 w-full flex-1 flex-col px-12 py-3';
 
 const VIEW_COLUMNS_CLASS =
-  'relative flex h-full w-full flex-1 flex-row gap-6';
+  'relative flex h-full w-full flex-1 flex-row gap-12';
 
 const VIEW_LEFT_COLUMN_CLASS =
   'flex min-h-0 w-full flex-1';
@@ -45,7 +44,6 @@ export default function ViewLayout({
   title,
   left,
   right,
-  onBack,
   cancelText,
   onCancel,
   confirmText,
@@ -56,10 +54,7 @@ export default function ViewLayout({
 }: ViewLayoutProps) {
   return (
     <MainContent>
-      <MainHeader
-        title={title}
-        action={onBack ? <BackButton onClick={onBack} /> : undefined}
-      />
+      <MainHeader title={title} />
 
       <div className={VIEW_LAYOUT_CLASS}>
         <div className={VIEW_COLUMNS_CLASS}>

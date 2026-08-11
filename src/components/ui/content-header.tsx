@@ -13,9 +13,9 @@ const CONTENT_HEADER_CLASS = 'flex items-center justify-between px-6';
 
 const CONTENT_HEADER_TITLE_COLUMN_CLASS = 'flex flex-1 flex-col gap-1';
 
-const CONTENT_HEADER_TITLE_CLASS = 'text-xl text-white tracking-tight';
+const CONTENT_HEADER_TITLE_CLASS = 'text-lg text-foreground tracking-tight';
 
-const CONTENT_HEADER_SUBTITLE_CLASS = 'line-clamp-2 text-sm text-neutral-500';
+const CONTENT_HEADER_SUBTITLE_CLASS = 'line-clamp-2 text-sm text-muted-foreground';
 
 const CONTENT_HEADER_ACTION_CLASS = 'flex shrink-0 items-center';
 

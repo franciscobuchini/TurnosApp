@@ -5,16 +5,18 @@
   de modo que lo creado/guardado sobrevive a recargas.
 */
 
-import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry, Business } from './types.ts';
+import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry, Business, Appointment } from './types.ts';
 import teamMembersJson from './teamMembers.json';
 import servicesJson from './service.json';
 import clientsJson from './client.json';
 import businessJson from './business.json';
+import appointmentsJson from './appointments.json';
 
 const CLIENTS_STORAGE_KEY = 'turnosapp.clients';
 const SERVICES_STORAGE_KEY = 'turnosapp.services';
 const TEAM_MEMBERS_STORAGE_KEY = 'turnosapp.teamMembers';
 const BUSINESS_STORAGE_KEY = 'turnosapp.business';
+const APPOINTMENTS_STORAGE_KEY = 'turnosapp.appointments';
 
 function readObject<T>(key: string, seed: T): T {
   if (typeof localStorage === 'undefined') {
@@ -72,7 +74,7 @@ function writeCollection<T>(key: string, value: T[]) {
 //  - OpeningHoursEntry[]: { dayOfWeek, startTime, endTime } con "HH:mm".
 //  - Formato "Día y horas" del seed: { day: "L", hours: ["9:00 - 18:00"] }.
 // Esta función normaliza cualquier valor al formato OpeningHoursEntry para que
-// el componente EntityWeekSchedule coincida siempre con lo guardado en la BBDD.
+// el componente WeekSchedule coincida siempre con lo guardado en la BBDD.
 // Las entradas sin ambos horarios (startTime/endTime) se descartan: un horario
 // incompleto nunca se persiste.
 const DAY_LETTER_TO_NUMBER: Record<string, number> = {
@@ -217,6 +219,24 @@ export function removeClient(name: string): Client[] {
   const next = current.filter((existing) => existing.name.toLowerCase() !== name.toLowerCase());
   saveClients(next);
   return next;
+}
+
+/* ── Turnos (appointments) ────────────────────────────────── */
+
+export function getAppointments(): Appointment[] {
+  return readCollection(APPOINTMENTS_STORAGE_KEY, appointmentsJson as Appointment[]);
+}
+
+export function getAppointmentsByDate(date: Date): Appointment[] {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+  return getAppointments().filter((a) => a.date === dateStr);
+}
+
+export function saveAppointments(appointments: Appointment[]) {
+  writeCollection(APPOINTMENTS_STORAGE_KEY, appointments);
 }
 
 export function getOpeningHours(): OpeningHoursEntry[] {

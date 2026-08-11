@@ -1,26 +1,110 @@
 /*
   src/styles/Theme.css
-  Colores de la app, en un solo lugar y en hexadecimal. Para cambiar un color
-  se edita acá — el resto de los archivos (Index.css, los componentes de
-  shadcn en components/ui/) ya están armados para tomar el valor de estas
-  variables, no hace falta tocar nada más.
+  Todos los colores de la app, en un solo lugar y en hexadecimal.
 
-  No es la paleta de colores de servicios (esa vive en Variables.css,
-  --palette-01..12): esto es el tema de la interfaz (fondos, texto, bordes).
+  Para cambiar un color se edita la primera sección de acá abajo. El resto
+  del archivo es el "cableado" hacia los nombres que usa Tailwind/shadcn
+  (bg-card, text-primary, border-border, etc.) para generar esas clases —
+  no define colores nuevos, no hace falta tocarlo.
 */
 
 :root {
   /* Superficies, de más oscuro a más claro */
   --color-bg: #0a0a0a;         /* fondo general de la app */
-  --color-surface: #171717;    /* tarjetas, sidebar, popovers, footers */
-  --color-field: #262626;      /* inputs, pills, celdas, hover sutil */
-  --color-border: #404040;     /* bordes de inputs y tarjetas */
+  --color-surface: #161616;    /* tarjetas, sidebar, popovers, footers */
+  --color-field: #272727;      /* inputs, pills, celdas, hover sutil */
+  --color-border: #272727;     /* bordes de inputs y tarjetas */
+  --color-gray: #c7c7c7;
 
   /* Texto */
   --color-text: #fafafa;       /* texto principal sobre fondo oscuro */
   --color-text-muted: #a3a3a3; /* texto secundario (labels, descripciones) */
 
   /* Acento */
-  --color-accent: #e5e5e5;     /* botón "primary": claro, con texto oscuro encima */
+  --color-accent: #e4f77a;     /* botón "primary": lima, con texto oscuro encima */
   --color-danger: #ef4444;     /* eliminar, errores */
+
+  /* Paleta pastel decorativa: colores de servicio (ColorPicker) y
+     resaltados del Calendar (hoy/seleccionado). No confundir con
+     --color-accent de arriba, que es el color de marca/acción de los
+     componentes interactivos. */
+  --palette-01: #e4f77a; /* lima */
+  --palette-02: #c5bdf6; /* lavanda */
+  --palette-03: #c4deeb; /* celeste */
+  --palette-04: #f6c6d0; /* rosa */
+  --palette-05: #ffd9a8; /* durazno */
+  --palette-06: #b8e8d4; /* menta */
+  --palette-07: #ffb4a8; /* coral */
+  --palette-08: #d9c2f0; /* violeta */
+  --palette-09: #fff3b0; /* manteca */
+  --palette-10: #bfd8ff; /* azul pastel */
+  --palette-11: #f9c8a9; /* salmón claro */
+  --palette-12: #d6f5c3; /* verde lima suave */
+}
+
+/*
+  Tema claro: mismo acento y mismo error, cambian solo las superficies y el
+  texto. Se activa con data-theme="light" en <html> (ver src/hooks/useTheme.ts).
+*/
+:root[data-theme='light'] {
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-field: #eeeeee;
+  --color-border: #eeeeee;
+  --color-gray: #dadada;
+  --color-text: #0a0a0a;
+  --color-text-muted: #8b8b8b;
+  
+}
+
+/*
+  Cableado hacia shadcn/Tailwind — no tocar. La app no tiene selector de
+  tema: usa siempre esta única paleta oscura (equivalente a lo que sería
+  .dark en shadcn), aplicada directo acá.
+
+  Los radios (rounded-md, rounded-xl, etc.) no se redefinen acá: se usa
+  directo la escala nativa de Tailwind.
+*/
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gray: var(--color-gray);
+}
+
+:root {
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-bg);
+  --popover-foreground: var(--color-text);
+  --primary: var(--color-accent);
+  --primary-foreground: var(--color-surface);
+  --secondary: var(--color-field);
+  --secondary-foreground: var(--color-text);
+  --muted: var(--color-field);
+  --muted-foreground: var(--color-text-muted);
+  --accent: var(--color-field);
+  --accent-foreground: var(--color-text);
+  --destructive: var(--color-danger);
+  --border: var(--color-border);
+  --input: var(--color-field);
+  --ring: var(--color-text-muted);
+  --gray: var(--color-gray);
 }

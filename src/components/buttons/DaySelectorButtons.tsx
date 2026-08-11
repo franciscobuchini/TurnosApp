@@ -8,13 +8,13 @@ interface DaySelectorButtonsProps {
   onSelectDate: (date: Date) => void;
 }
 
-const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-24 flex-1 p-3 shrink-0 justify-center items-center bg-transparent';
+const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-24 flex-1 p-3 shrink-0 justify-center items-center bg-transparent rounded-3xl';
 
-const WEEK_SELECTOR_DAY_DEFAULT_CLASS = 'hover:bg-transparent';
+const WEEK_SELECTOR_DAY_DEFAULT_CLASS = 'text-foreground hover:bg-card';
 
-const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-card text-white hover:bg-card';
+const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-(--palette-01) hover:bg-(--palette-01) text-black';
 
-const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-white hover:bg-white';
+const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-(--palette-02) hover:bg-(--palette-02) text-black';
 
 const WEEK_SELECTOR_DAY_VISIBILITY_0_CLASS = '';
 const WEEK_SELECTOR_DAY_VISIBILITY_1_CLASS = 'hidden @min-[380px]:flex';

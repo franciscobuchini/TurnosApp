@@ -60,3 +60,14 @@ export type FiltersOption = {
   label: string;
   checked?: boolean;
 };
+
+export type Appointment = {
+  id: string;
+  date: string;       // "YYYY-MM-DD"
+  startTime: string;  // "HH:mm"
+  endTime: string;    // "HH:mm"
+  member: string;
+  client: string;
+  service: string;
+  notes?: string;
+};

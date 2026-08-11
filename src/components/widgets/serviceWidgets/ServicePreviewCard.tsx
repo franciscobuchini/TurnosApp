@@ -14,12 +14,12 @@ const PREVIEW_CARD_CLASS =
   'flex h-20 w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card';
 
 const PREVIEW_IMAGE_CLASS =
-  'flex h-full w-20 shrink-0 items-center justify-center text-neutral-500';
+  'flex h-full w-20 shrink-0 items-center justify-center text-muted-foreground';
 
 const PREVIEW_IMAGE_IMG_CLASS = 'h-full w-full object-cover';
 
 const PREVIEW_IMAGE_WITH_COLOR_CLASS =
-  'flex h-full w-4 shrink-0 text-neutral-100';
+  'flex h-full w-4 shrink-0 text-foreground';
 
 const PREVIEW_DETAILS_CLASS =
   'flex min-w-0 flex-1 flex-col justify-center gap-1 px-3';
@@ -31,16 +31,16 @@ const PREVIEW_COLOR_DOT_CLASS =
   'h-2.5 w-2.5 shrink-0 rounded-full';
 
 const PREVIEW_TITLE_CLASS =
-  'truncate text-sm font-semibold text-neutral-100';
+  'truncate text-sm font-semibold text-foreground';
 
 const PREVIEW_DESCRIPTION_CLASS =
-  'truncate text-xs text-neutral-400';
+  'truncate text-xs text-muted-foreground';
 
 const PREVIEW_FOOTER_CLASS =
-  'flex items-center gap-2 text-sm text-neutral-300';
+  'flex items-center gap-2 text-sm text-muted-foreground';
 
 const PREVIEW_DIVIDER_DOT_CLASS =
-  'h-1 w-1 rounded-full bg-neutral-600';
+  'h-1 w-1 rounded-full bg-border';
 
 export default function ServicePreviewCard({
   name,
@@ -60,7 +60,7 @@ const hasPhoto =
             hasPhoto
               ? PREVIEW_IMAGE_CLASS
               : PREVIEW_IMAGE_WITH_COLOR_CLASS,
-            hasPhoto ? 'bg-neutral-800' : colorClassName
+            hasPhoto ? 'bg-muted' : colorClassName
           )}
         >
           {hasPhoto ? (

@@ -7,7 +7,7 @@ interface CancelButtonProps extends Omit<React.HTMLAttributes<HTMLElement>, 'chi
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-const CANCEL_BUTTON_CLASS = 'h-12 rounded-2xl px-8 text-base text-neutral-100';
+const CANCEL_BUTTON_CLASS = 'h-12 rounded-2xl px-8 text-base text-foreground';
 
 export default function CancelButton({ text, className, onClick, ...props }: CancelButtonProps) {
   return (

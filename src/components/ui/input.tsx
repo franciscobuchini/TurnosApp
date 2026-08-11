@@ -12,10 +12,10 @@ import { Textarea } from "@/components/ui/textarea"
 */
 
 const INPUT_BASE_CLASS =
-  "h-11 w-full min-w-0 rounded-md border border-input bg-transparent px-4 py-2 text-base shadow-xs outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+  "h-11 w-full min-w-0 rounded-md border border-input bg-transparent px-4 py-2 text-base outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm aria-invalid:border-destructive aria-invalid:ring-destructive/20"
 
 const INPUT_WITH_PREFIX_CLASS =
-  "flex items-center h-11 w-full min-w-0 rounded-md border border-input bg-transparent shadow-xs outline-none has-[:focus-visible]:border-ring has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50"
+  "flex items-center h-11 w-full min-w-0 rounded-md border border-input bg-transparent outline-none has-[:focus-visible]:border-ring has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50"
 
 const INPUT_PREFIX_CLASS =
   "shrink-0 pl-4 text-base text-muted-foreground select-none md:text-sm"

@@ -8,9 +8,7 @@ import { twMerge } from 'tailwind-merge';
 import { Table, type TableColumn } from '@/components/ui/table';
 import ContentHeader from '@/components/ui/content-header';
 import CalendarNavigationButtons from '../../buttons/CalendarNavigationButtons';
-import SummaryButton from '../../buttons/SummaryButton';
 import { DAY_NAMES, MONTH_NAMES, isSameDay } from '@/utils/dateName';
-import { useFiltersGroup } from '@/hooks/useFiltersGroup';
 
 interface CalendarProps {
   weekDaysNames?: string[];
@@ -19,28 +17,24 @@ interface CalendarProps {
   className?: string;
 }
 
-const CALENDAR_CLASS = 'group flex w-full shrink-0 flex-col cursor-pointer open:gap-2 p-1 bg-card rounded-3xl';
+const CALENDAR_CLASS = 'flex w-full shrink-0 flex-col gap-2 p-2 py-4 bg-card rounded-4xl border border-border';
 
 const CALENDAR_ACTIONS_CLASS = 'flex gap-3';
 
-const CALENDAR_TABLE_CLASS = 'text-white';
+const CALENDAR_TABLE_CLASS = 'text-foreground';
 
 const CALENDAR_TABLE_HEADER_CLASS = 'bg-transparent';
 
 const CALENDAR_DAY_CIRCLE_CLASS = 'flex items-center justify-center w-8 h-8 mx-auto text-sm cursor-pointer rounded-full';
-const CALENDAR_DAY_CIRCLE_DEFAULT_CLASS = 'hover:bg-neutral-700';
+const CALENDAR_DAY_CIRCLE_DEFAULT_CLASS = 'hover:bg-muted';
 const CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS = 'opacity-30';
 const CALENDAR_DAY_CELL_CLASS = 'flex items-center justify-center cursor-pointer';
 
-const CALENDAR_TODAY_CIRCLE_CLASS = 'bg-(--palette-03) text-neutral-800 font-medium rounded-full';
+const CALENDAR_TODAY_CIRCLE_CLASS = 'bg-(--palette-02) text-black font-medium rounded-full';
 
-const CALENDAR_SELECTED_CIRCLE_CLASS = 'bg-(--palette-01) text-neutral-800 font-medium rounded-full';
+const CALENDAR_SELECTED_CIRCLE_CLASS = 'bg-(--palette-01) text-black font-medium rounded-full';
 
 const CALENDAR_COLUMN_ALIGN_CLASS = 'align-middle px-2 py-1 text-center';
-const CALENDAR_SUMMARY_CLASS = 'list-none outline-none [&::-webkit-details-marker]:hidden';
-const CALENDAR_TITLE_CLOSED_CLASS = 'group-open:hidden';
-const CALENDAR_TITLE_OPEN_CLASS = 'hidden group-open:block';
-const CALENDAR_SUMMARY_BUTTON_CLASS = 'block group-open:hidden';
 const CALENDAR_ROW_HEIGHT_CLASS = 'h-auto';
 
 /* MONDAY_FIRST_DAY_NAMES: DAY_NAMES reordenado para que la semana arranque en Lunes */
@@ -180,50 +174,22 @@ export default function Calendar({
     alignClassName: CALENDAR_COLUMN_ALIGN_CLASS,
   }));
 
-  const groupName = useFiltersGroup();
-
-  const handleSummaryClick = (event: React.MouseEvent<HTMLElement>) => {
-    if ((event.target as HTMLElement).closest('button')) return;
-
-    const details = event.currentTarget.parentElement as HTMLDetailsElement | null;
-    if (details?.open) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  };
-
   return (
-    <details
-      data-calendar
-      open
-      name={groupName}
-      className={twMerge(CALENDAR_CLASS, className)}
-    >
+    <div className={twMerge(CALENDAR_CLASS, className)}>
       {/* Cabecera de navegación */}
-      <summary
-        className={CALENDAR_SUMMARY_CLASS}
-        onClick={handleSummaryClick}
-      >
+      <div>
         <ContentHeader
-          title={
-            <>
-              <span className={CALENDAR_TITLE_CLOSED_CLASS}>Calendario</span>
-              <span className={CALENDAR_TITLE_OPEN_CLASS}>{`${MONTH_NAMES[month]} ${year}`}</span>
-            </>
-          }
+          title={`${MONTH_NAMES[month]} ${year}`}
           action={
-            <div
-              className={CALENDAR_ACTIONS_CLASS}
-            >
+            <div className={CALENDAR_ACTIONS_CLASS}>
               <CalendarNavigationButtons
                 onPrevMonth={prevMonth}
                 onNextMonth={nextMonth}
               />
-              <SummaryButton className={CALENDAR_SUMMARY_BUTTON_CLASS} />
             </div>
           }
         />
-      </summary>
+      </div>
 
       {/* Renderizado de la grilla mensual utilizando el componente Table */}
       <Table
@@ -233,6 +199,6 @@ export default function Calendar({
         className={CALENDAR_TABLE_CLASS}
         headerClassName={CALENDAR_TABLE_HEADER_CLASS}
       />
-    </details>
+    </div>
   );
 }

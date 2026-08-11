@@ -32,9 +32,9 @@ const WRAPPER_CLASS = 'flex flex-wrap justify-start gap-3';
 
 const SWATCH_CLASS = 'h-8 w-8 rounded-full border border-border';
 
-const SWATCH_ACTIVE_CLASS = 'border-4 border-neutral-50';
+const SWATCH_ACTIVE_CLASS = 'border-4 border-foreground';
 
-const SWATCH_INACTIVE_CLASS = 'border-transparent hover:border-neutral-300';
+const SWATCH_INACTIVE_CLASS = 'border-transparent hover:border-border';
 
 
 
