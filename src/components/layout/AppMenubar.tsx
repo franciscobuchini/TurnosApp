@@ -21,7 +21,6 @@ import {
   Megaphone,
   Moon,
   Plus,
-  Settings,
   Sun,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,9 +49,6 @@ const MAIN_ITEMS: MenubarItem[] = [
   { to: '/admin/marketing', label: 'Marketing', icon: <Megaphone className={ICON_CLASS} /> },
 ];
 
-const BUSINESS_ITEMS: MenubarItem[] = [
-  { to: '/admin/ajustes', label: 'Tu negocio', icon: <Settings className={ICON_CLASS} /> },
-];
 
 interface AppMenubarProps {
   /* Sidebar de "agregar turno" abierto: prioriza ese botón como activo por
@@ -81,7 +77,15 @@ export default function AppMenubar({ addShiftOpen = false, onCloseAddShift }: Ap
 
   return (
     <nav className={MENUBAR_CLASS} aria-label="Accesos directos">
-      <Image src={business.image} name={business.name} className="size-10 shrink-0" />
+      <button
+        type="button"
+        onClick={() => navigate('/admin/ajustes')}
+        className="cursor-pointer"
+        aria-label="Tu negocio"
+        title="Tu negocio"
+      >
+        <Image src={business.image} name={business.name} className="size-10 shrink-0" />
+      </button>
 
       <Button
         variant={addShiftOpen ? 'default' : 'ghost'}
@@ -112,21 +116,6 @@ export default function AppMenubar({ addShiftOpen = false, onCloseAddShift }: Ap
       <div className="flex-1" />
 
       <div className={GROUP_CLASS}>
-        {BUSINESS_ITEMS.map(({ to, label, icon }) => (
-          <Button
-            key={to}
-            to={addShiftOpen ? undefined : to}
-            onClick={addShiftOpen ? () => handleNavClick(to) : undefined}
-            variant={isActive(to) ? 'default' : 'ghost'}
-            size="icon-lg"
-            icon={icon}
-            aria-label={label}
-            title={label}
-          />
-        ))}
-
-        <hr className="w-8 border-border" />
-
         <Button
           variant="ghost"
           size="icon-lg"

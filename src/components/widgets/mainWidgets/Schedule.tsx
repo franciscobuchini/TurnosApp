@@ -40,13 +40,15 @@ const SCHEDULE_LABEL_TEXT_CLASS = 'absolute inset-x-0 -top-[5%] -translate-y-1/2
 
 const SCHEDULE_LABEL_HEADER_CLASS = 'sr-only';
 
-const SCHEDULE_SLOT_CELL_CLASS = 'border-t border-border/25 relative';
+const SCHEDULE_SLOT_CELL_CLASS = 'border-t border-border/25 relative group/cell';
 
 const SCHEDULE_MEMBER_HEADER_CLASS = 'flex items-center justify-center gap-2 text-sm font-medium truncate text-muted-foreground';
 
 const SCHEDULE_MEMBER_IMAGE_CLASS = 'h-8 w-8 shrink-0 text-xs';
 
 const SCHEDULE_EMPTY_CLASS = 'absolute inset-0 flex items-center justify-center pointer-events-none text-muted-foreground text-sm';
+
+const SCHEDULE_ADD_HINT_CLASS = 'absolute inset-1 flex items-center justify-center rounded-2xl text-sm text-muted-foreground/0 border border-dashed border-transparent group-hover/cell:text-muted-foreground group-hover/cell:border-muted-foreground transition-colors cursor-pointer select-none';
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -150,10 +152,11 @@ export default function Schedule({
         cellClassName: SCHEDULE_SLOT_CELL_CLASS,
         cell: (_slot: string, rowIndex: number) => {
           const memberMap = appointmentMap.get(member);
-          if (!memberMap) return null;
 
-          const entry = memberMap.get(rowIndex);
-          if (!entry) return null;
+          const entry = memberMap?.get(rowIndex);
+          if (!entry) {
+            return <span className={SCHEDULE_ADD_HINT_CLASS}>+ Agregar turno</span>;
+          }
 
           const { appointment, spanSlots } = entry;
           const colorClassName = serviceColorMap[appointment.service] || undefined;

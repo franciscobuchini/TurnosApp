@@ -22,7 +22,7 @@ interface SidebarProps {
 
 const SIDEBAR_CLASS = 'flex flex-col min-w-0 shrink-0 w-90 -my-3';
 
-const SIDEBAR_INNER_CLASS = 'flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
+const SIDEBAR_INNER_CLASS = 'flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&:has([data-filter-panel][open])>[data-sidebar-title]]:hidden';
 
 export default function Sidebar({ children, className, footer }: SidebarProps) {
   return (

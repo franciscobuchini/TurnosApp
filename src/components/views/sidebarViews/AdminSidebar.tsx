@@ -16,6 +16,7 @@ import { TeamFilterButton, ServiceFilterButton, ClientFilterButton } from '../..
 import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../EntityView';
 import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../ServiceView';
 import AddClientView, { ADD_CLIENT_VIEW_TITLE } from '../ClientView';
+import { getBusiness } from '../../../database/data';
 
 interface AdminSidebarProps {
   selectedDate: Date;
@@ -37,9 +38,11 @@ export default function AdminSidebar({
   clientFilters,
 }: AdminSidebarProps) {
   const navigate = useNavigate();
+  const business = getBusiness();
 
   return (
     <Sidebar>
+      <h2 data-sidebar-title className="p-6 text-xl font-semibold text-foreground truncate">{business.name}</h2>
       <Calendar selectedDate={selectedDate} onSelectDate={onSelectDate} />
       <DetailsPanel
         title="Equipo"
