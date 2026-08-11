@@ -34,14 +34,6 @@ const LIGHT_AMBIENT_CLASS =
 const LIGHT_SECONDARY_CLASS =
   'absolute -right-[10%] top-[35%] h-[380px] w-[380px] rounded-full bg-(--palette-01) opacity-[0.035] dark:opacity-0 blur-[90px]';
 
-const ORBIT_CLASS =
-  'absolute left-[65%] top-[10%] h-[500px] w-[500px] rounded-full border border-(--palette-03)/[0.10] dark:border-(--palette-03)/[0.14]';
-
-const ORBIT_SECONDARY_CLASS =
-  'absolute left-[65%] top-[10%] h-[360px] w-[360px] rounded-full border border-(--palette-02)/[0.07] dark:border-(--palette-02)/[0.10]';
-
-const ACCENT_CLASS =
-  'absolute left-[65%] top-[10%] h-2 w-2 rounded-full bg-(--palette-03) opacity-50 dark:opacity-75 blur-[2px]';
 
 export default function Background() {
   return (
@@ -56,10 +48,6 @@ export default function Background() {
       <div className={GLOW_CYAN_CLASS} />
       <div className={GLOW_PURPLE_CLASS} />
       <div className={GLOW_LIME_CLASS} />
-
-      <div className={ORBIT_CLASS} />
-      <div className={ORBIT_SECONDARY_CLASS} />
-      <div className={ACCENT_CLASS} />
     </div>
   );
 }
