@@ -4,7 +4,6 @@ import Home from './pages/landing/Home';
 import Dashboard, { useAdminContext } from './pages/admin/Dashboard';
 import Personalizacion from './pages/admin/Personalizacion';
 import SettingsBusinessView from './components/views/SettingsBusinessView';
-import SettingsScheduleView from './components/views/SettingsScheduleView';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Site from './pages/clients/Site';
 
@@ -129,13 +128,12 @@ function App() {
         <Route path="/personalizacion" element={<Personalizacion />} />
 
         <Route path="/SettingsView" element={<Navigate to="/admin/ajustes" replace />} />
-        <Route path="/SettingsView/horarios" element={<Navigate to="/admin/ajustes/horarios" replace />} />
+        <Route path="/SettingsView/horarios" element={<Navigate to="/admin/ajustes" replace />} />
         <Route path="/SettingsView/seguridad" element={<Navigate to="/admin/ajustes" replace />} />
 
         <Route path="/admin" element={<Dashboard />}>
           <Route index element={<SchedulePage />} />
           <Route path="ajustes" element={<SettingsBusinessView />} />
-          <Route path="ajustes/horarios" element={<SettingsScheduleView />} />
 
           <Route path="metricas" element={<AdminPlaceholderPage subtitle="Métricas del negocio" />} />
           <Route path="marketing" element={<AdminPlaceholderPage subtitle="Herramientas de marketing" />} />

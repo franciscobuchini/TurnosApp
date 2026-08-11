@@ -47,7 +47,7 @@
   texto. Se activa con data-theme="light" en <html> (ver src/hooks/useTheme.ts).
 */
 :root[data-theme='light'] {
-  --color-bg: #fafafa;
+  --color-bg: #f8f8f8;
   --color-surface: #ffffff;
   --color-field: #eeeeee;
   --color-border: #eeeeee;

@@ -17,7 +17,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Calendar,
   ChartColumn,
-  Clock,
   Globe,
   Megaphone,
   Moon,
@@ -52,8 +51,7 @@ const MAIN_ITEMS: MenubarItem[] = [
 ];
 
 const BUSINESS_ITEMS: MenubarItem[] = [
-  { to: '/admin/ajustes/horarios', label: 'Horarios del negocio', icon: <Clock className={ICON_CLASS} /> },
-  { to: '/admin/ajustes', label: 'Ajustes y Seguridad', icon: <Settings className={ICON_CLASS} /> },
+  { to: '/admin/ajustes', label: 'Tu negocio', icon: <Settings className={ICON_CLASS} /> },
 ];
 
 interface AppMenubarProps {

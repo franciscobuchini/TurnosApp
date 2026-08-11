@@ -125,7 +125,7 @@ export default function WeekSchedule({
                     {!readOnly && day.ranges.length < 2 && (
                       <button
                         type="button"
-                        className="h-8 hover:bg-muted px-3 rounded-2xl text-muted-foreground hover:text-foreground text-xs flex items-center gap-1 transition-all cursor-pointer"
+                        className="h-8 px-3 rounded-2xl text-muted-foreground text-sm flex items-center gap-1 transition-all cursor-pointer"
                         onClick={() => addRange(dayRow.dayOfWeek)}
                       >
                         <Plus size={14} />

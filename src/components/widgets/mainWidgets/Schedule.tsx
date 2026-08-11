@@ -11,7 +11,7 @@ import Box from '@/components/ui/box';
 import Image from '@/components/ui/image';
 import { Table, type TableColumn } from '@/components/ui/table';
 import CurrentTimeLine from '@/components/ui/current-time-line';
-import { getAppointmentsByDate, getservices } from '@/database/data';
+import { getAppointmentsByDate, getservices, getTeamMembers } from '@/database/data';
 import type { Appointment } from '@/database/types';
 import { SERVICE_COLOR_BY_ID } from '@/components/widgets/serviceWidgets/serviceColors';
 import AppointmentCard from './AppointmentCard';
@@ -91,7 +91,8 @@ export default function Schedule({
   const appointments = useMemo(() => getAppointmentsByDate(selectedDate), [selectedDate]);
   const appointmentMap = useMemo(() => buildAppointmentMap(appointments), [appointments]);
 
-  /* Mapa servicio → colorClassName para pintar cada tarjeta con el color del servicio. */
+  /* Mapa servicio → color/foto y miembro → foto, para pintar cada tarjeta
+     con el color del servicio y mostrar los avatares correspondientes. */
   const serviceColorMap = useMemo(() => {
     const services = getservices();
     const map: Record<string, string> = {};
@@ -99,6 +100,24 @@ export default function Schedule({
       if (s.colorId) {
         map[s.name] = SERVICE_COLOR_BY_ID[s.colorId]?.className ?? '';
       }
+    }
+    return map;
+  }, []);
+
+  const servicePhotoMap = useMemo(() => {
+    const services = getservices();
+    const map: Record<string, string> = {};
+    for (const s of services) {
+      if (s.photo) map[s.name] = s.photo;
+    }
+    return map;
+  }, []);
+
+  const memberPhotoMap = useMemo(() => {
+    const teamMembers = getTeamMembers();
+    const map: Record<string, string> = {};
+    for (const m of teamMembers) {
+      if (m.photo) map[m.name] = m.photo;
     }
     return map;
   }, []);
@@ -124,7 +143,7 @@ export default function Schedule({
         key: `member-${member}`,
         header: (
           <span className={SCHEDULE_MEMBER_HEADER_CLASS}>
-            <Image name={member} className={SCHEDULE_MEMBER_IMAGE_CLASS} />
+            <Image src={memberPhotoMap[member]} name={member} className={SCHEDULE_MEMBER_IMAGE_CLASS} />
             {member}
           </span>
         ),
@@ -144,6 +163,7 @@ export default function Schedule({
               appointment={appointment}
               spanSlots={spanSlots}
               colorClassName={colorClassName}
+              servicePhoto={servicePhotoMap[appointment.service]}
             />
           );
         },

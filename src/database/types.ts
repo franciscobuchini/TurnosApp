@@ -15,15 +15,13 @@ export type Business = {
   image: string;
   url: string;
   location: string;
-  // Horario del local (las 3 vistas de ajustes comparten este único JSON).
+  // Horario del local.
   schedule: OpeningHoursEntry[] | string;
   managerName: string;
   email: string;
   password: string;
   // PIN de 4 dígitos para acceder al panel del administrador.
   adminPin: string;
-  // Anticipación (en minutos) que necesita el cliente para reservar desde la web.
-  advanceMinutes: number;
 };
 
 export type TeamMember = {

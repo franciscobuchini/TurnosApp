@@ -46,7 +46,7 @@ function toMinutes(time?: string): number | null {
 }
 
 const SELECTOR_CLASS =
-  'flex h-9 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-input bg-input px-4 py-2 text-sm text-foreground outline-none focus:border-foreground';
+  'flex h-9 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-border bg-input px-4 py-2 text-sm text-foreground outline-none focus:border-foreground';
 
 const POPOVER_CLASS =
   'fixed z-[9999] flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-2xl';
@@ -57,7 +57,7 @@ const OPTION_CLASS =
   'flex h-9 min-w-14 shrink-0 items-center justify-center rounded-lg text-sm';
 
 function optionClass(selected: boolean, disabled: boolean): string {
-  if (disabled) return `${OPTION_CLASS} cursor-not-allowed text-muted-foreground`;
+  if (disabled) return `${OPTION_CLASS} cursor-not-allowed text-muted-foreground/40`;
   if (selected) return `${OPTION_CLASS} bg-foreground/15 text-foreground`;
   return `${OPTION_CLASS} text-muted-foreground hover:bg-muted hover:text-foreground`;
 }
@@ -87,12 +87,14 @@ export default function HourSelector({
   const minTotal = toMinutes(min);
   const maxTotal = toMinutes(max);
 
-  const isMinuteEnabled = (m: number) => {
-    const total = draftHour * 60 + m;
+  const isMinuteEnabledFor = (h: number, m: number) => {
+    const total = h * 60 + m;
     if (minTotal != null && total < minTotal) return false;
     if (maxTotal != null && total > maxTotal) return false;
     return isTimeWithinBusinessHours(total, businessHours);
   };
+
+  const isMinuteEnabled = (m: number) => isMinuteEnabledFor(draftHour, m);
 
   const isHourEnabled = (h: number) =>
     MINUTES.some((m) => {
@@ -136,14 +138,24 @@ export default function HourSelector({
   };
 
   const confirmSelection = (h: number, m: number) => {
-    if (!isMinuteEnabled(m)) return;
+    if (!isMinuteEnabledFor(h, m)) return;
     onChange?.(`${pad(h)}:${pad(m)}`);
     closePanel();
   };
 
   const pickMinute = (m: number) => {
-    if (!isMinuteEnabled(m)) return;
     confirmSelection(draftHour, m);
+  };
+
+  // Cambiar la hora ya deja guardado el horario (con el minuto actual, o
+  // :00 si todavía no se eligió ninguno): si el usuario hace click afuera
+  // del popover sin tocar los minutos, no se pierde la selección.
+  const pickHour = (h: number) => {
+    setDraftHour(h);
+    const m = draftMinute ?? 0;
+    if (isMinuteEnabledFor(h, m)) {
+      onChange?.(`${pad(h)}:${pad(m)}`);
+    }
   };
 
   useEffect(() => {
@@ -249,7 +261,7 @@ export default function HourSelector({
                       type="button"
                       disabled={!enabled}
                       className={optionClass(h === draftHour, !enabled)}
-                      onClick={() => setDraftHour(h)}
+                      onClick={() => pickHour(h)}
                       onDoubleClick={() => confirmSelection(h, draftMinute ?? 0)}
                     >
                       {pad(h)}

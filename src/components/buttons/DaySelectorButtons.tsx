@@ -10,11 +10,14 @@ interface DaySelectorButtonsProps {
 
 const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-24 flex-1 p-3 shrink-0 justify-center items-center bg-transparent rounded-3xl';
 
-const WEEK_SELECTOR_DAY_DEFAULT_CLASS = 'text-foreground hover:bg-card';
+/* Mismo criterio que WeekNavigationButtons: sin colores de paleta (chocaban
+   con los colores de servicio de las tarjetas de turnos), solo grises y
+   bordes del theme, consistentes entre ambos componentes y en los 2 temas. */
+const WEEK_SELECTOR_DAY_DEFAULT_CLASS = 'bg-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground';
 
-const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-(--palette-01) hover:bg-(--palette-01) text-black';
+const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-transparent border border-border text-foreground hover:bg-muted/60';
 
-const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-(--palette-02) hover:bg-(--palette-02) text-black';
+const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-muted border border-foreground/15 text-foreground hover:bg-muted';
 
 const WEEK_SELECTOR_DAY_VISIBILITY_0_CLASS = '';
 const WEEK_SELECTOR_DAY_VISIBILITY_1_CLASS = 'hidden @min-[380px]:flex';
