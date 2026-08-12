@@ -26,6 +26,7 @@ import {
   updateService as dbUpdateService,
   addTeamMember,
   updateTeamMember,
+  addAppointment,
   getservices,
   removeClient,
   removeService,
@@ -37,6 +38,15 @@ import { SERVICE_COLOR_BY_ID } from '../../components/widgets/serviceWidgets/ser
 import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';
 import AddShiftSidebar from '../../components/views/sidebarViews/AddShiftSidebar';
+
+/** Horario elegido en el Schedule para el turno en curso del flujo
+    "Agregar turno", a la espera de que se elija el cliente. */
+export interface ShiftSlot {
+  member: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+}
 
 export interface AdminContext {
   teamFilters: FiltersOption[];
@@ -55,6 +65,22 @@ export interface AdminContext {
   addShiftOpen: boolean;
   openAddShift: () => void;
   closeAddShift: () => void;
+  /** Servicio seleccionado en el flujo "Agregar turno" (nil si no hay selección). */
+  shiftService: string | null;
+  selectShiftService: (serviceName: string) => void;
+  /** Horario elegido en el Schedule, a la espera de que se elija el cliente. */
+  shiftSlot: ShiftSlot | null;
+  selectShiftSlot: (slot: ShiftSlot) => void;
+  /** Vuelve a la selección de horario sin cerrar el flujo (mantiene el servicio elegido). */
+  cancelShiftSlot: () => void;
+  /** Confirma el turno con el cliente elegido: lo persiste y cierra el flujo. */
+  confirmShiftClient: (clientName: string) => void;
+  /** Se incrementa cada vez que se crea un turno, para que el Schedule vuelva a leer la BBDD. */
+  appointmentsVersion: number;
+  /** Hora ("HH:mm") del turno recién creado: el Schedule hace scroll a esa
+      fila al montarse, para no perder de vista el turno agregado. */
+  scrollToTime: string | null;
+  clearScrollToTime: () => void;
   createMember: (member: TeamMember) => void;
   updateMember: (previousName: string, member: TeamMember) => void;
   deleteMember: (name: string) => void;
@@ -86,7 +112,37 @@ function Dashboard() {
   };
   const [addShiftOpen, setAddShiftOpen] = useState(false);
   const openAddShift = () => setAddShiftOpen(true);
-  const closeAddShift = () => setAddShiftOpen(false);
+  const closeAddShift = () => {
+    setAddShiftOpen(false);
+    setShiftService(null);
+    setShiftSlot(null);
+  };
+  const [shiftService, setShiftService] = useState<string | null>(null);
+  const selectShiftService = (serviceName: string) => setShiftService(serviceName);
+  const [shiftSlot, setShiftSlot] = useState<ShiftSlot | null>(null);
+  const selectShiftSlot = (slot: ShiftSlot) => setShiftSlot(slot);
+  const cancelShiftSlot = () => setShiftSlot(null);
+  const [appointmentsVersion, setAppointmentsVersion] = useState(0);
+  const [scrollToTime, setScrollToTime] = useState<string | null>(null);
+  const clearScrollToTime = () => setScrollToTime(null);
+
+  const confirmShiftClient = (clientName: string) => {
+    if (!shiftSlot || !shiftService) return;
+
+    addAppointment({
+      id: crypto.randomUUID(),
+      date: shiftSlot.date,
+      startTime: shiftSlot.startTime,
+      endTime: shiftSlot.endTime,
+      member: shiftSlot.member,
+      client: clientName,
+      service: shiftService,
+    });
+
+    setAppointmentsVersion((version) => version + 1);
+    setScrollToTime(shiftSlot.startTime);
+    closeAddShift();
+  };
 
   useEffect(() => {
     const state = location.state as { openAddShift?: boolean } | null;
@@ -154,6 +210,9 @@ function Dashboard() {
     addClient({ ...client, appointmentsCount: 0, totalSpent: 0 });
     setClients(getClients());
     setSelectedClientName(client.name);
+    if (shiftSlot && shiftService) {
+      confirmShiftClient(client.name);
+    }
     navigate('/admin');
   };
 
@@ -187,6 +246,15 @@ function Dashboard() {
     addShiftOpen,
     openAddShift,
     closeAddShift,
+    shiftService,
+    selectShiftService,
+    shiftSlot,
+    selectShiftSlot,
+    cancelShiftSlot,
+    confirmShiftClient,
+    appointmentsVersion,
+    scrollToTime,
+    clearScrollToTime,
     createMember,
     updateMember,
     deleteMember,
@@ -209,8 +277,13 @@ function Dashboard() {
         addShiftOpen ? (
           <AddShiftSidebar
             serviceFilters={serviceFilters}
-            toggleServiceFilter={toggleServiceFilter}
+            clientFilters={clientFilters}
             onClose={closeAddShift}
+            selectedService={shiftService}
+            onSelectService={selectShiftService}
+            shiftSlot={shiftSlot}
+            onBack={cancelShiftSlot}
+            onConfirmClient={confirmShiftClient}
           />
         ) : isSidebarlessPage ? null : (
           <AdminSidebar

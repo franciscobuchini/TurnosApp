@@ -140,7 +140,11 @@ function buildDaysFromValue(value?: OpeningHoursEntry[]): Record<number, DaySche
 // superposición). Un turno incompleto (faltando "desde" o "hasta") se descarta
 // al guardar: la fila desaparece. Un turno inválido queda visible en la UI (con
 // su mensaje de error) pero nunca llega al schedule final. Si un día queda sin
-// turnos, es un día libre ("No trabaja").
+// turnos, es un día libre ("No trabaja") y se guarda explícito como
+// { startTime: null, endTime: null } — nunca se omite. Omitirlo lo volvería
+// indistinguible de "sin datos para ese día" (getBusinessHoursByDay lee
+// ausente = sin restricción, no cerrado), lo que dejaría el día libre sin
+// bloquear en el Schedule después de guardar.
 function serializeDays(days: Record<number, DaySchedule>): OpeningHoursEntry[] {
   const schedule: OpeningHoursEntry[] = [];
 
@@ -148,8 +152,11 @@ function serializeDays(days: Record<number, DaySchedule>): OpeningHoursEntry[] {
     const day = days[dayOfWeek];
 
     if (!day.works) {
+      schedule.push({ dayOfWeek, startTime: null, endTime: null });
       continue;
     }
+
+    let pushedRange = false;
 
     day.ranges.forEach((range, index) => {
       if (!range.startTime || !range.endTime) {
@@ -160,7 +167,14 @@ function serializeDays(days: Record<number, DaySchedule>): OpeningHoursEntry[] {
         return;
       }
       schedule.push({ dayOfWeek, startTime: range.startTime, endTime: range.endTime });
+      pushedRange = true;
     });
+
+    // "Trabaja" pero todos los turnos cargados son inválidos/incompletos:
+    // sigue sin ser un día cerrado de verdad, así que tampoco se omite.
+    if (!pushedRange) {
+      schedule.push({ dayOfWeek, startTime: null, endTime: null });
+    }
   }
 
   return schedule;
@@ -209,10 +223,14 @@ export function getBusinessHoursByDay(
   const byDay: Record<number, TimeRange[]> = {};
 
   for (const entry of businessHours ?? []) {
+    // El día se registra siempre (aunque quede vacío) para que un día cerrado
+    // se distinga de un día sin datos: [] = cerrado, undefined = sin restricción.
+    byDay[entry.dayOfWeek] ??= [];
+
     if (typeof entry.startTime !== 'string' || typeof entry.endTime !== 'string') {
       continue;
     }
-    (byDay[entry.dayOfWeek] ??= []).push({
+    byDay[entry.dayOfWeek].push({
       startTime: entry.startTime,
       endTime: entry.endTime,
     });
@@ -222,8 +240,11 @@ export function getBusinessHoursByDay(
 }
 
 // Verdadero si `totalMinutes` cae dentro de alguno de los tramos en que el
-// local está abierto ese día. `undefined` (día sin datos) no restringe; una
-// lista vacía significa día cerrado y bloquea todos los horarios.
+// local está abierto ese día. Límites inclusive: un horario elegido justo en
+// la apertura o el cierre es válido (se usa para habilitar/deshabilitar
+// opciones puntuales del selector de hora, donde "hasta" = el cierre debe
+// poder elegirse). `undefined` (día sin datos) no restringe; una lista vacía
+// significa día cerrado y bloquea todos los horarios.
 export function isTimeWithinBusinessHours(
   totalMinutes: number,
   businessHours?: TimeRange[],
@@ -236,6 +257,29 @@ export function isTimeWithinBusinessHours(
     (hours) =>
       totalMinutes >= timeToMinutes(hours.startTime) &&
       totalMinutes <= timeToMinutes(hours.endTime),
+  );
+}
+
+// Verdadero si el slot de `durationMinutes` que arranca en `slotMinutes`
+// entra completo en alguno de los tramos. A diferencia de
+// isTimeWithinBusinessHours, acá el cierre es exclusivo: un slot que arranca
+// justo al cierre no es reservable porque no queda tiempo dentro del
+// horario (ej. cierre 13:00 → el slot 13:00-13:15 queda bloqueado, el
+// 12:45-13:00 no). Se usa para bloquear celdas del Schedule, no para validar
+// un horario puntual elegido en el selector.
+export function isSlotWithinBusinessHours(
+  slotMinutes: number,
+  durationMinutes: number,
+  businessHours?: TimeRange[],
+): boolean {
+  if (businessHours === undefined) {
+    return true;
+  }
+
+  return businessHours.some(
+    (hours) =>
+      slotMinutes >= timeToMinutes(hours.startTime) &&
+      slotMinutes + durationMinutes <= timeToMinutes(hours.endTime),
   );
 }
 

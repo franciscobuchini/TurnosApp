@@ -26,13 +26,13 @@ const CARD_CLASS =
 
 const CARD_PAST_CLASS = 'opacity-30';
 
-const CARD_INNER_CLASS = 'flex flex-col h-full p-4 gap-4';
+const CARD_INNER_CLASS = 'flex flex-col h-full p-1.5 gap-4';
 
 const CARD_HEADER_ROW_CLASS = 'flex min-w-0 items-center gap-2';
 
 const CARD_SERVICE_AVATAR_CLASS = 'size-8 shrink-0 text-sm font-bold bg-background text-foreground';
 
-const CARD_TEXT_COLUMN_CLASS = 'flex min-w-0 flex-1 flex-col gap-1';
+const CARD_TEXT_COLUMN_CLASS = 'flex min-w-0 flex-1 flex-col';
 
 const CARD_SERVICE_CLASS = 'font-semibold truncate text-black';
 
@@ -44,7 +44,7 @@ const CARD_CLIENT_CLASS = 'truncate text-black/50';
 
 const CARD_NOTES_CLASS = 'truncate text-black/50';
 
-const CARD_TIME_CLASS = 'mt-auto text-xs text-black/50';
+const CARD_TIME_CLASS = 'mt-auto text-xs text-black/50 p-1';
 
 function isPastAppointment(appointment: Appointment): boolean {
   const end = new Date(`${appointment.date}T${appointment.endTime}`);

@@ -6,6 +6,7 @@
 import type { DetailsHTMLAttributes, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Dropdown } from '@/components/ui/dropdown';
+import { Button } from '@/components/ui/button';
 import Image from '@/components/ui/image';
 import ContentHeader from '@/components/ui/content-header';
 import { useFiltersGroup } from '@/hooks/useFiltersGroup';
@@ -28,6 +29,9 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   actionLabel?: string;
   onActionClick?: () => void;
   hideHeader?: boolean;
+  /** Id de la opción seleccionada (se resalta) y callback al hacer click en la fila. */
+  selectedId?: string;
+  onOptionClick?: (option: DetailsPanelOption) => void;
 }
 
 const FILTER_PANEL_CLASS = 'group w-full cursor-pointer overflow-hidden shrink-0 rounded-4xl text-foreground p-2 bg-card border border-border';
@@ -54,6 +58,8 @@ export default function DetailsPanel({
   className,
   name,
   hideHeader = false,
+  selectedId,
+  onOptionClick,
   ...props
 }: DetailsPanelProps) {
   /* Si no se pasa un name explícito, usa el del contenedor (sidebar/maincontent)
@@ -98,28 +104,52 @@ export default function DetailsPanel({
       </summary>
 
       <div data-filter-panel-body className={FILTER_PANEL_BODY_CLASS}>
-        {options.map((option) => (
-          <Dropdown
-            key={option.id}
-            items={renderDropdownItems ? renderDropdownItems(option) : []}
-            content={
-              <div
-                data-details-panel-content
-                className={twMerge(DETAILS_PANEL_CONTENT_CLASS, option.checked === false && 'opacity-40')}
-              >
-                <span className={DETAILS_PANEL_AVATAR_CLASS}>
-                  <Image
-                    name={option.label}
-                    className={twMerge(DETAILS_PANEL_IMAGE_CLASS, option.colorClassName)}
-                  />
-                </span>
-                <span className={DETAILS_PANEL_LABEL_CLASS}>{option.label}</span>
-              </div>
-            }
-            className={DETAILS_PANEL_TRIGGER_CLASS}
-            openClassName={DETAILS_PANEL_TRIGGER_OPEN_CLASS}
-          />
-        ))}
+        {options.map((option) => {
+          const content = (
+            <div
+              data-details-panel-content
+              className={twMerge(
+                DETAILS_PANEL_CONTENT_CLASS,
+                option.checked === false && 'opacity-40',
+              )}
+            >
+              <span className={DETAILS_PANEL_AVATAR_CLASS}>
+                <Image
+                  name={option.label}
+                  className={twMerge(DETAILS_PANEL_IMAGE_CLASS, option.colorClassName)}
+                />
+              </span>
+              <span className={DETAILS_PANEL_LABEL_CLASS}>{option.label}</span>
+            </div>
+          );
+
+          /* Sin ítems de dropdown, la fila es un botón simple (selección):
+             el mismo Button ghost que usa el Dropdown para idéntico estilo. */
+          return renderDropdownItems ? (
+            <Dropdown
+              key={option.id}
+              items={renderDropdownItems(option)}
+              onClick={() => onOptionClick?.(option)}
+              content={content}
+              className={DETAILS_PANEL_TRIGGER_CLASS}
+              openClassName={DETAILS_PANEL_TRIGGER_OPEN_CLASS}
+            />
+          ) : (
+            <Button
+              key={option.id}
+              type="button"
+              variant="ghost"
+              className={twMerge(
+                DETAILS_PANEL_TRIGGER_CLASS,
+                'text-left',
+                option.id === selectedId && DETAILS_PANEL_TRIGGER_OPEN_CLASS,
+              )}
+              onClick={() => onOptionClick?.(option)}
+            >
+              {content}
+            </Button>
+          );
+        })}
 
         {action ?? (actionLabel ? <AddButton text={actionLabel} onClick={onActionClick} /> : null)}
       </div>

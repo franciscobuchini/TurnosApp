@@ -8,7 +8,7 @@
 */
 
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Plus, X } from 'lucide-react';
 import ViewLayout from '../layout/ViewLayout';
 import Form from '@/components/ui/form';
@@ -221,6 +221,12 @@ export default function SettingsBusinessView() {
               onChange={(e) => handleAdminPinChange(e.target.value)}
             />
           </div>
+          <Link
+            to="/terminos"
+            className="w-fit text-sm text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+          >
+            Términos y condiciones
+          </Link>
         </Form>
       }
       right={

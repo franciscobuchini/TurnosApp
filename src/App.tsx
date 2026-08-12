@@ -1,11 +1,14 @@
+import { useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Background from './components/layout/Background';
 import Home from './pages/landing/Home';
+import Terms from './pages/landing/Terms';
 import Dashboard, { useAdminContext } from './pages/admin/Dashboard';
 import Personalizacion from './pages/admin/Personalizacion';
 import SettingsBusinessView from './components/views/SettingsBusinessView';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Site from './pages/clients/Site';
+import { getBlockedMemberNames } from './functions/scheduleCellAvailability';
 
 import ScheduleView from './components/views/ScheduleView';
 import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from './components/views/EntityView';
@@ -17,6 +20,13 @@ type CrudMode = 'create' | 'view' | 'edit';
 function SchedulePage() {
   const ctx = useAdminContext();
 
+  /* En el flujo "Agregar turno", las columnas de miembros que no tienen
+     marcado el servicio seleccionado quedan bloqueadas. */
+  const blockedMembers = useMemo(
+    () => getBlockedMemberNames(ctx.addShiftOpen ? ctx.shiftService : null),
+    [ctx.addShiftOpen, ctx.shiftService],
+  );
+
   return (
     <ScheduleView
       selectedMembers={ctx.selectedMembers}
@@ -25,6 +35,13 @@ function SchedulePage() {
       onViewDateChange={ctx.setViewDate}
       onSelectDate={ctx.setSelectedDate}
       selectedClientName={ctx.selectedClientName ?? undefined}
+      blockedMembers={blockedMembers}
+      previewService={ctx.addShiftOpen ? ctx.shiftService : null}
+      pendingSlot={ctx.shiftSlot}
+      onSlotClick={ctx.selectShiftSlot}
+      appointmentsVersion={ctx.appointmentsVersion}
+      scrollToTime={ctx.scrollToTime}
+      onScrollConsumed={ctx.clearScrollToTime}
     />
   );
 }
@@ -124,7 +141,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/site" element={<Site />} />
-        <Route path="/site" element={<Site />} />
+        <Route path="/terminos" element={<Terms />} />
         <Route path="/personalizacion" element={<Personalizacion />} />
 
         <Route path="/SettingsView" element={<Navigate to="/admin/ajustes" replace />} />

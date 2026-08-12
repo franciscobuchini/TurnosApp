@@ -75,8 +75,9 @@ function writeCollection<T>(key: string, value: T[]) {
 //  - Formato "Día y horas" del seed: { day: "L", hours: ["9:00 - 18:00"] }.
 // Esta función normaliza cualquier valor al formato OpeningHoursEntry para que
 // el componente WeekSchedule coincida siempre con lo guardado en la BBDD.
-// Las entradas sin ambos horarios (startTime/endTime) se descartan: un horario
-// incompleto nunca se persiste.
+// Una entrada con ambos horarios null (startTime/endTime) representa un día
+// cerrado y se conserva; una entrada incompleta (solo un lado) se descarta:
+// un horario incompleto nunca se persiste.
 const DAY_LETTER_TO_NUMBER: Record<string, number> = {
   L: 1, M: 2, X: 3, J: 4, V: 5, S: 6, D: 0,
 };
@@ -98,11 +99,15 @@ export function normalizeOpeningHours(schedule: unknown): OpeningHoursEntry[] {
       continue;
     }
 
-    if (typeof entry.dayOfWeek === 'number' && typeof entry.startTime === 'string' && typeof entry.endTime === 'string') {
-      const startTime = padTime(entry.startTime);
-      const endTime = padTime(entry.endTime);
-      result.push({ dayOfWeek: entry.dayOfWeek, startTime, endTime });
-      continue;
+if (typeof entry.dayOfWeek === 'number') {
+      if (typeof entry.startTime === 'string' && typeof entry.endTime === 'string') {
+        const startTime = padTime(entry.startTime);
+        const endTime = padTime(entry.endTime);
+        result.push({ dayOfWeek: entry.dayOfWeek, startTime, endTime });
+      } else if (entry.startTime === null && entry.endTime === null) {
+        // Día cerrado: se conserva sin tramos.
+        result.push({ dayOfWeek: entry.dayOfWeek, startTime: null, endTime: null });
+      }
     }
 
     const dayNumber = DAY_LETTER_TO_NUMBER[String(entry.day ?? '')];
@@ -124,11 +129,29 @@ export function normalizeOpeningHours(schedule: unknown): OpeningHoursEntry[] {
   return result;
 }
 
+// Completa los días 0-6 ausentes del array como cerrados
+// ({ startTime: null, endTime: null }). Un día ausente es indistinguible de
+// "sin datos" para getBusinessHoursByDay (que lo interpreta como "sin
+// restricción"), así que sin esto un día cerrado que no llegó a persistirse
+// explícito parecería abierto 24h en el Schedule. Se usa tanto para el
+// horario del negocio (getOpeningHours) como el de cada miembro del equipo.
+function fillMissingDaysAsClosed(entries: OpeningHoursEntry[]): OpeningHoursEntry[] {
+  const result = [...entries];
+
+  for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+    if (!result.some((entry) => entry.dayOfWeek === dayOfWeek)) {
+      result.push({ dayOfWeek, startTime: null, endTime: null });
+    }
+  }
+
+  return result;
+}
+
 export function getTeamMembers(): TeamMember[] {
   const members = readCollection(TEAM_MEMBERS_STORAGE_KEY, teamMembersJson as unknown as TeamMember[]);
   return members.map((member) => ({
     ...member,
-    schedule: normalizeOpeningHours(member.schedule),
+    schedule: fillMissingDaysAsClosed(normalizeOpeningHours(member.schedule)),
   }));
 }
 
@@ -239,8 +262,15 @@ export function saveAppointments(appointments: Appointment[]) {
   writeCollection(APPOINTMENTS_STORAGE_KEY, appointments);
 }
 
+export function addAppointment(appointment: Appointment): Appointment[] {
+  const current = getAppointments();
+  const next = [...current, appointment];
+  saveAppointments(next);
+  return next;
+}
+
 export function getOpeningHours(): OpeningHoursEntry[] {
-  return normalizeOpeningHours(getBusiness().schedule);
+  return fillMissingDaysAsClosed(normalizeOpeningHours(getBusiness().schedule));
 }
 
 export function saveOpeningHours(schedule: OpeningHoursEntry[]) {

@@ -9,14 +9,20 @@
       "Corte de Pelo Masculino",
       "Recorte de Barba + Spa",
       "Coloración y Reflejos",
-      "Tratamiento de Nutrición Capilar"
+      "Tratamiento Capilar"
     ],
     "schedule": [
-      { "day": "L", "hours": ["9:00 - 18:00"] },
-      { "day": "M", "hours": ["9:00 - 18:00"] },
-      { "day": "X", "hours": ["9:00 - 18:00"] },
-      { "day": "J", "hours": ["9:00 - 18:00"] },
-      { "day": "V", "hours": ["9:00 - 18:00"] }
+      { "dayOfWeek": 0, "startTime": null, "endTime": null },
+      { "dayOfWeek": 1, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 1, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 2, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 3, "startTime": null, "endTime": null },
+      { "dayOfWeek": 4, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 4, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 5, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 6, "startTime": "10:00", "endTime": "14:00" }
     ]
   },
   {
@@ -27,15 +33,20 @@
     "phone": "+54 9 11 6789-2345",
     "services": [
       "Coloración y Reflejos",
-      "Tratamiento de Nutrición Capilar",
+      "Tratamiento Capilar",
       "Corte de Pelo Masculino"
     ],
     "schedule": [
-      { "day": "M", "hours": ["10:00 - 19:00"] },
-      { "day": "X", "hours": ["10:00 - 19:00"] },
-      { "day": "J", "hours": ["10:00 - 19:00"] },
-      { "day": "V", "hours": ["10:00 - 19:00"] },
-      { "day": "S", "hours": ["10:00 - 19:00"] }
+      { "dayOfWeek": 0, "startTime": null, "endTime": null },
+      { "dayOfWeek": 1, "startTime": null, "endTime": null },
+      { "dayOfWeek": 2, "startTime": "10:00", "endTime": "13:00" },
+      { "dayOfWeek": 2, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 3, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 3, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 4, "startTime": "10:00", "endTime": "13:00" },
+      { "dayOfWeek": 4, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 6, "startTime": "10:00", "endTime": "14:00" }
     ]
   },
   {
@@ -49,30 +60,39 @@
       "Recorte de Barba + Spa"
     ],
     "schedule": [
-      { "day": "L", "hours": ["8:00 - 12:00", "14:00 - 18:00"] },
-      { "day": "M", "hours": ["8:00 - 16:00"] },
-      { "day": "X", "hours": ["8:00 - 16:00"] },
-      { "day": "J", "hours": ["8:00 - 12:00", "14:00 - 18:00"] },
-      { "day": "V", "hours": ["8:00 - 16:00"] },
-      { "day": "S", "hours": ["8:00 - 12:00"] }
+      { "dayOfWeek": 0, "startTime": null, "endTime": null },
+      { "dayOfWeek": 1, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 2, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 3, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 3, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 4, "startTime": null, "endTime": null },
+      { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 5, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 6, "startTime": "10:00", "endTime": "14:00" }
     ]
   },
   {
     "name": "Lucia Gomez",
     "photo": "",
-    "role": "Manicurista",
+    "role": "Especialista en Cuidado Personal",
     "email": "lucia@mail.com",
     "phone": "+54 9 11 8901-4567",
     "services": [
-      "Manicura Rusa",
-      "Pedicura Completa",
-      "Nail Art Complejo"
+      "Perfilado de Cejas",
+      "Lavado + Peinado"
     ],
     "schedule": [
-      { "day": "L", "hours": ["9:00 - 17:00"] },
-      { "day": "M", "hours": ["9:00 - 17:00"] },
-      { "day": "J", "hours": ["9:00 - 17:00"] },
-      { "day": "V", "hours": ["9:00 - 17:00"] }
+      { "dayOfWeek": 0, "startTime": null, "endTime": null },
+      { "dayOfWeek": 1, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 1, "startTime": "15:00", "endTime": "17:00" },
+      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 3, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 3, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 4, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 4, "startTime": "15:00", "endTime": "17:00" },
+      { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 6, "startTime": null, "endTime": null }
     ]
   }
 ]

@@ -29,7 +29,7 @@
     "colorId": "celeste",
     "description": "Lavado profesional con shampoo premium y peinado personalizado.",
     "price": 4500,
-    "duration": "20 min"
+    "duration": "30 min"
   },
   {
     "name": "Afeitado Clásico",
@@ -45,7 +45,7 @@
     "colorId": "manteca",
     "description": "Corte para niños con atención personalizada y ambiente amigable.",
     "price": 6500,
-    "duration": "35 min"
+    "duration": "45 min"
   },
   {
     "name": "Tratamiento Capilar",
@@ -53,7 +53,7 @@
     "colorId": "menta",
     "description": "Hidratación profunda y nutrición para fortalecer el cabello.",
     "price": 9000,
-    "duration": "50 min"
+    "duration": "60 min"
   },
   {
     "name": "Alisado Capilar",
@@ -77,7 +77,7 @@
     "colorId": "salmon",
     "description": "Diseño y perfilado de cejas para resaltar la expresión facial.",
     "price": 3500,
-    "duration": "20 min"
+    "duration": "30 min"
   },
   {
     "name": "Combo Corte + Barba",
