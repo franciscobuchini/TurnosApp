@@ -32,44 +32,12 @@
     "duration": "30 min"
   },
   {
-    "name": "Afeitado Clásico",
-    "photo": "",
-    "colorId": "rosa",
-    "description": "Afeitado completo con navaja, toallas calientes y loción refrescante.",
-    "price": 5500,
-    "duration": "30 min"
-  },
-  {
-    "name": "Corte Infantil",
-    "photo": "",
-    "colorId": "manteca",
-    "description": "Corte para niños con atención personalizada y ambiente amigable.",
-    "price": 6500,
-    "duration": "45 min"
-  },
-  {
     "name": "Tratamiento Capilar",
     "photo": "",
     "colorId": "menta",
     "description": "Hidratación profunda y nutrición para fortalecer el cabello.",
     "price": 9000,
     "duration": "60 min"
-  },
-  {
-    "name": "Alisado Capilar",
-    "photo": "",
-    "colorId": "violeta",
-    "description": "Tratamiento de alisado para reducir el frizz y facilitar el peinado diario.",
-    "price": 22000,
-    "duration": "180 min"
-  },
-  {
-    "name": "Permanente Masculina",
-    "photo": "",
-    "colorId": "azul-pastel",
-    "description": "Ondulación permanente para lograr volumen y textura duradera.",
-    "price": 18000,
-    "duration": "120 min"
   },
   {
     "name": "Perfilado de Cejas",
@@ -86,13 +54,5 @@
     "description": "Corte de cabello y arreglo completo de barba en una sola sesión.",
     "price": 13000,
     "duration": "75 min"
-  },
-  {
-    "name": "Decoloración Completa",
-    "photo": "",
-    "colorId": "durazno",
-    "description": "Proceso de decoloración profesional con protección de la fibra capilar.",
-    "price": 20000,
-    "duration": "150 min"
   }
 ]

@@ -13,16 +13,13 @@
     ],
     "schedule": [
       { "dayOfWeek": 0, "startTime": null, "endTime": null },
-      { "dayOfWeek": 1, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 1, "startTime": "15:00", "endTime": "19:00" },
-      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 2, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 1, "startTime": null, "endTime": null },
+      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "18:00" },
       { "dayOfWeek": 3, "startTime": null, "endTime": null },
-      { "dayOfWeek": 4, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 4, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 4, "startTime": "09:00", "endTime": "18:00" },
       { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 5, "startTime": "15:00", "endTime": "19:00" },
-      { "dayOfWeek": 6, "startTime": "10:00", "endTime": "14:00" }
+      { "dayOfWeek": 5, "startTime": "16:00", "endTime": "20:00" },
+      { "dayOfWeek": 6, "startTime": "09:00", "endTime": "14:00" }
     ]
   },
   {
@@ -39,14 +36,12 @@
     "schedule": [
       { "dayOfWeek": 0, "startTime": null, "endTime": null },
       { "dayOfWeek": 1, "startTime": null, "endTime": null },
-      { "dayOfWeek": 2, "startTime": "10:00", "endTime": "13:00" },
-      { "dayOfWeek": 2, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "18:00" },
       { "dayOfWeek": 3, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 3, "startTime": "15:00", "endTime": "19:00" },
-      { "dayOfWeek": 4, "startTime": "10:00", "endTime": "13:00" },
-      { "dayOfWeek": 4, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 3, "startTime": "16:00", "endTime": "20:00" },
+      { "dayOfWeek": 4, "startTime": "09:00", "endTime": "18:00" },
       { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 6, "startTime": "10:00", "endTime": "14:00" }
+      { "dayOfWeek": 6, "startTime": null, "endTime": null }
     ]
   },
   {
@@ -61,15 +56,14 @@
     ],
     "schedule": [
       { "dayOfWeek": 0, "startTime": null, "endTime": null },
-      { "dayOfWeek": 1, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 2, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 1, "startTime": null, "endTime": null },
+      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "18:00" },
       { "dayOfWeek": 3, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 3, "startTime": "15:00", "endTime": "19:00" },
+      { "dayOfWeek": 3, "startTime": "16:00", "endTime": "20:00" },
       { "dayOfWeek": 4, "startTime": null, "endTime": null },
       { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 5, "startTime": "15:00", "endTime": "19:00" },
-      { "dayOfWeek": 6, "startTime": "10:00", "endTime": "14:00" }
+      { "dayOfWeek": 5, "startTime": "16:00", "endTime": "20:00" },
+      { "dayOfWeek": 6, "startTime": "09:00", "endTime": "14:00" }
     ]
   },
   {
@@ -84,15 +78,13 @@
     ],
     "schedule": [
       { "dayOfWeek": 0, "startTime": null, "endTime": null },
-      { "dayOfWeek": 1, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 1, "startTime": "15:00", "endTime": "17:00" },
-      { "dayOfWeek": 2, "startTime": "09:00", "endTime": "13:00" },
+      { "dayOfWeek": 1, "startTime": null, "endTime": null },
+      { "dayOfWeek": 2, "startTime": null, "endTime": null },
       { "dayOfWeek": 3, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 3, "startTime": "15:00", "endTime": "19:00" },
-      { "dayOfWeek": 4, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 4, "startTime": "15:00", "endTime": "17:00" },
+      { "dayOfWeek": 3, "startTime": "16:00", "endTime": "20:00" },
+      { "dayOfWeek": 4, "startTime": "09:00", "endTime": "18:00" },
       { "dayOfWeek": 5, "startTime": "09:00", "endTime": "13:00" },
-      { "dayOfWeek": 6, "startTime": null, "endTime": null }
+      { "dayOfWeek": 6, "startTime": "09:00", "endTime": "14:00" }
     ]
   }
 ]
