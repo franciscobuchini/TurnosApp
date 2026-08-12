@@ -17,6 +17,7 @@ interface AppointmentCardProps {
   colorClassName?: string;
   servicePhoto?: string;
   className?: string;
+  onClick?: () => void;
 }
 
 const SLOT_HEIGHT_PX = 48;
@@ -57,6 +58,7 @@ export default function AppointmentCard({
   colorClassName = 'bg-accent',
   servicePhoto,
   className,
+  onClick,
 }: AppointmentCardProps) {
   const heightPx = spanSlots * SLOT_HEIGHT_PX - 4;
   const showClient = spanSlots >= 2;
@@ -68,6 +70,7 @@ export default function AppointmentCard({
     <div
       className={twMerge(CARD_CLASS, colorClassName, isPast && CARD_PAST_CLASS, className)}
       style={{ height: `${heightPx}px`, top: '2px' }}
+      onClick={onClick}
     >
       <div className={CARD_INNER_CLASS}>
         <div className={CARD_HEADER_ROW_CLASS}>

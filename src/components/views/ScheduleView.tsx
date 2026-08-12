@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { Appointment } from '../../database/types';
 import type { ShiftSlot } from '../../pages/admin/Dashboard';
 import MainContent from '../layout/MainContent';
 import WeekSelector from '../widgets/mainWidgets/WeekSelector';
@@ -23,6 +24,8 @@ interface ScheduleViewProps {
   pendingSlot?: ShiftSlot | null;
   /** Se dispara al hacer click en una celda disponible con servicio elegido. */
   onSlotClick?: (slot: ShiftSlot) => void;
+  /** Se dispara al hacer click en la tarjeta de un turno ya confirmado. */
+  onAppointmentClick?: (appointment: Appointment) => void;
   /** Fuerza a Schedule a releer los turnos de la BBDD tras crear uno nuevo. */
   appointmentsVersion?: number;
   /** Hora ("HH:mm") del turno recién creado: al montar, hace scroll a esa fila. */
@@ -41,6 +44,7 @@ export default function ScheduleView({
   previewService,
   pendingSlot,
   onSlotClick,
+  onAppointmentClick,
   appointmentsVersion,
   scrollToTime,
   onScrollConsumed,
@@ -61,6 +65,7 @@ export default function ScheduleView({
         previewService={previewService}
         pendingSlot={pendingSlot}
         onSlotClick={onSlotClick}
+        onAppointmentClick={onAppointmentClick}
         appointmentsVersion={appointmentsVersion}
         scrollToTime={scrollToTime}
         onScrollConsumed={onScrollConsumed}

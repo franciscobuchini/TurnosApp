@@ -27,17 +27,20 @@ import {
   addTeamMember,
   updateTeamMember,
   addAppointment,
+  updateAppointment,
+  removeAppointment,
   getservices,
   removeClient,
   removeService,
   removeTeamMember,
 } from '../../database/data';
-import type { Client, FiltersOption, service, TeamMember } from '../../database/types';
+import type { Appointment, Client, FiltersOption, service, TeamMember } from '../../database/types';
 import { useTeamFilters } from '@/hooks/useTeamFilters';
 import { SERVICE_COLOR_BY_ID } from '../../components/widgets/serviceWidgets/serviceColors';
 import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';
 import AddShiftSidebar from '../../components/views/sidebarViews/AddShiftSidebar';
+import EditAppointmentSidebar from '../../components/views/sidebarViews/EditAppointmentSidebar';
 
 /** Horario elegido en el Schedule para el turno en curso del flujo
     "Agregar turno", a la espera de que se elija el cliente. */
@@ -75,12 +78,21 @@ export interface AdminContext {
   cancelShiftSlot: () => void;
   /** Confirma el turno con el cliente elegido: lo persiste y cierra el flujo. */
   confirmShiftClient: (clientName: string) => void;
+  /** Da de alta un cliente nuevo y confirma el turno con él, en un solo paso
+      (buscador/alta combinados del paso "Seleccionar cliente"). */
+  confirmShiftWithNewClient: (client: { name: string; phone: string; notes?: string }) => void;
   /** Se incrementa cada vez que se crea un turno, para que el Schedule vuelva a leer la BBDD. */
   appointmentsVersion: number;
   /** Hora ("HH:mm") del turno recién creado: el Schedule hace scroll a esa
       fila al montarse, para no perder de vista el turno agregado. */
   scrollToTime: string | null;
   clearScrollToTime: () => void;
+  /** Turno clickeado en el Schedule, a la espera de verse/editarse en la sidebar. */
+  editingAppointment: Appointment | null;
+  openEditAppointment: (appointment: Appointment) => void;
+  closeEditAppointment: () => void;
+  saveAppointment: (id: string, updated: Appointment) => void;
+  cancelAppointment: (id: string) => void;
   createMember: (member: TeamMember) => void;
   updateMember: (previousName: string, member: TeamMember) => void;
   deleteMember: (name: string) => void;
@@ -144,6 +156,23 @@ function Dashboard() {
     closeAddShift();
   };
 
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+
+  /* Si se navega fuera de la agenda mientras el panel de edición de turno,
+     o el flujo "Agregar turno", están abiertos, los cierra (si no,
+     quedarían mostrándose en rutas donde no corresponde, como
+     /admin/ajustes: el botón de Ajustes en AppMenubar navega directo sin
+     pasar por closeAddShift, a diferencia de los demás accesos del menú).
+     Va ANTES que el efecto de abajo (que puede volver a abrir "Agregar
+     turno" vía location.state) para que, si ambos disparan en el mismo
+     commit, ese efecto tenga la última palabra y el flujo quede abierto. */
+  useEffect(() => {
+    setEditingAppointment(null);
+    setAddShiftOpen(false);
+    setShiftService(null);
+    setShiftSlot(null);
+  }, [location.pathname]);
+
   useEffect(() => {
     const state = location.state as { openAddShift?: boolean } | null;
     if (state?.openAddShift) {
@@ -151,6 +180,21 @@ function Dashboard() {
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location.state, location.pathname, navigate]);
+
+  const openEditAppointment = (appointment: Appointment) => setEditingAppointment(appointment);
+  const closeEditAppointment = () => setEditingAppointment(null);
+
+  const saveAppointment = (id: string, updated: Appointment) => {
+    updateAppointment(id, updated);
+    setAppointmentsVersion((version) => version + 1);
+    setEditingAppointment(null);
+  };
+
+  const cancelAppointment = (id: string) => {
+    removeAppointment(id);
+    setAppointmentsVersion((version) => version + 1);
+    setEditingAppointment(null);
+  };
   const { viewDate, selectedDate, setViewDate, setSelectedDate, selectDate } = useAgendaDate();
   const [clients, setClients] = useState<Client[]>(() => getClients());
   const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
@@ -216,6 +260,15 @@ function Dashboard() {
     navigate('/admin');
   };
 
+  /* A diferencia de createClient (alta desde la ruta /admin/cliente), esta
+     no navega: se usa desde el buscador/alta del paso "Seleccionar cliente"
+     del flujo "Agregar turno", que ya está en la propia agenda. */
+  const confirmShiftWithNewClient = (client: { name: string; phone: string; notes?: string }) => {
+    addClient({ ...client, appointmentsCount: 0, totalSpent: 0 });
+    setClients(getClients());
+    confirmShiftClient(client.name);
+  };
+
   const updateClient = (previousName: string, updated: Client) => {
     dbUpdateClient(previousName, updated);
     setClients(getClients());
@@ -252,9 +305,15 @@ function Dashboard() {
     selectShiftSlot,
     cancelShiftSlot,
     confirmShiftClient,
+    confirmShiftWithNewClient,
     appointmentsVersion,
     scrollToTime,
     clearScrollToTime,
+    editingAppointment,
+    openEditAppointment,
+    closeEditAppointment,
+    saveAppointment,
+    cancelAppointment,
     createMember,
     updateMember,
     deleteMember,
@@ -284,6 +343,14 @@ function Dashboard() {
             shiftSlot={shiftSlot}
             onBack={cancelShiftSlot}
             onConfirmClient={confirmShiftClient}
+            onAddClientAndConfirm={confirmShiftWithNewClient}
+          />
+        ) : editingAppointment ? (
+          <EditAppointmentSidebar
+            appointment={editingAppointment}
+            onClose={closeEditAppointment}
+            onSave={saveAppointment}
+            onCancelAppointment={cancelAppointment}
           />
         ) : isSidebarlessPage ? null : (
           <AdminSidebar

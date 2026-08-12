@@ -1,6 +1,8 @@
-import { type ChangeEvent, type FocusEvent, type MouseEvent, useEffect, useState } from 'react';
+import { type ChangeEvent, useEffect, useState } from 'react';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import formatCapitalizedWords from '@/utils/formatCapitalizedWords';
+import WhatsAppInput, { WHATSAPP_PREFIX } from '../WhatsAppInput';
 import ServiceSelector from './ServiceSelector';
 
 interface FormAddEntityProps {
@@ -25,35 +27,6 @@ interface FormAddEntityProps {
 const FORM_CLASS = 'flex flex-col gap-6';
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
 
-const whatsappPrefix = '+54 9 ';
-
-function formatCapitalizedWords(value: string) {
-  const hasTrailingSpace = /\s$/.test(value);
-  const words = value.trim().split(/\s+/).filter(Boolean);
-
-  if (!words.length) {
-    return '';
-  }
-
-  const formattedWords = words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-
-  return hasTrailingSpace ? `${formattedWords.join(' ')} ` : formattedWords.join(' ');
-}
-
-function setCursorAfterPrefix(input: HTMLInputElement) {
-  const position = whatsappPrefix.length;
-  if (input.selectionStart != null && input.selectionStart < position) {
-    input.setSelectionRange(position, position);
-  }
-}
-
-// Solo números y un "+" al inicio: descarta cualquier otro carácter.
-function sanitizeWhatsApp(value: string): string {
-  const digits = value.replace(/\D/g, '');
-  const hasLeadingPlus = value.startsWith('+');
-  return hasLeadingPlus ? `+${digits}` : digits;
-}
-
 export default function FormAddEntity({ mode = 'create', initialValues, onValuesChange, onValidityChange }: FormAddEntityProps) {
   const [memberName, setMemberName] = useState(initialValues?.name ?? '');
   const [role, setRole] = useState(initialValues?.role ?? '');
@@ -72,7 +45,7 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
     });
   }, [memberName, role, phone, email, selectedServices, onValuesChange]);
 
-  const isFormValid = Boolean(memberName.trim() && role.trim() && phone.replace(whatsappPrefix, '').trim());
+  const isFormValid = Boolean(memberName.trim() && role.trim() && phone.replace(WHATSAPP_PREFIX, '').trim());
 
   useEffect(() => {
     onValidityChange?.(isFormValid);
@@ -84,21 +57,6 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
 
   const handleRoleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setRole(formatCapitalizedWords(event.target.value));
-  };
-
-  const handleWhatsAppFocus = (event: FocusEvent<HTMLInputElement>) => {
-    const input = event.currentTarget;
-    if (!input.value) {
-      input.value = whatsappPrefix;
-      setPhone(input.value);
-    }
-
-    window.requestAnimationFrame(() => setCursorAfterPrefix(input));
-  };
-
-  const handleWhatsAppMouseUp = (event: MouseEvent<HTMLInputElement>) => {
-    const input = event.currentTarget;
-    window.requestAnimationFrame(() => setCursorAfterPrefix(input));
   };
 
   return (
@@ -124,16 +82,7 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
       </div>
 
       <div className={TWO_COLUMN_GRID_CLASS}>
-        <Input
-          label="WhatsApp"
-          name="phone"
-          type="tel"
-          value={phone || whatsappPrefix}
-          onChange={(event) => setPhone(sanitizeWhatsApp(event.target.value))}
-          onFocus={handleWhatsAppFocus}
-          onMouseUp={handleWhatsAppMouseUp}
-          readOnly={readOnly}
-        />
+        <WhatsAppInput name="phone" value={phone} onChange={setPhone} readOnly={readOnly} />
 
         <Input
           label="Email"

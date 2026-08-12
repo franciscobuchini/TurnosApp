@@ -1,6 +1,8 @@
-import { type ChangeEvent, type FocusEvent, type MouseEvent, useEffect, useState } from 'react';
+import { type ChangeEvent, useEffect, useState } from 'react';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import formatCapitalizedWords from '@/utils/formatCapitalizedWords';
+import WhatsAppInput, { WHATSAPP_PREFIX } from '../WhatsAppInput';
 
 interface FormAddClientProps {
   mode?: 'create' | 'view' | 'edit';
@@ -21,28 +23,6 @@ interface FormAddClientProps {
 
 const FORM_CLASS = 'flex flex-1 flex-col gap-8';
 
-const whatsappPrefix = '+54 9 ';
-
-function formatCapitalizedWords(value: string) {
-  const hasTrailingSpace = /\s$/.test(value);
-  const words = value.trim().split(/\s+/).filter(Boolean);
-
-  if (!words.length) {
-    return '';
-  }
-
-  const formattedWords = words.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-
-  return hasTrailingSpace ? `${formattedWords.join(' ')} ` : formattedWords.join(' ');
-}
-
-function setCursorAfterPrefix(input: HTMLInputElement) {
-  const position = whatsappPrefix.length;
-  if (input.selectionStart != null && input.selectionStart < position) {
-    input.setSelectionRange(position, position);
-  }
-}
-
 export default function FormAddClient({ mode = 'create', initialValues, onValidityChange, onValuesChange }: FormAddClientProps) {
   const [fullName, setFullName] = useState(initialValues?.fullName ?? '');
   const [whatsapp, setWhatsapp] = useState(initialValues?.whatsapp ?? '');
@@ -56,7 +36,7 @@ export default function FormAddClient({ mode = 'create', initialValues, onValidi
     setNotes(initialValues?.notes ?? '');
   }, [mode, initialValues?.fullName, initialValues?.whatsapp, initialValues?.email, initialValues?.notes]);
 
-  const isFormValid = Boolean(fullName.trim()) && Boolean(whatsapp.replace(whatsappPrefix, '').trim());
+  const isFormValid = Boolean(fullName.trim()) && Boolean(whatsapp.replace(WHATSAPP_PREFIX, '').trim());
 
   useEffect(() => {
     onValidityChange?.(isFormValid);
@@ -75,20 +55,6 @@ export default function FormAddClient({ mode = 'create', initialValues, onValidi
     setFullName(formatCapitalizedWords(event.target.value));
   };
 
-  const handleWhatsAppFocus = (event: FocusEvent<HTMLInputElement>) => {
-    const input = event.currentTarget;
-    if (!input.value) {
-      input.value = whatsappPrefix;
-    }
-
-    window.requestAnimationFrame(() => setCursorAfterPrefix(input));
-  };
-
-  const handleWhatsAppMouseUp = (event: MouseEvent<HTMLInputElement>) => {
-    const input = event.currentTarget;
-    window.requestAnimationFrame(() => setCursorAfterPrefix(input));
-  };
-
   return (
       <Form className={FORM_CLASS}>
         <Input
@@ -99,16 +65,7 @@ export default function FormAddClient({ mode = 'create', initialValues, onValidi
           onChange={handleNameChange}
           readOnly={mode === 'view'}
         />
-        <Input
-          label="WhatsApp"
-          name="whatsapp"
-          type="tel"
-          value={whatsapp || whatsappPrefix}
-          onChange={(event) => setWhatsapp(event.target.value)}
-          onFocus={handleWhatsAppFocus}
-          onMouseUp={handleWhatsAppMouseUp}
-          readOnly={mode === 'view'}
-        />
+        <WhatsAppInput name="whatsapp" value={whatsapp} onChange={setWhatsapp} readOnly={mode === 'view'} />
         <Input
           label="Email"
           name="email"

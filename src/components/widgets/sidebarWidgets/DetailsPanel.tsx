@@ -45,7 +45,12 @@ const DETAILS_PANEL_IMAGE_CLASS = 'h-full w-full';
 
 const DETAILS_PANEL_LABEL_CLASS = '';
 
-const DETAILS_PANEL_TRIGGER_CLASS = 'w-full h-12 gap-4 shrink-0 justify-center text-muted-foreground hover:text-foreground rounded-3xl';
+/* animate-in solo dispara al montarse (no en cada apertura del acordeón,
+   ya que las filas existentes no se desmontan al cerrar/abrir un <details>
+   nativo) — así una fila recién agregada (ej. un servicio que se acaba de
+   crear) entra con una transición sutil sin re-animar el resto de la lista. */
+const DETAILS_PANEL_TRIGGER_CLASS =
+  'w-full h-12 gap-4 shrink-0 justify-center text-muted-foreground hover:text-foreground rounded-3xl animate-in fade-in-0 slide-in-from-top-1 duration-200';
 const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-background';
 
 export default function DetailsPanel({

@@ -1,6 +1,7 @@
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/ui/button';
 import { getDayName, isSameDay } from '@/utils/dateName';
+import { weekSelectorStateClass } from './weekSelectorButtonState';
 
 interface DaySelectorButtonsProps {
   weekDays: Date[];
@@ -9,15 +10,6 @@ interface DaySelectorButtonsProps {
 }
 
 const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-24 flex-1 p-3 shrink-0 justify-center items-center bg-transparent rounded-3xl';
-
-/* Mismo criterio que WeekNavigationButtons: sin colores de paleta (chocaban
-   con los colores de servicio de las tarjetas de turnos), solo grises y
-   bordes del theme, consistentes entre ambos componentes y en los 2 temas. */
-const WEEK_SELECTOR_DAY_DEFAULT_CLASS = 'bg-transparent text-muted-foreground hover:bg-muted/60 hover:text-foreground';
-
-const WEEK_SELECTOR_DAY_TODAY_CLASS = 'bg-transparent border border-border text-foreground hover:bg-muted/60';
-
-const WEEK_SELECTOR_DAY_SELECTED_CLASS = 'bg-muted border border-foreground/15 text-foreground hover:bg-muted';
 
 const WEEK_SELECTOR_DAY_VISIBILITY_0_CLASS = '';
 const WEEK_SELECTOR_DAY_VISIBILITY_1_CLASS = 'hidden @min-[380px]:flex';
@@ -73,11 +65,7 @@ export default function DaySelectorButtons({
             onClick={handleDayClick}
             className={twMerge(WEEK_SELECTOR_DAY_BUTTON_CLASS,
               visibilityClassName,
-              isSelected
-                ? WEEK_SELECTOR_DAY_SELECTED_CLASS
-                : isToday
-                  ? WEEK_SELECTOR_DAY_TODAY_CLASS
-                  : WEEK_SELECTOR_DAY_DEFAULT_CLASS,
+              weekSelectorStateClass(isSelected, isToday),
             )}
           >
             <span className={WEEK_SELECTOR_DAY_COLUMN_CLASS}>

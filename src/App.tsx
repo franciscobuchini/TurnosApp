@@ -39,6 +39,7 @@ function SchedulePage() {
       previewService={ctx.addShiftOpen ? ctx.shiftService : null}
       pendingSlot={ctx.shiftSlot}
       onSlotClick={ctx.selectShiftSlot}
+      onAppointmentClick={ctx.addShiftOpen ? undefined : ctx.openEditAppointment}
       appointmentsVersion={ctx.appointmentsVersion}
       scrollToTime={ctx.scrollToTime}
       onScrollConsumed={ctx.clearScrollToTime}

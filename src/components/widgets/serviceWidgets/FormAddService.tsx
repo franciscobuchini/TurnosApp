@@ -3,6 +3,7 @@ import { type ChangeEvent, useEffect, useState } from 'react';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import formatCapitalizedWords from '@/utils/formatCapitalizedWords';
 
 import ColorPicker from './ColorPicker';
 import PhotoPicker from './PhotoPicker';
@@ -12,24 +13,6 @@ import { SERVICE_COLORS } from './serviceColors';
 const FORM_CLASS = 'flex flex-1 flex-col gap-8';
 const FIELD_GROUP_CLASS = 'flex flex-col gap-4';
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
-
-function formatCapitalizedWords(value: string) {
-  const trimmed = value.trim();
-
-  if (!trimmed) return '';
-
-  const hasTrailingSpace = /\s$/.test(value);
-
-  const formatted = trimmed
-    .split(/\s+/)
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
-    )
-    .join(' ');
-
-  return hasTrailingSpace ? `${formatted} ` : formatted;
-}
 
 interface FormAddServiceProps {
   mode?: 'create' | 'view' | 'edit';

@@ -5,6 +5,7 @@ import ViewLayout from '../layout/ViewLayout';
 import FormAddService from '../widgets/serviceWidgets/FormAddService';
 import ServicePreviewCard from '../widgets/serviceWidgets/ServicePreviewCard';
 import { SERVICE_COLOR_BY_ID, SERVICE_COLORS } from '../widgets/serviceWidgets/serviceColors';
+import { useEntityViewFooter } from '@/hooks/useEntityViewFooter';
 
 export const ADD_SERVICE_VIEW_TITLE = 'Agregar un nuevo servicio';
 
@@ -78,6 +79,14 @@ export default function AddServiceView({
   const [isFormValid, setIsFormValid] = useState(false);
   const [draftValues, setDraftValues] = useState<ServiceDraftValues>(EMPTY_DRAFT);
 
+  const { actionLabel, cancelLabel, isConfirmDisabled, handleCancel } = useEntityViewFooter({
+    mode,
+    isFormValid,
+    onBack,
+    onClose,
+    onCancel,
+  });
+
   if (!open) return null;
 
   const buildService = (): service => ({
@@ -89,15 +98,6 @@ export default function AddServiceView({
     photo: selectedService?.photo ?? '',
   });
 
-  const handleBack = onBack ?? onClose;
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-      return;
-    }
-
-    handleBack?.();
-  };
   const handleConfirm = () => {
     if (mode === 'create') {
       if (!isFormValid) {
@@ -117,9 +117,6 @@ export default function AddServiceView({
 
     onEdit?.();
   };
-  const actionLabel = mode === 'edit' ? 'Guardar' : mode === 'view' ? 'Editar' : 'Confirmar';
-  const cancelLabel = mode === 'view' ? 'Volver' : 'Cancelar';
-  const isConfirmDisabled = mode === 'create' && !isFormValid;
 
   const previewColor = SERVICE_COLOR_BY_ID[draftValues.colorId] ?? SERVICE_COLORS[0];
   const previewDuration = draftValues.duration.replace(/\s*min$/i, '');

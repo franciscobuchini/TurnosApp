@@ -269,6 +269,20 @@ export function addAppointment(appointment: Appointment): Appointment[] {
   return next;
 }
 
+export function updateAppointment(id: string, appointment: Appointment): Appointment[] {
+  const current = getAppointments();
+  const next = current.map((a) => (a.id === id ? appointment : a));
+  saveAppointments(next);
+  return next;
+}
+
+export function removeAppointment(id: string): Appointment[] {
+  const current = getAppointments();
+  const next = current.filter((a) => a.id !== id);
+  saveAppointments(next);
+  return next;
+}
+
 export function getOpeningHours(): OpeningHoursEntry[] {
   return fillMissingDaysAsClosed(normalizeOpeningHours(getBusiness().schedule));
 }

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getClients } from '../../database/data';
 import type { Client } from '../../database/types';
 import ViewLayout from '../layout/ViewLayout';
 import ComingSoonPanel from '../layout/ComingSoonPanel';
 import FormAddClient from '../widgets/clientWidgets/FormAddClient';
+import { useEntityViewFooter } from '@/hooks/useEntityViewFooter';
 
 export const ADD_CLIENT_VIEW_TITLE = 'Agregar un nuevo cliente';
 
@@ -56,32 +57,19 @@ export default function AddClientView({
     notes: '',
   });
 
+  const { actionLabel, cancelLabel, isConfirmDisabled, handleCancel } = useEntityViewFooter({
+    mode,
+    isFormValid,
+    onBack,
+    onClose,
+    onCancel,
+  });
+
   const clients = clientsProp ?? getClients();
   const shouldPrefillClient = mode !== 'create' && Boolean(clientName);
   const selectedClient = shouldPrefillClient
     ? clients.find((client) => normalizeClientName(client.name) === normalizeClientName(clientName))
     : undefined;
-
-  useEffect(() => {
-    if (selectedClient) {
-      setDraftValues({
-        fullName: selectedClient.name ?? '',
-        whatsapp: selectedClient.phone ?? '',
-        email: selectedClient.email ?? '',
-        notes: selectedClient.notes ?? '',
-      });
-      return;
-    }
-
-    if (mode === 'create') {
-      setDraftValues({
-        fullName: '',
-        whatsapp: '',
-        email: '',
-        notes: '',
-      });
-    }
-  }, [mode, selectedClient]);
 
   if (!open) return null;
 
@@ -92,15 +80,6 @@ export default function AddClientView({
     notes: selectedClient?.notes ?? '',
   };
 
-  const handleBack = onBack ?? onClose;
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-      return;
-    }
-
-    handleBack?.();
-  };
   const handleConfirm = () => {
     if (mode === 'create') {
       if (!isFormValid) {
@@ -136,9 +115,6 @@ export default function AddClientView({
 
     onEdit?.();
   };
-  const actionLabel = mode === 'edit' ? 'Guardar' : mode === 'view' ? 'Editar' : 'Confirmar';
-  const cancelLabel = mode === 'view' ? 'Volver' : 'Cancelar';
-  const isConfirmDisabled = mode === 'create' && !isFormValid;
 
   const resolvedMode = mode;
 

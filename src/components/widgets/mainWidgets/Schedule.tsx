@@ -38,6 +38,9 @@ interface ScheduleProps {
   /** Se dispara al hacer click en una celda disponible con servicio elegido
       (y sin un horario ya pendiente de confirmar). */
   onSlotClick?: (slot: ShiftSlot) => void;
+  /** Se dispara al hacer click en la tarjeta de un turno ya confirmado
+      (no en las tarjetas de preview/pending del flujo "Agregar turno"). */
+  onAppointmentClick?: (appointment: Appointment) => void;
   /** Fuerza a recalcular los turnos leídos de la BBDD tras crear uno nuevo. */
   appointmentsVersion?: number;
   /** Hora ("HH:mm") del turno recién creado: al montar, hace scroll a la
@@ -47,7 +50,7 @@ interface ScheduleProps {
   onScrollConsumed?: () => void;
 }
 
-const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-3xl bg-card';
+const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-b-3xl bg-card';
 
 const SCHEDULE_SCROLL_CLASS = 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
 
@@ -92,6 +95,14 @@ const SCHEDULE_PREVIEW_CONFLICT_CLASS =
    siguientes. */
 const SCHEDULE_SLOT_CLICK_CLASS = 'absolute inset-1 cursor-pointer rounded-2xl';
 
+/* Recuadro punteado que marca, sin necesidad de hover, cada tramo libre
+   donde el servicio elegido entra (ver computeAvailablePreviewRegions): un
+   solo recuadro por tramo contiguo (no uno por cada horario posible dentro
+   de él), siempre visible, con la línea lo más fina posible. Al pasar el
+   mouse la preview de color se dibuja encima (mismo z-10, por debajo de
+   SCHEDULE_PREVIEW_CARD_CLASS). */
+const SCHEDULE_AVAILABLE_SLOT_CLASS = 'absolute inset-x-1 z-10 rounded-3xl border border-dashed border-white pointer-events-none';
+
 /* Turno elegido en el Schedule, a la espera de que se confirme el cliente:
    misma tarjeta que la preview pero fija (no depende del hover) y con un
    anillo que la distingue de un turno ya confirmado. */
@@ -102,6 +113,11 @@ const SLOT_DURATION_MINUTES = 15;
 /* Alto de cada fila del Schedule (h-12). Se usa para calcular el scroll a la
    fila del turno recién creado. */
 const SCHEDULE_ROW_HEIGHT_PX = 48;
+
+/* Colchón que se muestra antes/después del horario real de apertura del
+   negocio (2 horas = 8 slots de 15 min), para que la grilla no arranque
+   justo en el horario de apertura. */
+const BUSINESS_HOURS_PADDING_SLOTS = (2 * 60) / SLOT_DURATION_MINUTES;
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -198,6 +214,141 @@ function buildAppointmentMap(appointments: Appointment[]) {
   return map;
 }
 
+interface EarliestBookableRowParams {
+  members: string[];
+  blockedMembers?: string[];
+  spanSlots: number;
+  selectedDate: Date;
+  now: Date;
+  businessRanges?: TimeRange[];
+  memberRangesByDay: Record<string, Record<number, TimeRange[]>>;
+  appointmentMap: Map<string, Map<number, { appointment: Appointment; spanSlots: number }>>;
+  /** Ventana visible del Schedule (horario real ± colchón): acota la búsqueda
+      a filas que efectivamente se renderizan. */
+  windowStartSlot: number;
+  windowEndSlot: number;
+}
+
+/** Primera fila (0-95) en la que algún miembro no bloqueado puede arrancar un
+    turno de `spanSlots`, o null si no entra en ningún lado ese día. Se usa
+    para llevar el scroll de Schedule al primer horario libre apenas se
+    elige un servicio en el flujo "Agregar turno". */
+function findEarliestBookableRow({
+  members,
+  blockedMembers,
+  spanSlots,
+  selectedDate,
+  now,
+  businessRanges,
+  memberRangesByDay,
+  appointmentMap,
+  windowStartSlot,
+  windowEndSlot,
+}: EarliestBookableRowParams): number | null {
+  const eligibleMembers = members.filter((member) => !blockedMembers?.includes(member));
+  if (eligibleMembers.length === 0) return null;
+
+  const checkAvailability = (member: string, row: number): CellAvailability =>
+    getCellAvailability({
+      selectedDate,
+      now,
+      slotMinutes: row * SLOT_DURATION_MINUTES,
+      businessRanges,
+      memberRanges: memberRangesByDay[member]?.[selectedDate.getDay()],
+      member,
+      blockedMembers,
+    });
+
+  const isRowFree = (member: string, row: number): boolean => {
+    const memberAppointments = appointmentMap.get(member);
+    if (memberAppointments?.has(row)) return false;
+    if (isRowCoveredByExistingAppointment(row, member, appointmentMap)) return false;
+    if (checkAvailability(member, row) !== 'available') return false;
+    return isSpanBookable(row, spanSlots, member, appointmentMap, (r) => checkAvailability(member, r));
+  };
+
+  for (let row = windowStartSlot; row < windowEndSlot; row++) {
+    if (eligibleMembers.some((member) => isRowFree(member, row))) {
+      return row;
+    }
+  }
+
+  return null;
+}
+
+interface AvailablePreviewRegionsParams {
+  members: string[];
+  blockedMembers?: string[];
+  spanSlots: number;
+  selectedDate: Date;
+  now: Date;
+  businessRanges?: TimeRange[];
+  memberRangesByDay: Record<string, Record<number, TimeRange[]>>;
+  appointmentMap: Map<string, Map<number, { appointment: Appointment; spanSlots: number }>>;
+  windowStartSlot: number;
+  windowEndSlot: number;
+}
+
+/** Para cada miembro, un único tramo por cada bloque contiguo de filas
+    libres (dentro de horario y sin turnos existentes) que sea, al menos,
+    tan largo como el servicio elegido — así se marca todo el hueco
+    disponible de una vez, en vez de repetir un recuadro del tamaño del
+    servicio por cada horario posible dentro de ese mismo hueco. Un mismo
+    miembro puede tener varios tramos si el horario tiene cortes (ej.
+    almuerzo). */
+function computeAvailablePreviewRegions({
+  members,
+  blockedMembers,
+  spanSlots,
+  selectedDate,
+  now,
+  businessRanges,
+  memberRangesByDay,
+  appointmentMap,
+  windowStartSlot,
+  windowEndSlot,
+}: AvailablePreviewRegionsParams): Map<string, Map<number, number>> {
+  const result = new Map<string, Map<number, number>>();
+
+  for (const member of members) {
+    const regions = new Map<number, number>();
+
+    if (!blockedMembers?.includes(member)) {
+      const isRowOpen = (row: number): boolean =>
+        getCellAvailability({
+          selectedDate,
+          now,
+          slotMinutes: row * SLOT_DURATION_MINUTES,
+          businessRanges,
+          memberRanges: memberRangesByDay[member]?.[selectedDate.getDay()],
+          member,
+          blockedMembers,
+        }) === 'available' && !isRowCoveredByExistingAppointment(row, member, appointmentMap);
+
+      let row = windowStartSlot;
+      while (row < windowEndSlot) {
+        if (!isRowOpen(row)) {
+          row += 1;
+          continue;
+        }
+
+        const regionStart = row;
+        while (row < windowEndSlot && isRowOpen(row)) {
+          row += 1;
+        }
+
+        if (row - regionStart >= spanSlots) {
+          regions.set(regionStart, row - regionStart);
+        }
+      }
+    }
+
+    result.set(member, regions);
+  }
+
+  return result;
+}
+
 export default function Schedule({
   selectedDate,
   members,
@@ -206,11 +357,42 @@ export default function Schedule({
   previewService,
   pendingSlot,
   onSlotClick,
+  onAppointmentClick,
   appointmentsVersion,
   scrollToTime,
   onScrollConsumed,
 }: ScheduleProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  /* Horario del local por día: undefined = sin restricción; lista vacía = día
+     cerrado (todos los slots bloqueados); con tramos = fuera de horario bloqueado. */
+  const businessRanges = useMemo(
+    () => getBusinessHoursByDay(getOpeningHours())[selectedDate.getDay()],
+    [selectedDate],
+  );
+
+  /* Día sin ningún tramo de apertura (ej. domingo cerrado): no tiene sentido
+     mostrar la grilla, se reemplaza por el mismo mensaje vacío que "sin
+     miembros seleccionados" pero avisando que el día está libre. */
+  const isFullyClosed = businessRanges !== undefined && businessRanges.length === 0;
+
+  /* Ventana visible del Schedule: desde el colchón antes de la apertura más
+     temprana hasta el colchón después del cierre más tardío de ese día. Sin
+     datos de horario (o día cerrado, que de todas formas no renderiza grilla)
+     se muestra el día completo. */
+  const { windowStartSlot, windowEndSlot } = useMemo(() => {
+    if (!businessRanges || businessRanges.length === 0) {
+      return { windowStartSlot: 0, windowEndSlot: 24 * 4 };
+    }
+
+    const starts = businessRanges.map((range) => timeToSlotIndex(range.startTime));
+    const ends = businessRanges.map((range) => timeToSlotIndex(range.endTime));
+
+    return {
+      windowStartSlot: Math.max(0, Math.min(...starts) - BUSINESS_HOURS_PADDING_SLOTS),
+      windowEndSlot: Math.min(24 * 4, Math.max(...ends) + BUSINESS_HOURS_PADDING_SLOTS),
+    };
+  }, [businessRanges]);
 
   /* Al montar (o al llegar un nuevo scrollToTime), posiciona el scroll en la
      fila del turno recién creado: queda en el 25% superior de la vista para
@@ -219,12 +401,17 @@ export default function Schedule({
     if (!scrollToTime || !scrollRef.current) return;
 
     const rowIndex = timeToSlotIndex(scrollToTime);
-    const target = Math.max(rowIndex * SCHEDULE_ROW_HEIGHT_PX - scrollRef.current.clientHeight * 0.25, 0);
+    const target = Math.max(
+      (rowIndex - windowStartSlot) * SCHEDULE_ROW_HEIGHT_PX - scrollRef.current.clientHeight * 0.25,
+      0,
+    );
     scrollRef.current.scrollTop = target;
     onScrollConsumed?.();
-  }, [scrollToTime, onScrollConsumed]);
-  const slots = Array.from({ length: 24 * 4 }, (_, index) => {
-    const totalMinutes = index * 15;
+  }, [scrollToTime, onScrollConsumed, windowStartSlot]);
+
+  const slots = Array.from({ length: windowEndSlot - windowStartSlot }, (_, relativeIndex) => {
+    const absoluteIndex = windowStartSlot + relativeIndex;
+    const totalMinutes = absoluteIndex * 15;
     const hour = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     const displayHour = hour.toString().padStart(2, '0');
@@ -241,13 +428,6 @@ export default function Schedule({
   const appointmentMap = useMemo(() => buildAppointmentMap(appointments), [appointments]);
   const now = new Date();
 
-  /* Horario del local por día: undefined = sin restricción; lista vacía = día
-     cerrado (todos los slots bloqueados); con tramos = fuera de horario bloqueado. */
-  const businessRanges = useMemo(
-    () => getBusinessHoursByDay(getOpeningHours())[selectedDate.getDay()],
-    [selectedDate],
-  );
-
   /* Horarios de trabajo de cada miembro, por día: undefined = sin restricción;
      lista vacía = no trabaja (celdas bloqueadas). */
   const memberRangesByDay = useMemo(() => {
@@ -258,6 +438,17 @@ export default function Schedule({
     }
     return map;
   }, []);
+
+  const computeAvailabilityFor = (member: string, row: number): CellAvailability =>
+    getCellAvailability({
+      selectedDate,
+      now,
+      slotMinutes: row * SLOT_DURATION_MINUTES,
+      businessRanges,
+      memberRanges: memberRangesByDay[member]?.[selectedDate.getDay()],
+      member,
+      blockedMembers,
+    });
 
   /* Mapa servicio → color/foto y miembro → foto, para pintar cada tarjeta
      con el color del servicio y mostrar los avatares correspondientes. */
@@ -306,6 +497,75 @@ export default function Schedule({
     };
   }, [previewService]);
 
+  /* Tramos libres (por miembro) donde el servicio elegido entra, para
+     marcarlos con un recuadro punteado sin depender del hover — así se ve
+     de una todo el hueco disponible, no solo el horario que se está
+     mirando. */
+  const availablePreviewRegions = useMemo(() => {
+    if (!previewServiceInfo) return null;
+
+    return computeAvailablePreviewRegions({
+      members,
+      blockedMembers,
+      spanSlots: previewServiceInfo.spanSlots,
+      selectedDate,
+      now: new Date(),
+      businessRanges,
+      memberRangesByDay,
+      appointmentMap,
+      windowStartSlot,
+      windowEndSlot,
+    });
+  }, [
+    previewServiceInfo,
+    members,
+    blockedMembers,
+    selectedDate,
+    businessRanges,
+    memberRangesByDay,
+    appointmentMap,
+    windowStartSlot,
+    windowEndSlot,
+  ]);
+
+  /* Al elegir (o cambiar) el servicio en el flujo "Agregar turno", hace
+     scroll al primer horario libre en el que ese servicio entra completo
+     para alguno de los miembros habilitados — así no hay que buscarlo a
+     mano en la grilla. */
+  useLayoutEffect(() => {
+    if (!previewServiceInfo || !scrollRef.current) return;
+
+    const earliestRow = findEarliestBookableRow({
+      members,
+      blockedMembers,
+      spanSlots: previewServiceInfo.spanSlots,
+      selectedDate,
+      now: new Date(),
+      businessRanges,
+      memberRangesByDay,
+      appointmentMap,
+      windowStartSlot,
+      windowEndSlot,
+    });
+    if (earliestRow === null) return;
+
+    const target = Math.max(
+      (earliestRow - windowStartSlot) * SCHEDULE_ROW_HEIGHT_PX - scrollRef.current.clientHeight * 0.25,
+      0,
+    );
+    scrollRef.current.scrollTop = target;
+  }, [
+    previewServiceInfo,
+    members,
+    blockedMembers,
+    selectedDate,
+    businessRanges,
+    memberRangesByDay,
+    appointmentMap,
+    windowStartSlot,
+    windowEndSlot,
+  ]);
+
   const dateStr = useMemo(() => toDateStr(selectedDate), [selectedDate]);
 
   /* Columna fija de etiquetas de hora: width explícito para que table-fixed no la incluya
@@ -315,8 +575,11 @@ export default function Schedule({
     header: <span className={SCHEDULE_LABEL_HEADER_CLASS}>Horas</span>,
     width: '64px',
     cellClassName: SCHEDULE_LABEL_CELL_CLASS,
-    cell: (slot, index) =>
-      index === 0 ? '' : index % 4 === 0 ? <span className={SCHEDULE_LABEL_TEXT_CLASS}>{slot}</span> : '',
+    cell: (slot, index) => {
+      if (index === 0) return '';
+      const absoluteIndex = windowStartSlot + index;
+      return absoluteIndex % 4 === 0 ? <span className={SCHEDULE_LABEL_TEXT_CLASS}>{slot}</span> : '';
+    },
   };
 
   /* Una columna por cada miembro seleccionado. Si no hay ninguno,
@@ -335,22 +598,18 @@ export default function Schedule({
         ),
         cellClassName: SCHEDULE_SLOT_CELL_CLASS,
         cell: (_slot: string, rowIndex: number) => {
+          /* rowIndex es la posición dentro de la ventana renderizada (0 =
+             windowStartSlot), no el slot absoluto del día: hay que sumarle
+             el offset de la ventana para todo lo que compare contra horarios
+             reales o contra appointmentMap (indexado por slot absoluto). */
+          const absoluteRow = windowStartSlot + rowIndex;
           const memberMap = appointmentMap.get(member);
 
-          const computeAvailability = (row: number): CellAvailability =>
-            getCellAvailability({
-              selectedDate,
-              now,
-              slotMinutes: row * SLOT_DURATION_MINUTES,
-              businessRanges,
-              memberRanges: memberRangesByDay[member]?.[selectedDate.getDay()],
-              member,
-              blockedMembers,
-            });
+          const computeAvailability = (row: number): CellAvailability => computeAvailabilityFor(member, row);
 
-          const entry = memberMap?.get(rowIndex);
+          const entry = memberMap?.get(absoluteRow);
           if (!entry) {
-            if (isRowCoveredByExistingAppointment(rowIndex, member, appointmentMap)) return null;
+            if (isRowCoveredByExistingAppointment(absoluteRow, member, appointmentMap)) return null;
 
             /* Turno ya elegido en el Schedule, a la espera de que se confirme
                el cliente: se fija en su celda de inicio y el resto de las
@@ -358,7 +617,7 @@ export default function Schedule({
                se cancele. */
             if (pendingSlot) {
               const isPendingStart =
-                pendingSlot.member === member && rowIndex === timeToSlotIndex(pendingSlot.startTime);
+                pendingSlot.member === member && absoluteRow === timeToSlotIndex(pendingSlot.startTime);
 
               if (isPendingStart && previewServiceInfo) {
                 return (
@@ -383,16 +642,15 @@ export default function Schedule({
               return null;
             }
 
-            const availability = computeAvailability(rowIndex);
+            const availability = computeAvailability(absoluteRow);
 
-            if (availability === 'blocked') return <BlockedCell />;
-            if (availability === 'past') return null;
+            if (availability === 'blocked' || availability === 'past') return <BlockedCell />;
             if (!previewServiceInfo) return null;
 
             if (previewServiceInfo) {
               const heightPx = previewServiceInfo.spanSlots * 48 - 4;
               const bookable = isSpanBookable(
-                rowIndex,
+                absoluteRow,
                 previewServiceInfo.spanSlots,
                 member,
                 appointmentMap,
@@ -410,13 +668,20 @@ export default function Schedule({
                 );
               }
 
-              const startTime = minutesToTime(rowIndex * SLOT_DURATION_MINUTES);
+              const startTime = minutesToTime(absoluteRow * SLOT_DURATION_MINUTES);
               const endTime = minutesToTime(
-                rowIndex * SLOT_DURATION_MINUTES + previewServiceInfo.spanSlots * SLOT_DURATION_MINUTES,
+                absoluteRow * SLOT_DURATION_MINUTES + previewServiceInfo.spanSlots * SLOT_DURATION_MINUTES,
               );
+              const regionLength = availablePreviewRegions?.get(member)?.get(absoluteRow);
 
               return (
                 <>
+                  {regionLength !== undefined && (
+                    <span
+                      className={SCHEDULE_AVAILABLE_SLOT_CLASS}
+                      style={{ height: `${regionLength * 48 - 4}px`, top: '2px' }}
+                    />
+                  )}
                   <AppointmentCard
                     appointment={{
                       id: 'preview',
@@ -454,12 +719,17 @@ export default function Schedule({
               spanSlots={spanSlots}
               colorClassName={colorClassName}
               servicePhoto={servicePhotoMap[appointment.service]}
+              onClick={onAppointmentClick ? () => onAppointmentClick(appointment) : undefined}
             />
           );
         },
       }));
 
   const columns: TableColumn<string>[] = [labelColumn, ...memberColumns];
+
+  /* "Día libre" pisa el aviso de "sin miembros seleccionados": describe mejor
+     la situación cuando, además, ese día el negocio no abre. */
+  const emptyMessage = isFullyClosed ? 'Día libre' : isEmpty ? 'No hay miembros del equipo seleccionados' : null;
 
   return (
     <Box className={twMerge(SCHEDULE_CLASS, className)}>
@@ -474,14 +744,16 @@ export default function Schedule({
             showHeader
             stickyHeader
           />
-          {!isEmpty && <CurrentTimeLine selectedDate={selectedDate} />}
+          {!isEmpty && (
+            <CurrentTimeLine
+              selectedDate={selectedDate}
+              windowStartSlot={windowStartSlot}
+              windowEndSlot={windowEndSlot}
+            />
+          )}
         </div>
       </div>
-      {isEmpty && (
-        <div className={SCHEDULE_EMPTY_CLASS}>
-          No hay miembros del equipo seleccionados
-        </div>
-      )}
+      {emptyMessage && <div className={SCHEDULE_EMPTY_CLASS}>{emptyMessage}</div>}
     </Box>
   );
 }
