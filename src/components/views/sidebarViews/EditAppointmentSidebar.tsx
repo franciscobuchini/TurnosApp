@@ -138,7 +138,7 @@ function SelectRow({ label, value, options, onSelect }: SelectRowProps) {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="ghost" className={TRIGGER_CLASS}>
-            <Image name={value} className={twMerge(ROW_AVATAR_CLASS, selected?.colorClassName)} />
+            <Image name={value} className={twMerge(ROW_AVATAR_CLASS, selected?.colorClassName && 'text-black', selected?.colorClassName)} />
             {value}
             <ChevronDown className="size-3.5 text-muted-foreground" />
           </Button>
@@ -155,7 +155,7 @@ function SelectRow({ label, value, options, onSelect }: SelectRowProps) {
               className={OPTION_CLASS}
               onClick={() => onSelect(option)}
             >
-              <Image name={option.label} className={twMerge(ROW_AVATAR_CLASS, option.colorClassName)} />
+              <Image name={option.label} className={twMerge(ROW_AVATAR_CLASS, option.colorClassName && 'text-black', option.colorClassName)} />
               {option.label}
             </Button>
           ))}
@@ -191,7 +191,7 @@ function DateRow({ label, value, onSelect }: DateRowProps) {
             <ChevronDown className="size-3.5 text-muted-foreground" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="end" className="w-80 border-none bg-transparent p-0 shadow-none">
+        <PopoverContent align="end" className="w-[22rem] border-none bg-transparent p-0 shadow-none">
           <Calendar
             selectedDate={dateObj}
             onSelectDate={(date) => {

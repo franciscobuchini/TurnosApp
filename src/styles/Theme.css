@@ -15,6 +15,7 @@
   --color-field: #272727;      /* inputs, pills, celdas, hover sutil */
   --color-border: #272727;     /* bordes de inputs y tarjetas */
   --color-gray: #c7c7c7;
+  --color-gray-past: #6e6e6e;  /* turnos pasados: gris más oscuro en tema oscuro */
 
   /* Texto */
   --color-text: #fafafa;       /* texto principal sobre fondo oscuro */
@@ -52,6 +53,7 @@
   --color-field: #eeeeee;
   --color-border: #eeeeee;
   --color-gray: #dadada;
+  --color-gray-past: #ececec;  /* turnos pasados: gris más claro en tema claro */
   --color-text: #0a0a0a;
   --color-text-muted: #8b8b8b;
   
@@ -85,6 +87,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-gray: var(--color-gray);
+  --color-gray-past: var(--gray-past);
 }
 
 :root {
@@ -107,4 +110,5 @@
   --input: var(--color-field);
   --ring: var(--color-text-muted);
   --gray: var(--color-gray);
+  --gray-past: var(--color-gray-past);
 }

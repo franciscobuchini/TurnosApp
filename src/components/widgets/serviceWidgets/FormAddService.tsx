@@ -3,6 +3,8 @@ import { type ChangeEvent, useEffect, useState } from 'react';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import DurationSelector from '@/components/ui/duration-selector';
+import { minutesToTime } from '@/hooks/useWeekSchedule';
 import formatCapitalizedWords from '@/utils/formatCapitalizedWords';
 
 import ColorPicker from './ColorPicker';
@@ -37,6 +39,12 @@ interface FormAddServiceProps {
 
 function toFormDuration(value?: string) {
   return value?.replace(/\s*min$/i, '') ?? '';
+}
+
+/* "HH:mm" -> minutos como string (el form trabaja en minutos). */
+function durationMinutesFromSelector(value: string): string {
+  const [hours, minutes] = value.split(':').map(Number);
+  return String(hours * 60 + minutes);
 }
 
 export default function FormAddService({
@@ -87,6 +95,15 @@ export default function FormAddService({
 
   const readOnly = mode === 'view';
 
+  /* El selector trabaja con "HH:mm"; el form guarda minutos sueltos ("60").
+     Una duración en minutos no válida se muestra como 00:00 (sin valor). */
+  const durationMinutes = (() => {
+    const parsed = parseInt(duration, 10);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  })();
+
+  const selectorDuration = /^\d+$/.test(duration) ? minutesToTime(durationMinutes) : undefined;
+
   const handleServiceNameChange = (
     event: ChangeEvent<HTMLInputElement>,
   ) => {
@@ -95,7 +112,7 @@ export default function FormAddService({
 
   const isFormValid =
     Boolean(serviceName.trim()) &&
-    Boolean(duration.trim()) &&
+    durationMinutes > 0 &&
     Boolean(price.trim());
 
   useEffect(() => {
@@ -133,15 +150,14 @@ export default function FormAddService({
         />
 
         <div className={TWO_COLUMN_GRID_CLASS}>
-          <Input
-            label="Duración (min)"
-            name="duration"
-            type="number"
-            placeholder="60"
-            value={duration}
-            onChange={(event) => setDuration(event.target.value)}
-            readOnly={readOnly}
-          />
+          <div className="flex flex-col gap-4">
+            <Label>Duración</Label>
+            <DurationSelector
+              value={selectorDuration}
+              onChange={(value) => setDuration(durationMinutesFromSelector(value))}
+              readOnly={readOnly}
+            />
+          </div>
 
           <Input
             label="Precio"

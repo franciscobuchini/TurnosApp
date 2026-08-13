@@ -5,20 +5,24 @@
   donde X es la cantidad de miembros del equipo seleccionados.
 */
 
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import Box from '@/components/ui/box';
 import Image from '@/components/ui/image';
 import { Table, type TableColumn } from '@/components/ui/table';
+import { Dropdown } from '@/components/ui/dropdown';
 import CurrentTimeLine from '@/components/ui/current-time-line';
 import { getAppointmentsByDate, getOpeningHours, getservices, getTeamMembers } from '@/database/data';
-import type { Appointment } from '@/database/types';
+import type { Appointment, FiltersOption } from '@/database/types';
 import type { ShiftSlot } from '@/pages/admin/Dashboard';
 import { getBusinessHoursByDay, minutesToTime, type TimeRange } from '@/hooks/useWeekSchedule';
 import { getCellAvailability, type CellAvailability } from '@/functions/scheduleCellAvailability';
+import { DEFAULT_ROW_HEIGHT_PX } from '@/functions/scheduleZoom';
 import { SERVICE_COLOR_BY_ID } from '@/components/widgets/serviceWidgets/serviceColors';
+import { TeamFilterButton } from '@/components/widgets/sidebarWidgets/DropdownRowActions';
 import AppointmentCard from './AppointmentCard';
 import BlockedCell from './BlockedCell';
+import ScheduleControls from './ScheduleControls';
 
 interface ScheduleProps {
   selectedDate: Date;
@@ -48,8 +52,20 @@ interface ScheduleProps {
   scrollToTime?: string | null;
   /** Se avisa cuando el scroll al turno recién creado ya se realizó. */
   onScrollConsumed?: () => void;
+  /** Abre el flujo "Agregar turno" (botón flotante, ver ScheduleControls). */
+  onOpenAddShift?: () => void;
+  /** Filtros del equipo: el header de cada columna de miembro abre el mismo
+      dropdown de acciones que el panel Equipo de la sidebar (ocultar/mostrar
+      y ver perfil). */
+  teamFilters?: FiltersOption[];
+  toggleTeamFilter?: (id: string, checked: boolean) => void;
+  onMemberDetails?: (name: string) => void;
 }
 
+/* Solo se redondea abajo (rounded-b-3xl): las esquinas de arriba no se ven
+   igual aunque se las redondee, porque el header sticky de la tabla no
+   respeta el border-radius de su contenedor con scroll (limitación de CSS,
+   no un olvido) — queda pegado al borde con esquinas rectas sí o sí. */
 const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-b-3xl bg-card';
 
 const SCHEDULE_SCROLL_CLASS = 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
@@ -59,8 +75,6 @@ const SCHEDULE_CONTENT_CLASS = 'relative';
 const SCHEDULE_TABLE_CLASS = '';
 
 const SCHEDULE_TABLE_HEADER_CLASS = 'bg-card';
-
-const SCHEDULE_ROW_HEIGHT_CLASS = 'h-12';
 
 const SCHEDULE_LABEL_CELL_CLASS = 'relative w-16 text-center';
 
@@ -101,7 +115,7 @@ const SCHEDULE_SLOT_CLICK_CLASS = 'absolute inset-1 cursor-pointer rounded-2xl';
    de él), siempre visible, con la línea lo más fina posible. Al pasar el
    mouse la preview de color se dibuja encima (mismo z-10, por debajo de
    SCHEDULE_PREVIEW_CARD_CLASS). */
-const SCHEDULE_AVAILABLE_SLOT_CLASS = 'absolute inset-x-1 z-10 rounded-3xl border border-dashed border-white pointer-events-none';
+const SCHEDULE_AVAILABLE_SLOT_CLASS = 'absolute inset-x-0.5 z-10 rounded-3xl border border-dashed border-foreground pointer-events-none';
 
 /* Turno elegido en el Schedule, a la espera de que se confirme el cliente:
    misma tarjeta que la preview pero fija (no depende del hover) y con un
@@ -110,14 +124,12 @@ const SCHEDULE_PENDING_CARD_CLASS = 'ring-2 ring-foreground/70 ring-offset-1 rin
 
 const SLOT_DURATION_MINUTES = 15;
 
-/* Alto de cada fila del Schedule (h-12). Se usa para calcular el scroll a la
-   fila del turno recién creado. */
-const SCHEDULE_ROW_HEIGHT_PX = 48;
-
 /* Colchón que se muestra antes/después del horario real de apertura del
-   negocio (2 horas = 8 slots de 15 min), para que la grilla no arranque
+   negocio (1 hora = 4 slots de 15 min), para que la grilla no arranque
    justo en el horario de apertura. */
-const BUSINESS_HOURS_PADDING_SLOTS = (2 * 60) / SLOT_DURATION_MINUTES;
+/* Colchón de celdas extra antes de la apertura y después del cierre del
+   negocio, para que el día no arranque/termine exacto en el horario real. */
+const BUSINESS_HOURS_PADDING_SLOTS = 30 / SLOT_DURATION_MINUTES;
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -214,68 +226,6 @@ function buildAppointmentMap(appointments: Appointment[]) {
   return map;
 }
 
-interface EarliestBookableRowParams {
-  members: string[];
-  blockedMembers?: string[];
-  spanSlots: number;
-  selectedDate: Date;
-  now: Date;
-  businessRanges?: TimeRange[];
-  memberRangesByDay: Record<string, Record<number, TimeRange[]>>;
-  appointmentMap: Map<string, Map<number, { appointment: Appointment; spanSlots: number }>>;
-  /** Ventana visible del Schedule (horario real ± colchón): acota la búsqueda
-      a filas que efectivamente se renderizan. */
-  windowStartSlot: number;
-  windowEndSlot: number;
-}
-
-/** Primera fila (0-95) en la que algún miembro no bloqueado puede arrancar un
-    turno de `spanSlots`, o null si no entra en ningún lado ese día. Se usa
-    para llevar el scroll de Schedule al primer horario libre apenas se
-    elige un servicio en el flujo "Agregar turno". */
-function findEarliestBookableRow({
-  members,
-  blockedMembers,
-  spanSlots,
-  selectedDate,
-  now,
-  businessRanges,
-  memberRangesByDay,
-  appointmentMap,
-  windowStartSlot,
-  windowEndSlot,
-}: EarliestBookableRowParams): number | null {
-  const eligibleMembers = members.filter((member) => !blockedMembers?.includes(member));
-  if (eligibleMembers.length === 0) return null;
-
-  const checkAvailability = (member: string, row: number): CellAvailability =>
-    getCellAvailability({
-      selectedDate,
-      now,
-      slotMinutes: row * SLOT_DURATION_MINUTES,
-      businessRanges,
-      memberRanges: memberRangesByDay[member]?.[selectedDate.getDay()],
-      member,
-      blockedMembers,
-    });
-
-  const isRowFree = (member: string, row: number): boolean => {
-    const memberAppointments = appointmentMap.get(member);
-    if (memberAppointments?.has(row)) return false;
-    if (isRowCoveredByExistingAppointment(row, member, appointmentMap)) return false;
-    if (checkAvailability(member, row) !== 'available') return false;
-    return isSpanBookable(row, spanSlots, member, appointmentMap, (r) => checkAvailability(member, r));
-  };
-
-  for (let row = windowStartSlot; row < windowEndSlot; row++) {
-    if (eligibleMembers.some((member) => isRowFree(member, row))) {
-      return row;
-    }
-  }
-
-  return null;
-}
-
 interface AvailablePreviewRegionsParams {
   members: string[];
   blockedMembers?: string[];
@@ -361,8 +311,26 @@ export default function Schedule({
   appointmentsVersion,
   scrollToTime,
   onScrollConsumed,
+  onOpenAddShift,
+  teamFilters,
+  toggleTeamFilter,
+  onMemberDetails,
 }: ScheduleProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  /* Único número del que depende el alto de las filas: cambiarlo reacomoda
+     a la par la tabla, las AppointmentCard (altura según spanSlots) y el
+     reposicionamiento de CurrentTimeLine — ver src/functions/scheduleZoom.ts. */
+  const [rowHeightPx, setRowHeightPx] = useState(DEFAULT_ROW_HEIGHT_PX);
+
+  /* Ticker de un minuto: refresca "now" (turnos vivos/pasados, celdas ya
+     pasadas) al mismo ritmo que CurrentTimeLine, sin esperar a que cambie
+     otro estado. */
+  const [, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setNowTick((tick) => tick + 1), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   /* Horario del local por día: undefined = sin restricción; lista vacía = día
      cerrado (todos los slots bloqueados); con tramos = fuera de horario bloqueado. */
@@ -402,12 +370,12 @@ export default function Schedule({
 
     const rowIndex = timeToSlotIndex(scrollToTime);
     const target = Math.max(
-      (rowIndex - windowStartSlot) * SCHEDULE_ROW_HEIGHT_PX - scrollRef.current.clientHeight * 0.25,
+      (rowIndex - windowStartSlot) * rowHeightPx - scrollRef.current.clientHeight * 0.25,
       0,
     );
     scrollRef.current.scrollTop = target;
     onScrollConsumed?.();
-  }, [scrollToTime, onScrollConsumed, windowStartSlot]);
+  }, [scrollToTime, onScrollConsumed, windowStartSlot, rowHeightPx]);
 
   const slots = Array.from({ length: windowEndSlot - windowStartSlot }, (_, relativeIndex) => {
     const absoluteIndex = windowStartSlot + relativeIndex;
@@ -529,42 +497,36 @@ export default function Schedule({
   ]);
 
   /* Al elegir (o cambiar) el servicio en el flujo "Agregar turno", hace
-     scroll al primer horario libre en el que ese servicio entra completo
-     para alguno de los miembros habilitados — así no hay que buscarlo a
-     mano en la grilla. */
+     scroll hasta el primer turno disponible (el tramo libre más temprano) y
+     lo deja arriba de todo de la vista, justo debajo del header fijo de la
+     tabla — así el usuario ve de inmediato el primer horario que puede
+     tocar, no el medio de la pantalla.
+     Con un turno pendiente no corre: el usuario ya eligió dónde, y que el
+     Schedule se quede quieto mientras se busca el cliente. */
   useLayoutEffect(() => {
-    if (!previewServiceInfo || !scrollRef.current) return;
+    if (pendingSlot || !previewServiceInfo || !scrollRef.current || !availablePreviewRegions) {
+      return;
+    }
 
-    const earliestRow = findEarliestBookableRow({
-      members,
-      blockedMembers,
-      spanSlots: previewServiceInfo.spanSlots,
-      selectedDate,
-      now: new Date(),
-      businessRanges,
-      memberRangesByDay,
-      appointmentMap,
-      windowStartSlot,
-      windowEndSlot,
-    });
-    if (earliestRow === null) return;
+    let firstStart: number | null = null;
+    for (const regions of availablePreviewRegions.values()) {
+      for (const [start] of regions) {
+        if (firstStart === null || start < firstStart) {
+          firstStart = start;
+        }
+      }
+    }
+    if (firstStart === null) return;
 
+    /* El header sticky (h-10) tapa la fila si quedara en scrollTop 0; el
+       colchón extra deja un poco de aire entre el header y el primer turno
+       disponible. */
     const target = Math.max(
-      (earliestRow - windowStartSlot) * SCHEDULE_ROW_HEIGHT_PX - scrollRef.current.clientHeight * 0.25,
+      (firstStart - windowStartSlot) * rowHeightPx - 160,
       0,
     );
     scrollRef.current.scrollTop = target;
-  }, [
-    previewServiceInfo,
-    members,
-    blockedMembers,
-    selectedDate,
-    businessRanges,
-    memberRangesByDay,
-    appointmentMap,
-    windowStartSlot,
-    windowEndSlot,
-  ]);
+  }, [pendingSlot, previewServiceInfo, availablePreviewRegions, windowStartSlot, rowHeightPx]);
 
   const dateStr = useMemo(() => toDateStr(selectedDate), [selectedDate]);
 
@@ -582,22 +544,59 @@ export default function Schedule({
     },
   };
 
-  /* Una columna por cada miembro seleccionado. Si no hay ninguno,
-     se usa una columna vacía sin bordes para mantener el layout. */
+  /* Una columna por cada miembro seleccionado. Si no hay ninguno, o si el
+     día está cerrado (no tiene sentido mostrar columnas de miembros para un
+     día sin horario), se usa una columna vacía sin bordes para mantener el
+     layout. */
   const isEmpty = members.length === 0;
 
-  const memberColumns: TableColumn<string>[] = isEmpty
+  const showBlankGrid = isEmpty || isFullyClosed;
+
+  const memberColumns: TableColumn<string>[] = showBlankGrid
     ? [{ key: 'empty', header: null, cell: () => null }]
-    : members.map((member) => ({
-        key: `member-${member}`,
-        header: (
+    : members.map((member) => {
+        const teamFilter = teamFilters?.find((filter) => filter.label === member);
+        const memberHeader = (
           <span className={SCHEDULE_MEMBER_HEADER_CLASS}>
             <Image src={memberPhotoMap[member]} name={member} className={SCHEDULE_MEMBER_IMAGE_CLASS} />
             {member}
           </span>
-        ),
-        cellClassName: SCHEDULE_SLOT_CELL_CLASS,
-        cell: (_slot: string, rowIndex: number) => {
+        );
+
+        return {
+          key: `member-${member}`,
+          header: (
+            <Dropdown
+              items={[
+                <TeamFilterButton
+                  key={member}
+                  option={{
+                    id: teamFilter?.id ?? member.toLowerCase().replace(/\s+/g, '-'),
+                    label: member,
+                    checked: teamFilter?.checked,
+                  }}
+                  onToggle={toggleTeamFilter}
+                  onOpenDetails={() => onMemberDetails?.(member)}
+                />,
+              ]}
+              content={memberHeader}
+              className="h-10 px-2 rounded-3xl hover:bg-transparent"
+            />
+          ),
+          cellClassName: (_slot: string, rowIndex: number) => {
+            /* Las filas donde el negocio abre y cierra llevan la línea de
+               border con opacidad completa, para marcar de un vistazo el
+               arranque y el fin del horario de atención. */
+            const absoluteRow = windowStartSlot + rowIndex;
+            const isHoursBoundary =
+              businessRanges?.some(
+                (range) =>
+                  timeToSlotIndex(range.startTime) === absoluteRow ||
+                  timeToSlotIndex(range.endTime) === absoluteRow,
+              ) ?? false;
+            return twMerge(SCHEDULE_SLOT_CELL_CLASS, isHoursBoundary && 'border-foreground/20');
+          },
+          cell: (_slot: string, rowIndex: number) => {
           /* rowIndex es la posición dentro de la ventana renderizada (0 =
              windowStartSlot), no el slot absoluto del día: hay que sumarle
              el offset de la ventana para todo lo que compare contra horarios
@@ -632,6 +631,7 @@ export default function Schedule({
                       service: previewServiceInfo.name,
                     }}
                     spanSlots={previewServiceInfo.spanSlots}
+                    rowHeightPx={rowHeightPx}
                     colorClassName={previewServiceInfo.colorClassName}
                     servicePhoto={previewServiceInfo.photo}
                     className={SCHEDULE_PENDING_CARD_CLASS}
@@ -648,7 +648,7 @@ export default function Schedule({
             if (!previewServiceInfo) return null;
 
             if (previewServiceInfo) {
-              const heightPx = previewServiceInfo.spanSlots * 48 - 4;
+              const heightPx = previewServiceInfo.spanSlots * rowHeightPx - 4;
               const bookable = isSpanBookable(
                 absoluteRow,
                 previewServiceInfo.spanSlots,
@@ -679,7 +679,7 @@ export default function Schedule({
                   {regionLength !== undefined && (
                     <span
                       className={SCHEDULE_AVAILABLE_SLOT_CLASS}
-                      style={{ height: `${regionLength * 48 - 4}px`, top: '2px' }}
+                      style={{ height: `${regionLength * rowHeightPx - 2}px`, top: '1px' }}
                     />
                   )}
                   <AppointmentCard
@@ -693,6 +693,7 @@ export default function Schedule({
                       service: previewServiceInfo.name,
                     }}
                     spanSlots={previewServiceInfo.spanSlots}
+                    rowHeightPx={rowHeightPx}
                     colorClassName={previewServiceInfo.colorClassName}
                     servicePhoto={previewServiceInfo.photo}
                     className={SCHEDULE_PREVIEW_CARD_CLASS}
@@ -713,17 +714,31 @@ export default function Schedule({
           const { appointment, spanSlots } = entry;
           const colorClassName = serviceColorMap[appointment.service] || undefined;
 
+          /* Turno "vivo": la línea de hora actual lo está cruzando ahora
+             mismo. Se eleva por encima de la niebla del tiempo pasado (z-20,
+             CurrentTimeLine) para verse entero y normal mientras lo cruza,
+             pero por debajo del header sticky (z-30). Una vez que la línea
+             lo termina de pasar, vuelve a z-10 y se ve gris (pasado). */
+          const minutesElapsed = now.getHours() * 60 + now.getMinutes();
+          const nowSlot = minutesElapsed / 15;
+          const startSlot = timeToSlotIndex(appointment.startTime);
+          const endSlot = timeToSlotIndex(appointment.endTime);
+          const isLive = startSlot <= nowSlot && nowSlot < endSlot;
+
           return (
             <AppointmentCard
               appointment={appointment}
               spanSlots={spanSlots}
+              rowHeightPx={rowHeightPx}
               colorClassName={colorClassName}
               servicePhoto={servicePhotoMap[appointment.service]}
               onClick={onAppointmentClick ? () => onAppointmentClick(appointment) : undefined}
+              className={isLive ? 'z-[25]' : undefined}
             />
           );
         },
-      }));
+        };
+      });
 
   const columns: TableColumn<string>[] = [labelColumn, ...memberColumns];
 
@@ -733,22 +748,28 @@ export default function Schedule({
 
   return (
     <Box className={twMerge(SCHEDULE_CLASS, className)}>
+      <ScheduleControls
+        rowHeightPx={rowHeightPx}
+        onRowHeightChange={setRowHeightPx}
+        onAddShift={() => onOpenAddShift?.()}
+      />
       <div data-schedule-scroll ref={scrollRef} className={SCHEDULE_SCROLL_CLASS}>
         <div className={SCHEDULE_CONTENT_CLASS}>
           <Table
             columns={columns}
             rows={slots}
-            rowHeightClassName={SCHEDULE_ROW_HEIGHT_CLASS}
+            rowHeightPx={rowHeightPx}
             className={SCHEDULE_TABLE_CLASS}
             headerClassName={SCHEDULE_TABLE_HEADER_CLASS}
             showHeader
             stickyHeader
           />
-          {!isEmpty && (
+          {!showBlankGrid && (
             <CurrentTimeLine
               selectedDate={selectedDate}
               windowStartSlot={windowStartSlot}
               windowEndSlot={windowEndSlot}
+              rowHeightPx={rowHeightPx}
             />
           )}
         </div>

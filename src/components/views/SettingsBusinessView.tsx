@@ -23,6 +23,8 @@ interface BusinessDraft {
   imageUrl: string;
   url: string;
   location: string;
+  whatsapp: string;
+  instagram: string;
 }
 
 interface SecurityDraft {
@@ -50,6 +52,8 @@ export default function SettingsBusinessView() {
     imageUrl: business.image ?? '',
     url: business.url ?? '',
     location: business.location ?? '',
+    whatsapp: business.whatsapp ?? '',
+    instagram: business.instagram ?? '',
   });
 
   const [securityDraft, setSecurityDraft] = useState<SecurityDraft>({
@@ -98,7 +102,8 @@ export default function SettingsBusinessView() {
       image: draft.imageUrl,
       url: draft.url.trim(),
       location: draft.location.trim(),
-      managerName: securityDraft.name.trim(),
+      whatsapp: draft.whatsapp.trim(),
+      instagram: draft.instagram.trim(),      managerName: securityDraft.name.trim(),
       email: securityDraft.email.trim(),
       password: securityDraft.password,
       adminPin: securityDraft.adminPin,
@@ -133,6 +138,19 @@ export default function SettingsBusinessView() {
                 value={draft.location}
                 onChange={(e) => setValue('location')(e.target.value)}
               />
+              <Input
+                label="WhatsApp del negocio"
+                placeholder="+54 9 11 2345-6789"
+                value={draft.whatsapp}
+                onChange={(e) => setValue('whatsapp')(e.target.value)}
+              />
+              <Input
+                label="Instagram del negocio"
+                prefix="@"
+                placeholder="barberiastudio"
+                value={draft.instagram}
+                onChange={(e) => setValue('instagram')(e.target.value)}
+              />
             </div>
 
             {/* Columna 2 */}
@@ -144,7 +162,7 @@ export default function SettingsBusinessView() {
                      fileInputRef.current?.click();
                   }
                 }}
-                className="group relative flex aspect-square h-55 items-center justify-center rounded-4xl border border-dashed border-border bg-card/30 overflow-hidden cursor-pointer hover:border-muted-foreground transition-colors"
+                className="group relative flex min-h-40 w-full flex-1 items-center justify-center rounded-4xl border border-dashed border-border bg-card/30 overflow-hidden cursor-pointer hover:border-muted-foreground transition-colors"
               >
                 {draft.imageUrl ? (
                   <>
@@ -223,7 +241,7 @@ export default function SettingsBusinessView() {
           </div>
           <Link
             to="/terminos"
-            className="w-fit text-sm text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+            className="w-fit text-sm text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
           >
             Términos y condiciones
           </Link>

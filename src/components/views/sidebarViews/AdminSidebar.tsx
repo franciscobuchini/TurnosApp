@@ -26,6 +26,8 @@ import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../EntityView';
 import AddServiceView, { ADD_SERVICE_VIEW_TITLE } from '../ServiceView';
 import AddClientView, { ADD_CLIENT_VIEW_TITLE } from '../ClientView';
 import { getBusiness } from '../../../database/data';
+import { getSiteConfig } from '../../../database/siteConfig';
+import { SITE_HEADING_FONT_BY_ID } from '../../../site/design/headingFonts';
 
 interface AdminSidebarProps {
   selectedDate: Date;
@@ -57,6 +59,11 @@ export default function AdminSidebar({
 }: AdminSidebarProps) {
   const navigate = useNavigate();
   const business = getBusiness();
+
+  /* La misma fuente de título que eligió el dueño en Personalización web
+     (headingFont) se aplica al nombre del negocio de la sidebar. */
+  const siteConfig = getSiteConfig();
+  const headingFont = SITE_HEADING_FONT_BY_ID[siteConfig.headingFont];
 
   const panels: SidebarPanelConfig[] = [
     {
@@ -110,7 +117,7 @@ export default function AdminSidebar({
 
   return (
     <Sidebar>
-      <h2 data-sidebar-title className="p-6 text-xl font-semibold text-foreground truncate">{business.name}</h2>
+      <h2 data-sidebar-title style={{ fontFamily: headingFont.stack }} className="p-6 text-center text-3xl font-semibold text-foreground truncate">{business.name}</h2>
       <Calendar selectedDate={selectedDate} onSelectDate={onSelectDate} />
       {panels.map((panel) => (
         <DetailsPanel

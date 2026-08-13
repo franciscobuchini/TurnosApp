@@ -18,7 +18,7 @@ interface ImageProps {
   className?: string;
 }
 
-const IMAGE_CLASS = 'flex items-center justify-center select-none overflow-hidden rounded-full bg-gray text-black text-xs font-bold object-cover';
+const IMAGE_CLASS = 'flex items-center justify-center select-none overflow-hidden rounded-full bg-foreground/30 text-foreground text-xs font-bold object-cover';
 
 const IMAGE_INITIALS_CLASS = '';
 

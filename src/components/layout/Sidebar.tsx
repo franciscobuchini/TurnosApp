@@ -29,8 +29,11 @@ export default function Sidebar({ children, className, footer }: SidebarProps) {
     <aside className={twMerge(SIDEBAR_CLASS, className)}>
       <div className={SIDEBAR_INNER_CLASS}>
         <FiltersGroupProvider value="sidebar">{children}</FiltersGroupProvider>
+        {/* El footer vive dentro del scroll (no fijo): con contenido corto
+            queda pegado abajo (mt-auto) y, si el contenido crece, viaja con
+            el scroll en vez de taparlo. */}
+        {footer && <div className="mt-auto shrink-0">{footer}</div>}
       </div>
-      {footer && <div className="shrink-0 pb-3">{footer}</div>}
     </aside>
   );
 }

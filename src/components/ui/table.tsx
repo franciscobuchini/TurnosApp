@@ -25,7 +25,10 @@ export interface TableColumn<T> {
 interface GenericTableProps<T> {
   columns: TableColumn<T>[]
   rows: T[]
-  rowHeightClassName: string
+  rowHeightClassName?: string
+  /** Alto de fila en píxeles, como inline style: pisa rowHeightClassName
+      (útil cuando el alto es un valor dinámico, ej. un zoom). */
+  rowHeightPx?: number
   className?: string
   headerClassName?: string
   footer?: ReactNode
@@ -36,13 +39,15 @@ interface GenericTableProps<T> {
 function Table<T>({
   columns,
   rows,
-  rowHeightClassName,
+  rowHeightClassName = "",
+  rowHeightPx,
   className = "",
   headerClassName = "",
   footer,
   showHeader,
   stickyHeader = false,
 }: GenericTableProps<T>) {
+  const rowHeightStyle = rowHeightPx !== undefined ? { height: `${rowHeightPx}px` } : undefined
   const shouldShowHeader = showHeader ?? columns.some((column) => column.header)
 
   return (
@@ -54,7 +59,7 @@ function Table<T>({
       </colgroup>
       {shouldShowHeader && (
         <TableHeader>
-          <TableRow className={rowHeightClassName}>
+          <TableRow className={rowHeightClassName} style={rowHeightStyle}>
             {columns.map((column) => (
               <TableHead
                 key={column.key}
@@ -75,7 +80,7 @@ function Table<T>({
       )}
       <TableBody>
         {rows.map((row, rowIndex) => (
-          <TableRow key={rowIndex} className={rowHeightClassName}>
+          <TableRow key={rowIndex} className={rowHeightClassName} style={rowHeightStyle}>
             {columns.map((column) => {
               const resolvedCellClassName =
                 typeof column.cellClassName === "function"

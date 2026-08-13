@@ -1,7 +1,7 @@
 [
   {
     "name": "Corte de Pelo Masculino",
-    "photo": "",
+    "photo": "https://res.cloudinary.com/qo5h8fiu/image/upload/v1786200166/Photo-06_sy7kbz.webp",
     "colorId": "lima",
     "description": "Corte clásico o moderno con lavado incluido y asesoramiento de imagen.",
     "price": 8500,
@@ -9,7 +9,7 @@
   },
   {
     "name": "Recorte de Barba + Spa",
-    "photo": "",
+    "photo": "https://res.cloudinary.com/qo5h8fiu/image/upload/v1786200166/Photo-05_yv2qf1.webp",
     "colorId": "coral",
     "description": "Perfilado de barba con navaja, toallas calientes, aceites hidratantes y masaje facial.",
     "price": 6000,
@@ -17,7 +17,7 @@
   },
   {
     "name": "Coloración y Reflejos",
-    "photo": "",
+    "photo": "https://res.cloudinary.com/qo5h8fiu/image/upload/v1786200165/Photo-04_nnqtgm.webp",
     "colorId": "lavanda",
     "description": "Tinte completo o reflejos con productos de alta calidad para cuidar la salud capilar.",
     "price": 15000,
@@ -25,7 +25,7 @@
   },
   {
     "name": "Lavado + Peinado",
-    "photo": "",
+    "photo": "https://res.cloudinary.com/qo5h8fiu/image/upload/v1786200165/Photo-01_gylp7f.webp",
     "colorId": "celeste",
     "description": "Lavado profesional con shampoo premium y peinado personalizado.",
     "price": 4500,
@@ -33,7 +33,7 @@
   },
   {
     "name": "Tratamiento Capilar",
-    "photo": "",
+    "photo": "https://res.cloudinary.com/qo5h8fiu/image/upload/v1786200165/Photo-03_g0uklw.webp",
     "colorId": "menta",
     "description": "Hidratación profunda y nutrición para fortalecer el cabello.",
     "price": 9000,
@@ -41,18 +41,10 @@
   },
   {
     "name": "Perfilado de Cejas",
-    "photo": "",
+    "photo": "https://res.cloudinary.com/qo5h8fiu/image/upload/v1786200165/Photo-02_lmypdu.webp",
     "colorId": "salmon",
     "description": "Diseño y perfilado de cejas para resaltar la expresión facial.",
     "price": 3500,
     "duration": "30 min"
-  },
-  {
-    "name": "Combo Corte + Barba",
-    "photo": "",
-    "colorId": "verde-lima",
-    "description": "Corte de cabello y arreglo completo de barba en una sola sesión.",
-    "price": 13000,
-    "duration": "75 min"
   }
 ]

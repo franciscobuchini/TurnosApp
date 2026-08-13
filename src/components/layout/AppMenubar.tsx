@@ -5,11 +5,15 @@
   useLocation), así que cualquier página que lo monte vía
   <Layout menubar={<AppMenubar />}> lo obtiene funcionando sin pasarle props.
 
-  Arriba, la imagen del negocio (Ajustes > Negocio) y el acceso directo a
-  crear turno. Los accesos del medio quedan centrados verticalmente entre
-  ese grupo y el de ajustes. El de tema no navega: alterna claro/oscuro
-  directo (useTheme). El logo de la app es decorativo (no navega) y va
-  abajo de todo.
+  Arriba, la imagen del negocio (Ajustes > Negocio). Los accesos del medio
+  quedan centrados verticalmente entre ese grupo y el de ajustes. El de tema
+  no navega: alterna claro/oscuro directo (useTheme). El logo de la app es
+  decorativo (no navega) y va abajo de todo.
+
+  El botón de "Crear turno" que vivía acá se movió a ScheduleControls
+  (esquina inferior izquierda del Schedule) — addShiftOpen/onCloseAddShift
+  siguen acá porque los ítems de navegación de abajo igual necesitan cerrar
+  el flujo antes de navegar a otra página.
 */
 
 import type { ReactNode } from 'react';
@@ -20,7 +24,6 @@ import {
   Globe,
   Megaphone,
   Moon,
-  Plus,
   Sun,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,8 +54,8 @@ const MAIN_ITEMS: MenubarItem[] = [
 
 
 interface AppMenubarProps {
-  /* Sidebar de "agregar turno" abierto: prioriza ese botón como activo por
-     sobre Inicio, aunque la ruta también sea /admin. */
+  /* Sidebar de "agregar turno" abierto: "Inicio" deja de marcarse activo
+     aunque la ruta sea /admin (el flujo tapa la agenda normal). */
   addShiftOpen?: boolean;
   /* Callback para cerrar el panel de agregar turno cuando se navega a otro menú */
   onCloseAddShift?: () => void;
@@ -66,13 +69,13 @@ export default function AppMenubar({ addShiftOpen = false, onCloseAddShift }: Ap
 
   const isActive = (to: string) => !addShiftOpen && pathname === to;
 
-  /* Si hay panel abierto, los botones de nav cierran el panel en lugar de navegar */
+  /* Con panel de "agregar turno" abierto, los botones de nav lo cierran Y
+     navegan en el mismo click: un solo toque saca de cualquier vista. */
   const handleNavClick = (to: string) => {
     if (addShiftOpen && onCloseAddShift) {
       onCloseAddShift();
-    } else {
-      navigate(to);
     }
+    navigate(to);
   };
 
   return (
@@ -86,15 +89,6 @@ export default function AppMenubar({ addShiftOpen = false, onCloseAddShift }: Ap
       >
         <Image src={business.image} name={business.name} className="size-10 shrink-0" />
       </button>
-
-      <Button
-        variant={addShiftOpen ? 'default' : 'ghost'}
-        size="icon-lg"
-        icon={<Plus className={ICON_CLASS} />}
-        aria-label="Crear turno"
-        title="Crear turno"
-        onClick={() => navigate('/admin', { state: { openAddShift: true } })}
-      />
 
       <div className="flex-1" />
 

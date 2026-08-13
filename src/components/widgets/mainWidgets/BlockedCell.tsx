@@ -1,15 +1,23 @@
-/* 
+/*
   src/components/widgets/mainWidgets/BlockedCell.tsx
-  Estado visual "Bloqueado" para celdas del Schedule: la celda se ve más
-  oscura/opaca (light theme) o más clara (dark theme) para indicar que ese
-  horario no se puede reservar. Se usa por ejemplo cuando el negocio está
-  cerrado. Se aplica por celda dentro del render de la columna (Table.cell).
+  Estado visual "Bloqueado" para celdas del Schedule: horario fuera del
+  horario laboral del negocio (o del miembro). Sin background-color propio
+  — SCHEDULE_FOG_CLASS es la "niebla" compartida con el overlay de tiempo
+  pasado de current-time-line.tsx (misma capa, dos usos), para que ambas
+  categorías de "no disponible" se vean consistentes entre sí.
 */
 
 import { twMerge } from 'tailwind-merge';
 
-export const BLOCKED_CELL_CLASS =
-  'absolute inset-0 bg-current/8 cursor-not-allowed select-none pointer-events-none';
+/* "Niebla": solo desatura lo que haya detrás (turno, línea de grilla, etc.),
+   sin sumar ningún color/tono propio (ni de fondo ni de brillo). Compartida
+   por BlockedCell y el overlay de tiempo pasado. */
+export const SCHEDULE_FOG_CLASS = 'backdrop-grayscale';
+
+export const BLOCKED_CELL_CLASS = twMerge(
+  'absolute inset-0 cursor-not-allowed select-none pointer-events-none',
+  SCHEDULE_FOG_CLASS,
+);
 
 interface BlockedCellProps {
   className?: string;

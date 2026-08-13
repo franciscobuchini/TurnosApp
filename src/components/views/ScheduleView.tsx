@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Appointment } from '../../database/types';
+import type { FiltersOption } from '../../database/types';
 import type { ShiftSlot } from '../../pages/admin/Dashboard';
 import MainContent from '../layout/MainContent';
 import WeekSelector from '../widgets/mainWidgets/WeekSelector';
@@ -31,6 +32,13 @@ interface ScheduleViewProps {
   /** Hora ("HH:mm") del turno recién creado: al montar, hace scroll a esa fila. */
   scrollToTime?: string | null;
   onScrollConsumed?: () => void;
+  /** Abre el flujo "Agregar turno" desde el botón flotante del Schedule. */
+  onOpenAddShift?: () => void;
+  /** Filtros del equipo: para el dropdown de acciones del header de cada
+      miembro (ocultar/mostrar + ver perfil). */
+  teamFilters?: FiltersOption[];
+  toggleTeamFilter?: (id: string, checked: boolean) => void;
+  onMemberDetails?: (name: string) => void;
   children?: ReactNode;
 }
 
@@ -48,6 +56,10 @@ export default function ScheduleView({
   appointmentsVersion,
   scrollToTime,
   onScrollConsumed,
+  onOpenAddShift,
+  teamFilters,
+  toggleTeamFilter,
+  onMemberDetails,
   children,
 }: ScheduleViewProps) {
   return (
@@ -69,6 +81,10 @@ export default function ScheduleView({
         appointmentsVersion={appointmentsVersion}
         scrollToTime={scrollToTime}
         onScrollConsumed={onScrollConsumed}
+        onOpenAddShift={onOpenAddShift}
+        teamFilters={teamFilters}
+        toggleTeamFilter={toggleTeamFilter}
+        onMemberDetails={onMemberDetails}
       />
       {children}
     </MainContent>

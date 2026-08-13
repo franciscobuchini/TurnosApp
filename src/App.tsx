@@ -43,6 +43,10 @@ function SchedulePage() {
       appointmentsVersion={ctx.appointmentsVersion}
       scrollToTime={ctx.scrollToTime}
       onScrollConsumed={ctx.clearScrollToTime}
+      onOpenAddShift={ctx.openAddShift}
+      teamFilters={ctx.teamFilters}
+      toggleTeamFilter={ctx.toggleTeamFilter}
+      onMemberDetails={(name) => ctx.navigate(`/admin/miembro/${encodeURIComponent(name)}`)}
     />
   );
 }

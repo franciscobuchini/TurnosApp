@@ -3,7 +3,7 @@
   Helpers para derivar datos del filtro de equipo.
 */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { FiltersOption } from '../database/types';
 
 /* getSelectedMembers: dado el array de filtros del equipo, devuelve los labels
@@ -40,9 +40,15 @@ export function useTeamFilters(initialFilters: () => FiltersOption[]) {
     setTeamFilters((currentFilters) => removeTeamFilterChecked(currentFilters, label));
   };
 
+  /* Memoizado: si esta referencia cambiara en cada render, el Schedule
+     re-ejecutaría su efecto de centrado (depende de members vía
+     availablePreviewRegions) en cada render del Dashboard, saltando el scroll
+     a la mitad del tramo libre más largo justo al hacer click en una celda. */
+  const selectedMembers = useMemo(() => getSelectedMembers(teamFilters), [teamFilters]);
+
   return {
     teamFilters,
-    selectedMembers: getSelectedMembers(teamFilters),
+    selectedMembers,
     toggleTeamFilter,
     removeTeamFilter,
   };

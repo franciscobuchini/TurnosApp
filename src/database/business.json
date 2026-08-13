@@ -3,6 +3,8 @@
   "image": "",
   "url": "barberiastudio",
   "location": "Buenos Aires, Argentina",
+  "whatsapp": "+54 9 11 2345-6789",
+  "instagram": "barberiastudio",
   "schedule": [
     { "dayOfWeek": 0, "startTime": null, "endTime": null },
     { "dayOfWeek": 1, "startTime": null, "endTime": null },
