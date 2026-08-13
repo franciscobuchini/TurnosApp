@@ -14,6 +14,9 @@
 
 import type { Business, SiteConfig } from './types.ts';
 import { getBusiness } from './data.ts';
+import { isHexColor } from '../site/design/colorUtils.ts';
+import { SITE_FONTS } from '../site/design/fonts.ts';
+import { SITE_HEADING_FONTS } from '../site/design/headingFonts.ts';
 
 const SITE_CONFIG_STORAGE_PREFIX = 'turnosapp.siteConfig.';
 
@@ -28,12 +31,15 @@ function createDefaultSiteConfig(clientId: string, business: Business): SiteConf
     clientId,
     title: business.name || '',
     description: '',
-    theme: 'theme-2',
-    primaryColor: 'lime-500',
-    headingColor: 'lime-500',
+    backgroundColor: '#0a0a0a',
+    primaryColor: '#84cc16',
+    headingColor: '#84cc16',
     borderRadius: 'medium',
-    headingFont: 'heading-1',
-    bodyFont: 'font-1',
+    // El primer elemento de cada lista, no un id hardcodeado: si una fuente
+    // se saca de site/design/(fonts|headingFonts).ts, el default sigue
+    // siendo válido sin tener que acordarse de tocar este archivo también.
+    headingFont: SITE_HEADING_FONTS[0].id,
+    bodyFont: SITE_FONTS[0].id,
   };
 }
 
@@ -48,7 +54,21 @@ export function getSiteConfig(clientId: string = getClientId()): SiteConfig {
   try {
     const raw = localStorage.getItem(SITE_CONFIG_STORAGE_PREFIX + clientId);
     if (raw) {
-      return { ...seed, ...(JSON.parse(raw) as SiteConfig), clientId };
+      const saved = JSON.parse(raw) as Partial<SiteConfig>;
+      const merged = { ...seed, ...saved, clientId };
+
+      // Los 3 campos de color cambiaron de forma (antes ids como
+      // "lime-500"/"theme-2", ahora hex libre) — un SiteConfig guardado con
+      // el esquema anterior no debe colar un valor no-hex acá, o rompe todo
+      // color derivado (ver colorUtils.ts). Cada campo se sanea por
+      // separado en vez de todo o nada, así el resto de lo guardado
+      // (fuente, bordes, título/descripción) no se pierde.
+      return {
+        ...merged,
+        backgroundColor: isHexColor(merged.backgroundColor) ? merged.backgroundColor : seed.backgroundColor,
+        primaryColor: isHexColor(merged.primaryColor) ? merged.primaryColor : seed.primaryColor,
+        headingColor: isHexColor(merged.headingColor) ? merged.headingColor : seed.headingColor,
+      };
     }
   } catch {
     // ignorar datos corruptos y usar el seed

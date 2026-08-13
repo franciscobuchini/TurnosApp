@@ -17,15 +17,10 @@ export type SiteFontDefinition = {
 };
 
 export const SITE_FONTS: SiteFontDefinition[] = [
-  { id: 'font-1', label: 'Inter', stack: "'Inter', ui-sans-serif, system-ui, sans-serif" },
   { id: 'font-2', label: 'Poppins', stack: "'Poppins', ui-sans-serif, system-ui, sans-serif" },
   { id: 'font-3', label: 'Fraunces', stack: "'Fraunces', ui-serif, Georgia, serif" },
   { id: 'font-4', label: 'Space Grotesk', stack: "'Space Grotesk', ui-sans-serif, system-ui, sans-serif" },
-  { id: 'font-5', label: 'Playfair', stack: "'Playfair Display', ui-serif, Georgia, serif" },
-  { id: 'font-6', label: 'Oswald', stack: "'Oswald', ui-sans-serif, system-ui, sans-serif" },
-  { id: 'font-7', label: 'Lato', stack: "'Lato', ui-sans-serif, system-ui, sans-serif" },
   { id: 'font-8', label: 'Montserrat', stack: "'Montserrat', ui-sans-serif, system-ui, sans-serif" },
-  { id: 'font-9', label: 'Merriweather', stack: "'Merriweather', ui-serif, Georgia, serif" },
 ];
 
 export const SITE_FONT_BY_ID = Object.fromEntries(

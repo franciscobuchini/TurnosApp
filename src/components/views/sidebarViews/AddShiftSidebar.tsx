@@ -196,7 +196,7 @@ export default function AddShiftSidebar({
   }
 
   return (
-    <Sidebar footer={<CancelButton text="Cancelar" onClick={onClose} className="w-full" />}>
+    <Sidebar>
       <DetailsPanel
         title="Seleccionar servicio"
         options={serviceFilters}

@@ -44,6 +44,8 @@ function SchedulePage() {
       scrollToTime={ctx.scrollToTime}
       onScrollConsumed={ctx.clearScrollToTime}
       onOpenAddShift={ctx.openAddShift}
+      addShiftOpen={ctx.addShiftOpen}
+      onCloseAddShift={ctx.closeAddShift}
       teamFilters={ctx.teamFilters}
       toggleTeamFilter={ctx.toggleTeamFilter}
       onMemberDetails={(name) => ctx.navigate(`/admin/miembro/${encodeURIComponent(name)}`)}

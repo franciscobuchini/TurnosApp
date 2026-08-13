@@ -7,7 +7,7 @@
 */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { Plus, ZoomIn, ZoomOut } from 'lucide-react';
+import { Plus, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/ui/button';
 import { canZoomIn, canZoomOut, zoomIn, zoomOut } from '@/functions/scheduleZoom';
@@ -16,6 +16,11 @@ interface ScheduleControlsProps {
   rowHeightPx: number;
   onRowHeightChange: Dispatch<SetStateAction<number>>;
   onAddShift: () => void;
+  /** Flujo "Agregar turno" abierto: el botón de crear pasa a ser una "X"
+      (bg-destructive) que cierra el flujo, reemplazando al botón de
+      cancelar del sidebar. */
+  addShiftOpen?: boolean;
+  onCloseAddShift?: () => void;
   className?: string;
 }
 
@@ -30,19 +35,21 @@ export default function ScheduleControls({
   rowHeightPx,
   onRowHeightChange,
   onAddShift,
+  addShiftOpen = false,
+  onCloseAddShift,
   className,
 }: ScheduleControlsProps) {
   return (
     <div className={twMerge(SCHEDULE_CONTROLS_CLASS, className)}>
       <Button
         type="button"
-        variant="default"
+        variant={addShiftOpen ? 'destructive' : 'default'}
         size="icon-lg"
-        className={CONTROL_BUTTON_CLASS}
-        icon={<Plus className={ICON_CLASS} />}
-        aria-label="Crear turno"
-        title="Crear turno"
-        onClick={onAddShift}
+        className={twMerge(CONTROL_BUTTON_CLASS, addShiftOpen && 'text-white')}
+        icon={addShiftOpen ? <X className={ICON_CLASS} /> : <Plus className={ICON_CLASS} />}
+        aria-label={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
+        title={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
+        onClick={addShiftOpen ? onCloseAddShift : onAddShift}
       />
       <Button
         type="button"

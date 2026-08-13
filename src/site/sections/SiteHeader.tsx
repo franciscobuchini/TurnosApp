@@ -23,7 +23,7 @@ export default function SiteHeader({ business, title, onReserveClick }: SiteHead
     <header className={HEADER_CLASS}>
       <div className="flex min-w-0 items-center gap-3">
         <Image src={business.logo} name={business.name} className="size-10 shrink-0" />
-        <span className={`truncate text-base font-semibold ${SITE_HEADING_CLASS}`}>
+        <span className={`truncate text-xl font-bold ${SITE_HEADING_CLASS}`}>
           {title || business.name}
         </span>
       </div>

@@ -15,9 +15,9 @@
 import { isSameDay } from '@/utils/dateName';
 import { getAppointmentsByDate, getOpeningHours, getTeamMembers } from '@/database/data';
 import { getBusinessHoursByDay, type TimeRange } from '@/hooks/useWeekSchedule';
-import type { OpeningHoursEntry, TeamMember } from '@/database/types';
+import type { TeamMember } from '@/database/types';
 
-/** Cuántos días hacia adelante se buscan para el selector de fecha y para el primer día abierto. */
+/** Cuántos días hacia adelante se buscan para el selector de fecha y para el primer día con disponibilidad. */
 export const DATE_RANGE_DAYS = 21;
 
 /** Granularidad para proponer horarios de inicio candidatos. */
@@ -100,25 +100,6 @@ export function parseServiceDurationMinutes(duration: string): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-/** Primer día, desde `from` (inclusive) hasta DATE_RANGE_DAYS después, en el
-    que el negocio abre — así el paso de fecha/horario arranca mostrando
-    turnos disponibles en vez de un día cerrado. `null` si no abre ningún
-    día del rango (negocio sin horario cargado). */
-export function getFirstOpenDate(schedule: OpeningHoursEntry[], from: Date = new Date()): Date | null {
-  const hoursByDay = getBusinessHoursByDay(schedule);
-  const start = new Date(from.getFullYear(), from.getMonth(), from.getDate());
-
-  for (let offset = 0; offset < DATE_RANGE_DAYS; offset++) {
-    const date = new Date(start);
-    date.setDate(date.getDate() + offset);
-    if ((hoursByDay[date.getDay()] ?? []).length > 0) {
-      return date;
-    }
-  }
-
-  return null;
-}
-
 /**
  * Slots disponibles para reservar `serviceName` (duración `durationMinutes`)
  * en `date`, agregados entre todos los profesionales calificados. Un slot
@@ -198,4 +179,31 @@ export function getAvailableSlots(
       endTime: minutesToTime(startMinutes + durationMinutes),
       memberNames: Array.from(members),
     }));
+}
+
+/**
+ * Primer día, desde `from` (inclusive) hasta DATE_RANGE_DAYS después, en el
+ * que `serviceName` tiene al menos un horario reservable de verdad (ver
+ * getAvailableSlots) — a diferencia de "el negocio abre ese día", esto
+ * también descarta un día donde el negocio abre pero ningún profesional
+ * calificado para este servicio tiene un hueco (ya reservado, fuera de su
+ * propio horario, etc.). `null` si ningún día del rango tiene
+ * disponibilidad (o el servicio no existe / nadie calificado lo hace).
+ */
+export function getFirstAvailableDate(
+  serviceName: string,
+  durationMinutes: number,
+  from: Date = new Date(),
+): Date | null {
+  const start = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+
+  for (let offset = 0; offset < DATE_RANGE_DAYS; offset++) {
+    const date = new Date(start);
+    date.setDate(date.getDate() + offset);
+    if (getAvailableSlots(date, serviceName, durationMinutes, from).length > 0) {
+      return date;
+    }
+  }
+
+  return null;
 }

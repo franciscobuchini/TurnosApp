@@ -34,6 +34,10 @@ interface ScheduleViewProps {
   onScrollConsumed?: () => void;
   /** Abre el flujo "Agregar turno" desde el botón flotante del Schedule. */
   onOpenAddShift?: () => void;
+  /** Flujo "Agregar turno" abierto: el botón flotante del Schedule pasa a
+      ser una "X" que lo cierra. */
+  addShiftOpen?: boolean;
+  onCloseAddShift?: () => void;
   /** Filtros del equipo: para el dropdown de acciones del header de cada
       miembro (ocultar/mostrar + ver perfil). */
   teamFilters?: FiltersOption[];
@@ -57,6 +61,8 @@ export default function ScheduleView({
   scrollToTime,
   onScrollConsumed,
   onOpenAddShift,
+  addShiftOpen,
+  onCloseAddShift,
   teamFilters,
   toggleTeamFilter,
   onMemberDetails,
@@ -82,6 +88,8 @@ export default function ScheduleView({
         scrollToTime={scrollToTime}
         onScrollConsumed={onScrollConsumed}
         onOpenAddShift={onOpenAddShift}
+        addShiftOpen={addShiftOpen}
+        onCloseAddShift={onCloseAddShift}
         teamFilters={teamFilters}
         toggleTeamFilter={toggleTeamFilter}
         onMemberDetails={onMemberDetails}

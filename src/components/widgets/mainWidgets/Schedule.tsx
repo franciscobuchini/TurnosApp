@@ -21,7 +21,6 @@ import { DEFAULT_ROW_HEIGHT_PX } from '@/functions/scheduleZoom';
 import { SERVICE_COLOR_BY_ID } from '@/components/widgets/serviceWidgets/serviceColors';
 import { TeamFilterButton } from '@/components/widgets/sidebarWidgets/DropdownRowActions';
 import AppointmentCard from './AppointmentCard';
-import BlockedCell from './BlockedCell';
 import ScheduleControls from './ScheduleControls';
 
 interface ScheduleProps {
@@ -54,6 +53,10 @@ interface ScheduleProps {
   onScrollConsumed?: () => void;
   /** Abre el flujo "Agregar turno" (botón flotante, ver ScheduleControls). */
   onOpenAddShift?: () => void;
+  /** Flujo "Agregar turno" abierto: el botón flotante pasa a ser una "X"
+      que lo cierra (ver ScheduleControls). */
+  addShiftOpen?: boolean;
+  onCloseAddShift?: () => void;
   /** Filtros del equipo: el header de cada columna de miembro abre el mismo
       dropdown de acciones que el panel Equipo de la sidebar (ocultar/mostrar
       y ver perfil). */
@@ -68,9 +71,18 @@ interface ScheduleProps {
    no un olvido) — queda pegado al borde con esquinas rectas sí o sí. */
 const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-b-3xl bg-card';
 
-const SCHEDULE_SCROLL_CLASS = 'flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
+const SCHEDULE_SCROLL_CLASS = 'flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
 
 const SCHEDULE_CONTENT_CLASS = 'relative';
+
+/* Al cambiar de día, el contenido entra deslizándose en la dirección de la
+   navegación: a un día anterior entra desde la derecha (se percibe moviendo
+   hacia la izquierda) y a un día siguiente entra desde la izquierda (se
+   percibe moviendo hacia la derecha). Sólo se aplica cuando cambia el día
+   (ver slideDirection más abajo) — no en el primer render ni en re-renders
+   por otros cambios (zoom, nuevo turno, etc.). */
+const SCHEDULE_SLIDE_FROM_RIGHT_CLASS = 'animate-in fade-in-0 slide-in-from-right-8 duration-200';
+const SCHEDULE_SLIDE_FROM_LEFT_CLASS = 'animate-in fade-in-0 slide-in-from-left-8 duration-200';
 
 const SCHEDULE_TABLE_CLASS = '';
 
@@ -130,6 +142,15 @@ const SLOT_DURATION_MINUTES = 15;
 /* Colchón de celdas extra antes de la apertura y después del cierre del
    negocio, para que el día no arranque/termine exacto en el horario real. */
 const BUSINESS_HOURS_PADDING_SLOTS = 30 / SLOT_DURATION_MINUTES;
+
+/* Alto fijo del header de la tabla (TableHead es h-10). */
+const HEADER_HEIGHT_PX = 40;
+
+/* Capa que cubre los horarios NO laborales del negocio (antes de abrir,
+   después de cerrar y huecos entre tramos): en vez de pintar cada celda de
+   otro color, un solo plano bg-background/50 sobre todo el espacio. */
+const SCHEDULE_OFF_HOURS_OVERLAY_CLASS =
+  'absolute left-16 right-0 z-10 bg-background/50 pointer-events-none';
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -312,16 +333,48 @@ export default function Schedule({
   scrollToTime,
   onScrollConsumed,
   onOpenAddShift,
+  addShiftOpen = false,
+  onCloseAddShift,
   teamFilters,
   toggleTeamFilter,
   onMemberDetails,
 }: ScheduleProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  /* Dirección del slide de entrada al cambiar de día: se compara la fecha
+     de este render con la del render anterior. Usa setState-durante-render
+     (patrón oficial de React para "ajustar estado cuando cambia una prop",
+     ver react.dev/reference/react/useState#storing-information-from-previous-renders)
+     en vez de mutar un ref: un ref mutado acá adentro no sobrevive al doble
+     render de StrictMode (la segunda invocación ve el ref ya actualizado y
+     pierde la dirección antes de llegar a pintarse) — con setState React
+     vuelve a renderizar con el estado ya estable antes de que StrictMode
+     duplique la invocación, así que ambas pasadas coinciden. Sólo difiere
+     de null en el render donde selectedDate efectivamente cambió, así que
+     no se dispara en re-renders por otros motivos (zoom, nuevo turno, etc.)
+     ni en el primer render. */
+  const [previousSelectedDate, setPreviousSelectedDate] = useState(selectedDate);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
+  if (previousSelectedDate.getTime() !== selectedDate.getTime()) {
+    setSlideDirection(selectedDate.getTime() < previousSelectedDate.getTime() ? 'left' : 'right');
+    setPreviousSelectedDate(selectedDate);
+  }
+
   /* Único número del que depende el alto de las filas: cambiarlo reacomoda
      a la par la tabla, las AppointmentCard (altura según spanSlots) y el
      reposicionamiento de CurrentTimeLine — ver src/functions/scheduleZoom.ts. */
   const [rowHeightPx, setRowHeightPx] = useState(DEFAULT_ROW_HEIGHT_PX);
+
+  /* Alto real del header de la tabla: la fila del header lleva el mismo
+     alto inline que las filas del cuerpo (rowHeightPx), así que no es fijo
+     — se mide del DOM (mismo método que CurrentTimeLine) para que la capa
+     de horarios no laborales quede alineada con la grilla a cualquier zoom. */
+  const [headerHeightPx, setHeaderHeightPx] = useState(HEADER_HEIGHT_PX);
+  useLayoutEffect(() => {
+    const headerRow = scrollRef.current?.querySelector<HTMLElement>('thead tr');
+    if (!headerRow) return;
+    setHeaderHeightPx(headerRow.getBoundingClientRect().height);
+  }, [rowHeightPx]);
 
   /* Ticker de un minuto: refresca "now" (turnos vivos/pasados, celdas ya
      pasadas) al mismo ritmo que CurrentTimeLine, sin esperar a que cambie
@@ -361,6 +414,31 @@ export default function Schedule({
       windowEndSlot: Math.min(24 * 4, Math.max(...ends) + BUSINESS_HOURS_PADDING_SLOTS),
     };
   }, [businessRanges]);
+
+  /* Tramos del día que quedan fuera del horario laboral del negocio
+     (colchones antes/después de abrir y huecos entre tramos), como rangos
+     de slots contiguos: cada uno se cubre con una sola capa. Sin datos de
+     horario (undefined) no hay tramos no laborales. */
+  const offHoursRegions = useMemo(() => {
+    if (!businessRanges || businessRanges.length === 0) return null;
+
+    const segments = businessRanges
+      .map((range) => [timeToSlotIndex(range.startTime), timeToSlotIndex(range.endTime)] as const)
+      .sort((a, b) => a[0] - b[0]);
+
+    const regions: { startSlot: number; endSlot: number }[] = [];
+    let cursor = windowStartSlot;
+    for (const [start, end] of segments) {
+      if (start > cursor) {
+        regions.push({ startSlot: cursor, endSlot: start });
+      }
+      cursor = Math.min(Math.max(cursor, end), windowEndSlot);
+    }
+    if (cursor < windowEndSlot) {
+      regions.push({ startSlot: cursor, endSlot: windowEndSlot });
+    }
+    return regions;
+  }, [businessRanges, windowStartSlot, windowEndSlot]);
 
   /* Al montar (o al llegar un nuevo scrollToTime), posiciona el scroll en la
      fila del turno recién creado: queda en el 25% superior de la vista para
@@ -644,7 +722,7 @@ export default function Schedule({
 
             const availability = computeAvailability(absoluteRow);
 
-            if (availability === 'blocked' || availability === 'past') return <BlockedCell />;
+            if (availability === 'blocked' || availability === 'past') return null;
             if (!previewServiceInfo) return null;
 
             if (previewServiceInfo) {
@@ -752,9 +830,18 @@ export default function Schedule({
         rowHeightPx={rowHeightPx}
         onRowHeightChange={setRowHeightPx}
         onAddShift={() => onOpenAddShift?.()}
+        addShiftOpen={addShiftOpen}
+        onCloseAddShift={onCloseAddShift}
       />
       <div data-schedule-scroll ref={scrollRef} className={SCHEDULE_SCROLL_CLASS}>
-        <div className={SCHEDULE_CONTENT_CLASS}>
+        <div
+          key={selectedDate.getTime()}
+          className={twMerge(
+            SCHEDULE_CONTENT_CLASS,
+            slideDirection === 'left' && SCHEDULE_SLIDE_FROM_RIGHT_CLASS,
+            slideDirection === 'right' && SCHEDULE_SLIDE_FROM_LEFT_CLASS,
+          )}
+        >
           <Table
             columns={columns}
             rows={slots}
@@ -772,6 +859,17 @@ export default function Schedule({
               rowHeightPx={rowHeightPx}
             />
           )}
+          {!showBlankGrid &&
+            offHoursRegions?.map((region) => (
+              <div
+                key={`off-hours-${region.startSlot}`}
+                className={SCHEDULE_OFF_HOURS_OVERLAY_CLASS}
+                style={{
+                  top: headerHeightPx + (region.startSlot - windowStartSlot) * rowHeightPx,
+                  height: (region.endSlot - region.startSlot) * rowHeightPx,
+                }}
+              />
+            ))}
         </div>
       </div>
       {emptyMessage && <div className={SCHEDULE_EMPTY_CLASS}>{emptyMessage}</div>}

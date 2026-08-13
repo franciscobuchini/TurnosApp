@@ -12,7 +12,10 @@ import type { SiteConfig } from '@/database/types';
 import { getSiteCssVars } from './design/cssVars';
 
 interface SiteThemeProviderProps {
-  config: Pick<SiteConfig, 'theme' | 'primaryColor' | 'headingColor' | 'borderRadius' | 'headingFont' | 'bodyFont'>;
+  config: Pick<
+    SiteConfig,
+    'backgroundColor' | 'primaryColor' | 'headingColor' | 'borderRadius' | 'headingFont' | 'bodyFont'
+  >;
   className?: string;
   children: ReactNode;
 }
@@ -21,11 +24,7 @@ const SITE_THEME_CLASS = 'bg-(--site-bg) text-(--site-text)';
 
 export default function SiteThemeProvider({ config, className, children }: SiteThemeProviderProps) {
   return (
-    <div
-      data-site-theme={config.theme}
-      className={twMerge(SITE_THEME_CLASS, className)}
-      style={getSiteCssVars(config)}
-    >
+    <div data-site-root className={twMerge(SITE_THEME_CLASS, className)} style={getSiteCssVars(config)}>
       {children}
     </div>
   );

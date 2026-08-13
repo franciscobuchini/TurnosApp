@@ -10,8 +10,10 @@
   navega a otra pantalla, sólo actualiza qué horarios se muestran, así el
   selector de fecha queda siempre visible mientras se compara disponibilidad
   entre días. Por eso, al elegir el servicio, ya se preselecciona el primer
-  día en que el negocio abre (getFirstOpenDate) — se entra directo viendo
-  horarios, sin un paso intermedio de "elegí una fecha" vacío.
+  día con disponibilidad real para ESE servicio (getFirstAvailableDate) —
+  si hoy no queda ningún hueco (profesionales sin horario libre, todo ya
+  reservado, etc.) salta directo al próximo día que sí tenga, en vez de
+  dejar al cliente parado en un día sin turnos.
 
   Al confirmar reutiliza addClient + addAppointment de database/data.ts —
   el mismo camino que ya usa el flujo interno "Agregar turno" del admin
@@ -23,11 +25,11 @@ import { useMemo, useState } from 'react';
 import { addAppointment, addClient } from '@/database/data';
 import {
   getAvailableSlots,
-  getFirstOpenDate,
+  getFirstAvailableDate,
   parseServiceDurationMinutes,
   type AvailableSlot,
 } from '@/functions/bookingAvailability';
-import type { OpeningHoursEntry, service } from '@/database/types';
+import type { service } from '@/database/types';
 
 export type BookingStep = 'service' | 'schedule' | 'professional' | 'details' | 'confirm' | 'success';
 
@@ -39,8 +41,6 @@ export interface ClientDetails {
 
 interface UseBookingFlowOptions {
   services: service[];
-  /** Horario del negocio, para preseleccionar el primer día abierto al elegir servicio. */
-  businessSchedule: OpeningHoursEntry[];
 }
 
 function toDateKey(date: Date): string {
@@ -50,7 +50,7 @@ function toDateKey(date: Date): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export function useBookingFlow({ services, businessSchedule }: UseBookingFlowOptions) {
+export function useBookingFlow({ services }: UseBookingFlowOptions) {
   const [stepStack, setStepStack] = useState<BookingStep[]>(['service']);
   const [serviceName, setServiceName] = useState<string | null>(null);
   const [date, setDate] = useState<Date | null>(null);
@@ -79,7 +79,14 @@ export function useBookingFlow({ services, businessSchedule }: UseBookingFlowOpt
 
   const selectService = (name: string) => {
     setServiceName(name);
-    setDate(getFirstOpenDate(businessSchedule) ?? new Date());
+
+    // No se puede usar el `durationMinutes` de más abajo acá: está
+    // memoizado sobre el `serviceName` del render anterior, todavía no el
+    // que se acaba de elegir. Se recalcula fresco a partir de `name`.
+    const service = services.find((item) => item.name === name);
+    const duration = service ? parseServiceDurationMinutes(service.duration) : 0;
+    setDate(getFirstAvailableDate(name, duration) ?? new Date());
+
     setSlot(null);
     setMember(null);
     setStepStack(['service', 'schedule']);

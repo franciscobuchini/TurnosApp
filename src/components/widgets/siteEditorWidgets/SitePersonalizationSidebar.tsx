@@ -1,9 +1,12 @@
 /*
   src/components/widgets/siteEditorWidgets/SitePersonalizationSidebar.tsx
   Sidebar de la pestaña Personalización: Contenido (título/descripción) y
-  Apariencia (theme/bordes/fuente), cada control en su propio DetailsPanel
-  — el mismo acordeón colapsable que usa AdminSidebar (Equipo/Servicios/
-  Clientes), así que abrir uno cierra los demás. El botón Guardar persiste
+  Apariencia (fondo/botones/títulos/bordes/fuentes), cada control en su
+  propio DetailsPanel — el mismo acordeón colapsable que usa AdminSidebar
+  (Equipo/Servicios/Clientes), así que abrir uno cierra los demás. Fondo,
+  botones y títulos son los 3 únicos colores que se eligen a mano (mismo
+  HexColorPicker reutilizado) — el resto de las superficies del sitio se
+  derivan del color de fondo (ver colorUtils.ts). El botón Guardar persiste
   el SiteConfig — hasta ahí, los cambios sólo viven en el borrador de
   Personalizacion.tsx y ya se ven reflejados en la preview.
 */
@@ -12,7 +15,8 @@ import Sidebar from '@/components/layout/Sidebar';
 import DetailsPanel from '@/components/widgets/sidebarWidgets/DetailsPanel';
 import ConfirmButton from '@/components/buttons/ConfirmButton';
 import ContentSection from './ContentSection';
-import { BodyFontPicker, BorderRadiusPicker, HeadingColorPicker, HeadingFontPicker, PrimaryColorPicker, ThemePicker } from './AppearancePickers';
+import HexColorPicker from './HexColorPicker';
+import { BodyFontPicker, BorderRadiusPicker, HeadingFontPicker } from './AppearancePickers';
 import type { SiteConfig } from '@/database/types';
 
 interface SitePersonalizationSidebarProps {
@@ -47,25 +51,26 @@ export default function SitePersonalizationSidebar({
         </div>
       </DetailsPanel>
 
-      <DetailsPanel title="Tema">
+      <DetailsPanel title="Color de fondo">
         <div className={PANEL_BODY_CLASS}>
-          <ThemePicker value={config.theme} onChange={(theme) => onChange({ theme })} />
+          <HexColorPicker
+            value={config.backgroundColor}
+            onChange={(backgroundColor) => onChange({ backgroundColor })}
+          />
         </div>
       </DetailsPanel>
 
       <DetailsPanel title="Color de los botones">
         <div className={PANEL_BODY_CLASS}>
-          <PrimaryColorPicker value={config.primaryColor} onChange={(primaryColor) => onChange({ primaryColor })} />
+          <HexColorPicker value={config.primaryColor} onChange={(primaryColor) => onChange({ primaryColor })} />
         </div>
       </DetailsPanel>
 
       <DetailsPanel title="Color de los títulos">
         <div className={PANEL_BODY_CLASS}>
-          <HeadingColorPicker value={config.headingColor} onChange={(headingColor) => onChange({ headingColor })} />
+          <HexColorPicker value={config.headingColor} onChange={(headingColor) => onChange({ headingColor })} />
         </div>
       </DetailsPanel>
-
-      <DetailsPanel title="Trama del fondo" />
 
       <DetailsPanel title="Bordes">
         <div className={PANEL_BODY_CLASS}>

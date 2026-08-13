@@ -10,8 +10,7 @@
 import { twMerge } from 'tailwind-merge';
 
 /* "Niebla": solo desatura lo que haya detrás (turno, línea de grilla, etc.),
-   sin sumar ningún color/tono propio (ni de fondo ni de brillo). Compartida
-   por BlockedCell y el overlay de tiempo pasado. */
+   sin sumar ningún color/tono propio (ni de fondo ni de brillo). */
 export const SCHEDULE_FOG_CLASS = 'backdrop-grayscale';
 
 export const BLOCKED_CELL_CLASS = twMerge(

@@ -44,7 +44,7 @@ const STEP_TITLES: Record<BookingStep, string> = {
 const WIDE_STEPS: BookingStep[] = ['service', 'schedule'];
 
 export default function BookingWidget({ services, team, business }: BookingWidgetProps) {
-  const flow = useBookingFlow({ services, businessSchedule: business.schedule });
+  const flow = useBookingFlow({ services });
   const widgetRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 

@@ -16,20 +16,17 @@ export type SiteHeadingFontDefinition = {
 };
 
 export const SITE_HEADING_FONTS: SiteHeadingFontDefinition[] = [
-  { id: 'heading-1', label: 'Bebas Neue', stack: "'Bebas Neue', ui-sans-serif, system-ui, sans-serif" },
-  { id: 'heading-2', label: 'Abril Fatface', stack: "'Abril Fatface', ui-serif, Georgia, serif" },
+  { id: 'heading-1', label: 'Fugaz One', stack: "'Fugaz One', cursive" },
   { id: 'heading-3', label: 'Pacifico', stack: "'Pacifico', cursive" },
-  { id: 'heading-4', label: 'Righteous', stack: "'Righteous', ui-sans-serif, system-ui, sans-serif" },
   { id: 'heading-5', label: 'Cinzel', stack: "'Cinzel', ui-serif, Georgia, serif" },
   { id: 'heading-6', label: 'Bungee', stack: "'Bungee', cursive" },
   { id: 'heading-7', label: 'Rye', stack: "'Rye', cursive" },
   { id: 'heading-8', label: 'Lobster', stack: "'Lobster', cursive" },
-  { id: 'heading-9', label: 'Audiowide', stack: "'Audiowide', cursive" },
+  { id: 'heading-9', label: 'Limelight', stack: "'Limelight', cursive" },
   { id: 'heading-10', label: 'Press Start 2P', stack: "'Press Start 2P', cursive" },
   { id: 'heading-11', label: 'Orbitron', stack: "'Orbitron', ui-sans-serif, system-ui, sans-serif" },
   { id: 'heading-12', label: 'Chonburi', stack: "'Chonburi', ui-serif, Georgia, serif" },
   { id: 'heading-13', label: 'Titan One', stack: "'Titan One', cursive" },
-  { id: 'heading-14', label: 'Fredoka One', stack: "'Fredoka One', cursive" },
   { id: 'heading-15', label: 'Comfortaa', stack: "'Comfortaa', ui-sans-serif, system-ui, sans-serif" },
 ];
 

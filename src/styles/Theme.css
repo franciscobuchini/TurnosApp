@@ -112,3 +112,12 @@
   --gray: var(--color-gray);
   --gray-past: var(--color-gray-past);
 }
+
+/* Textareas: al enfocarse/activarse no se dibuja ningún outline, borde ni
+   ring — el border por defecto se mantiene en reposo y al pasar el mouse. */
+textarea:focus,
+textarea:focus-visible {
+  outline: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
