@@ -5,7 +5,7 @@
   de modo que lo creado/guardado sobrevive a recargas.
 */
 
-import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry, Business, Appointment } from './types.ts';
+import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry, Business, Appointment, ScheduleBlock } from './types.ts';
 import teamMembersJson from './teamMembers.json';
 import servicesJson from './service.json';
 import clientsJson from './client.json';
@@ -17,6 +17,7 @@ const SERVICES_STORAGE_KEY = 'turnosapp.services';
 const TEAM_MEMBERS_STORAGE_KEY = 'turnosapp.teamMembers';
 const BUSINESS_STORAGE_KEY = 'turnosapp.business';
 const APPOINTMENTS_STORAGE_KEY = 'turnosapp.appointments';
+const SCHEDULE_BLOCKS_STORAGE_KEY = 'turnosapp.scheduleBlocks';
 
 function readObject<T>(key: string, seed: T): T {
   if (typeof localStorage === 'undefined') {
@@ -280,6 +281,38 @@ export function removeAppointment(id: string): Appointment[] {
   const current = getAppointments();
   const next = current.filter((a) => a.id !== id);
   saveAppointments(next);
+  return next;
+}
+
+/* ── Bloqueos del Schedule (ver ScheduleBlock en types.ts) ───── */
+
+export function getScheduleBlocks(): ScheduleBlock[] {
+  return readCollection(SCHEDULE_BLOCKS_STORAGE_KEY, [] as ScheduleBlock[]);
+}
+
+export function getScheduleBlocksByDate(date: Date): ScheduleBlock[] {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const dateStr = `${yyyy}-${mm}-${dd}`;
+  return getScheduleBlocks().filter((block) => block.date === dateStr);
+}
+
+export function saveScheduleBlocks(blocks: ScheduleBlock[]) {
+  writeCollection(SCHEDULE_BLOCKS_STORAGE_KEY, blocks);
+}
+
+export function addScheduleBlock(block: ScheduleBlock): ScheduleBlock[] {
+  const current = getScheduleBlocks();
+  const next = [...current, block];
+  saveScheduleBlocks(next);
+  return next;
+}
+
+export function removeScheduleBlock(id: string): ScheduleBlock[] {
+  const current = getScheduleBlocks();
+  const next = current.filter((block) => block.id !== id);
+  saveScheduleBlocks(next);
   return next;
 }
 

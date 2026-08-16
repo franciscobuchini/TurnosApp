@@ -5,11 +5,13 @@
   componentes del sitio las consumen con la sintaxis de Tailwind v4 para
   variables arbitrarias: bg-(--site-surface), rounded-(--site-radius), etc.
 
-  Sólo 3 colores son elección directa (fondo, botones, títulos — ver
-  HexColorPicker); superficie/texto/texto-muted/borde y el color de texto
-  sobre los botones se derivan automáticamente (colorUtils.ts) para
-  garantizar contraste legible sin que el usuario tenga que combinar 6+
-  colores a mano.
+  Sólo 2 colores son elección directa (fondo y primario — ver
+  HexColorPicker): el primario cubre tanto botones/CTAs como títulos (antes
+  eran 2 campos separados, primaryColor/headingColor, pero se unificaron —
+  ver SiteConfig.primaryColor). Superficie/texto/texto-muted/borde y el
+  color de texto sobre los botones se derivan automáticamente
+  (colorUtils.ts) para garantizar contraste legible sin que el usuario
+  tenga que combinar varios colores a mano.
 
   La fuente de título (--site-heading-font) es aparte de fontFamily (que fija
   la fuente de texto, heredada por defecto): sólo los elementos con
@@ -25,11 +27,11 @@ import { SITE_HEADING_FONT_BY_ID, SITE_HEADING_FONTS } from './headingFonts';
 
 type SiteAppearanceConfig = Pick<
   SiteConfig,
-  'backgroundColor' | 'primaryColor' | 'headingColor' | 'borderRadius' | 'headingFont' | 'bodyFont'
+  'backgroundColor' | 'primaryColor' | 'borderRadius' | 'headingFont' | 'bodyFont'
 >;
 
 /** Clase para aplicar la fuente de título a un elemento (h1/h2, nombre del
-    negocio) junto con su color (--site-heading-color). */
+    negocio) junto con su color (--site-heading-color, igual al primario). */
 export const SITE_HEADING_CLASS =
   '[font-family:var(--site-heading-font)] text-(--site-heading-color)';
 
@@ -48,9 +50,13 @@ export function getSiteCssVars(config: SiteAppearanceConfig): CSSProperties {
     '--site-surface': surfaceColors.surface,
     '--site-text': surfaceColors.text,
     '--site-text-muted': surfaceColors.textMuted,
+    // Pisa el --avatar-text del admin (ver Theme.css e Image.tsx): los
+    // placeholders de foto en el sitio público deben contrastar contra el
+    // fondo QUE ELIGIÓ el negocio, no contra el tema del panel admin.
+    '--avatar-text': surfaceColors.text,
     '--site-primary': config.primaryColor,
     '--site-primary-foreground': primaryForeground,
-    '--site-heading-color': config.headingColor,
+    '--site-heading-color': config.primaryColor,
     '--site-border': surfaceColors.border,
     '--site-radius': radius.value,
     '--site-heading-font': headingFont.stack,

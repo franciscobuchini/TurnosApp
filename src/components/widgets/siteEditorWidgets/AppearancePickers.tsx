@@ -15,11 +15,13 @@
   en site/design/ — estos componentes no cambian.
 */
 
+import { twMerge } from 'tailwind-merge';
 import OptionSwatchPicker from './OptionSwatchPicker';
 import { SITE_RADII } from '@/site/design/radii';
 import { SITE_FONTS } from '@/site/design/fonts';
 import { SITE_HEADING_FONTS } from '@/site/design/headingFonts';
-import type { SiteConfig } from '@/database/types';
+import { SITE_SERVICE_CARD_STYLES } from '@/site/design/serviceCardStyles';
+import type { SiteConfig, SiteServiceCardStyleId } from '@/database/types';
 
 interface BorderRadiusPickerProps {
   value: SiteConfig['borderRadius'];
@@ -81,6 +83,77 @@ export function HeadingFontPicker({ value, onChange }: HeadingFontPickerProps) {
             Aa
           </span>
         ),
+      }))}
+    />
+  );
+}
+
+/* Mini-mockup de cada estilo de card de servicio (ver ServiceStep.tsx para
+   el layout real) — a diferencia de radio/fuente, no hay un único valor
+   visual que mostrar, así que cada preview redibuja en miniatura la forma
+   del layout (foto/franja de color + líneas simulando texto). */
+const CARD_STYLE_PREVIEW_CLASS = 'flex h-14 w-20 flex-col overflow-hidden rounded-md border border-foreground/20 bg-background';
+
+function ServiceCardStylePreview({ id }: { id: SiteServiceCardStyleId }) {
+  if (id === 'photo-top') {
+    return (
+      <div className={CARD_STYLE_PREVIEW_CLASS}>
+        <div className="h-7 w-full bg-foreground/25" />
+        <div className="flex flex-1 flex-col justify-center gap-1 p-1.5">
+          <div className="h-1.5 w-3/4 rounded-full bg-foreground/60" />
+          <div className="h-1.5 w-1/2 rounded-full bg-foreground/30" />
+        </div>
+      </div>
+    );
+  }
+
+  if (id === 'compact-row') {
+    return (
+      <div className={twMerge(CARD_STYLE_PREVIEW_CLASS, 'flex-row items-center gap-1.5 p-1.5')}>
+        <div className="size-8 shrink-0 rounded bg-foreground/25" />
+        <div className="flex flex-1 flex-col gap-1">
+          <div className="h-1.5 w-full rounded-full bg-foreground/60" />
+          <div className="h-1.5 w-2/3 rounded-full bg-foreground/30" />
+        </div>
+      </div>
+    );
+  }
+
+  if (id === 'minimal-list') {
+    return (
+      <div className={twMerge(CARD_STYLE_PREVIEW_CLASS, 'flex-row items-center gap-1.5 p-1.5')}>
+        <div className="h-8 w-1 shrink-0 rounded-full bg-foreground/50" />
+        <div className="flex flex-1 flex-col gap-1">
+          <div className="h-1.5 w-full rounded-full bg-foreground/60" />
+          <div className="h-1.5 w-2/3 rounded-full bg-foreground/30" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={twMerge(CARD_STYLE_PREVIEW_CLASS, 'relative justify-end bg-foreground/30 p-1.5')}>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="relative h-1.5 w-3/4 rounded-full bg-white/90" />
+    </div>
+  );
+}
+
+interface ServiceCardStylePickerProps {
+  value: SiteConfig['serviceCardStyle'];
+  onChange: (style: SiteConfig['serviceCardStyle']) => void;
+}
+
+export function ServiceCardStylePicker({ value, onChange }: ServiceCardStylePickerProps) {
+  return (
+    <OptionSwatchPicker
+      value={value}
+      onChange={onChange}
+      cols={2}
+      options={SITE_SERVICE_CARD_STYLES.map((style) => ({
+        id: style.id,
+        label: style.label,
+        render: <ServiceCardStylePreview id={style.id} />,
       }))}
     />
   );

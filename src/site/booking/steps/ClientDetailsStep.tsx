@@ -1,22 +1,22 @@
 /*
   src/site/booking/steps/ClientDetailsStep.tsx
-  Paso 4: datos de contacto — el mínimo indispensable para confirmar
-  (nombre y teléfono). Notas queda opcional.
+  Paso 4 (último antes de confirmar): datos de contacto — el mínimo
+  indispensable para confirmar (nombre y teléfono). Email y notas quedan
+  opcionales. Sin botón propio: el de "Confirmar" vive al final de todo
+  (BookingWidget), debajo de BookingSummary, ya que ahí se ve el resto de
+  la reserva junto con estos mismos datos (se reflejan en vivo).
 */
 
 import SiteField, { SITE_INPUT_CLASS } from '../../components/SiteField';
-import SiteButton from '../../components/SiteButton';
 import { twMerge } from 'tailwind-merge';
 import type { ClientDetails } from '../useBookingFlow';
 
 interface ClientDetailsStepProps {
   client: ClientDetails;
   onChange: (patch: Partial<ClientDetails>) => void;
-  isValid: boolean;
-  onContinue: () => void;
 }
 
-export default function ClientDetailsStep({ client, onChange, isValid, onContinue }: ClientDetailsStepProps) {
+export default function ClientDetailsStep({ client, onChange }: ClientDetailsStepProps) {
   return (
     <div className="flex flex-col gap-4">
       <SiteField label="Nombre">
@@ -37,6 +37,16 @@ export default function ClientDetailsStep({ client, onChange, isValid, onContinu
         />
       </SiteField>
 
+      <SiteField label="Email (opcional)">
+        <input
+          type="email"
+          value={client.email}
+          onChange={(event) => onChange({ email: event.target.value })}
+          placeholder="tu@mail.com"
+          className={SITE_INPUT_CLASS}
+        />
+      </SiteField>
+
       <SiteField label="Notas (opcional)">
         <textarea
           value={client.notes}
@@ -46,10 +56,6 @@ export default function ClientDetailsStep({ client, onChange, isValid, onContinu
           className={twMerge(SITE_INPUT_CLASS, 'resize-none')}
         />
       </SiteField>
-
-      <SiteButton disabled={!isValid} onClick={onContinue}>
-        Continuar
-      </SiteButton>
     </div>
   );
 }

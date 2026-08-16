@@ -8,10 +8,20 @@
   no define colores nuevos, no hace falta tocarlo.
 */
 
+/* Redefine el variant `dark:` de Tailwind: por default sigue
+   prefers-color-scheme (el tema del sistema operativo), pero el tema de
+   esta app es manual (data-theme en <html>, ver useTheme.ts) e
+   independiente del SO. Sin esto, componentes que usan `dark:` (ej.
+   Background.tsx) quedan atados al SO en vez de seguir el toggle de la
+   propia app — por eso, con el SO en modo oscuro, el fondo se veía "modo
+   oscuro" aunque la app estuviera en tema claro. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 :root {
   /* Superficies, de más oscuro a más claro */
   --color-bg: #0a0a0a;         /* fondo general de la app */
-  --color-surface: #161616;    /* tarjetas, sidebar, popovers, footers */
+  --color-surface: rgb(22 22 22 / 60%);    /* tarjetas, sidebar, popovers, footers — semitransparente (efecto glass, ver blur al final del archivo) */
+  --color-surface-solid: #161616;    /* mismo tono que --color-surface pero opaco — texto (--primary-foreground) y el Schedule, que no lleva glass (ver comentario en Schedule.tsx) */
   --color-field: #272727;      /* inputs, pills, celdas, hover sutil */
   --color-border: #272727;     /* bordes de inputs y tarjetas */
   --color-gray: #c7c7c7;
@@ -49,7 +59,8 @@
 */
 :root[data-theme='light'] {
   --color-bg: #f8f8f8;
-  --color-surface: #ffffff;
+  --color-surface: rgb(255 255 255 / 60%);
+  --color-surface-solid: #ffffff;
   --color-field: #eeeeee;
   --color-border: #eeeeee;
   --color-gray: #dadada;
@@ -95,10 +106,10 @@
   --foreground: var(--color-text);
   --card: var(--color-surface);
   --card-foreground: var(--color-text);
-  --popover: var(--color-bg);
+  --popover: var(--color-surface);
   --popover-foreground: var(--color-text);
   --primary: var(--color-accent);
-  --primary-foreground: var(--color-surface);
+  --primary-foreground: var(--color-surface-solid);
   --secondary: var(--color-field);
   --secondary-foreground: var(--color-text);
   --muted: var(--color-field);
@@ -111,6 +122,10 @@
   --ring: var(--color-text-muted);
   --gray: var(--color-gray);
   --gray-past: var(--color-gray-past);
+  /* Ver comentario en components/ui/image.tsx: acá el default (admin) es
+     --foreground; el sitio público lo pisa con su propio --site-text
+     (ver getSiteCssVars en site/design/cssVars.ts). */
+  --avatar-text: var(--foreground);
 }
 
 /* Textareas: al enfocarse/activarse no se dibuja ningún outline, borde ni
@@ -120,4 +135,18 @@ textarea:focus-visible {
   outline: none !important;
   border-color: transparent !important;
   box-shadow: none !important;
+}
+
+/* Efecto glass: --card y --popover ya son semitransparentes (arriba); acá
+   se agrega el desenfoque de lo que quede atrás. Como bg-card/bg-popover
+   son las clases que Tailwind genera para esos dos tokens, este único
+   bloque alcanza a todos los contenedores de la app (sidebars, diálogos,
+   popovers, toast, tarjetas) sin tocarlos uno por uno.
+   Excepción: Schedule.tsx y sus partes (grilla densa de turnos, se lee
+   peor con blur) usan bg-(--color-surface-solid) en vez de bg-card — no
+   llevan esta clase, así que no matchean acá. */
+.bg-card,
+.bg-popover {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }

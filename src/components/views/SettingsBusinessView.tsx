@@ -1,28 +1,37 @@
 /*
   src/components/views/SettingsBusinessView.tsx
-  Vista de Ajustes (/admin/ajustes): Negocio + Seguridad a la izquierda,
-  Horario del local a la derecha (columna propia para que la lista de días
-  no fuerce scroll junto con el resto). Las 3 secciones que antes vivían en
-  pantallas separadas (Negocio, Horarios, Seguridad) están acá, en una sola
-  pantalla.
+  Vista de Ajustes (/admin/ajustes): Negocio, Seguridad y Horario del local,
+  las 3 secciones que antes vivían en pantallas separadas, en una sola
+  pantalla. ViewLayout apila left/right en una sola columna (ver
+  ViewLayout.tsx), así que acá se sigue el mismo patrón que
+  FormAddEntity/FormAddService: un único Form con los campos uno debajo del
+  otro (de a pares cortos en grid de 2 columnas) y el horario aparte, como
+  `right`, igual que WeekSchedule en EntityView.
 */
 
-import { useRef, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Plus, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Check, Copy, MapPin } from 'lucide-react';
 import ViewLayout from '../layout/ViewLayout';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import PhotoUrlPicker from '@/components/ui/photo-url-picker';
+import AddButton from '../buttons/AddButton';
 import WeekSchedule from '../widgets/entityWidgets/WeekSchedule';
+import LocationPickerDialog from '../widgets/LocationPickerDialog';
 import { getBusiness, getOpeningHours, saveBusiness, saveOpeningHours } from '../../database/data';
 import type { OpeningHoursEntry } from '../../database/types';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 interface BusinessDraft {
   name: string;
   imageUrl: string;
   url: string;
   location: string;
+  latitude: number | null;
+  longitude: number | null;
   whatsapp: string;
   instagram: string;
 }
@@ -36,8 +45,7 @@ interface SecurityDraft {
 
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
 
-const COLUMN_FORM_CLASS =
-  'flex h-full min-h-0 flex-col gap-6 overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
+const COLUMN_FORM_CLASS = 'flex w-full flex-col gap-6';
 
 export default function SettingsBusinessView() {
   const navigate = useNavigate();
@@ -45,16 +53,20 @@ export default function SettingsBusinessView() {
 
   const business = getBusiness();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [copied, setCopied] = useState(false);
 
   const [draft, setDraft] = useState<BusinessDraft>({
     name: business.name ?? '',
     imageUrl: business.image ?? '',
     url: business.url ?? '',
     location: business.location ?? '',
+    latitude: business.latitude ?? null,
+    longitude: business.longitude ?? null,
     whatsapp: business.whatsapp ?? '',
     instagram: business.instagram ?? '',
   });
+
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
 
   const [securityDraft, setSecurityDraft] = useState<SecurityDraft>({
     name: business.managerName ?? '',
@@ -67,6 +79,19 @@ export default function SettingsBusinessView() {
     getOpeningHours(),
   );
 
+  // Snapshot del estado tal como llegó, para saber si hay cambios sin
+  // guardar (ver isDirty) — useRef con valor inicial sólo lo captura una
+  // vez, en el primer render.
+  const initialStateRef = useRef({ draft, securityDraft, businessHours });
+  const isDirty =
+    JSON.stringify({ draft, securityDraft, businessHours }) !== JSON.stringify(initialStateRef.current);
+
+  const { setDirty } = useUnsavedChanges();
+  useEffect(() => {
+    setDirty(isDirty);
+    return () => setDirty(false);
+  }, [isDirty, setDirty]);
+
   const setValue = (key: keyof BusinessDraft) => (value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));
 
@@ -78,20 +103,19 @@ export default function SettingsBusinessView() {
     setSecurityDraft((prev) => ({ ...prev, adminPin: digits }));
   };
 
-  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setDraft((prev) => ({ ...prev, imageUrl: String(reader.result ?? '') }));
-    };
-    reader.readAsDataURL(file);
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`https://minube.site/${draft.url}`);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
   };
 
-  const handleRemoveImage = () => {
-    setDraft((prev) => ({ ...prev, imageUrl: '' }));
-    if (fileInputRef.current) fileInputRef.current.value = '';
+  const handleLocationPicked = ({ latitude, longitude, address }: { latitude: number; longitude: number; address?: string }) => {
+    setDraft((prev) => ({
+      ...prev,
+      latitude,
+      longitude,
+      location: address || prev.location,
+    }));
   };
 
   const handleSave = () => {
@@ -102,8 +126,11 @@ export default function SettingsBusinessView() {
       image: draft.imageUrl,
       url: draft.url.trim(),
       location: draft.location.trim(),
+      latitude: draft.latitude ?? undefined,
+      longitude: draft.longitude ?? undefined,
       whatsapp: draft.whatsapp.trim(),
-      instagram: draft.instagram.trim(),      managerName: securityDraft.name.trim(),
+      instagram: draft.instagram.trim(),
+      managerName: securityDraft.name.trim(),
       email: securityDraft.email.trim(),
       password: securityDraft.password,
       adminPin: securityDraft.adminPin,
@@ -112,98 +139,75 @@ export default function SettingsBusinessView() {
   };
 
   return (
+    <>
     <ViewLayout
       title="Tu neogocio"
       left={
         <Form className={COLUMN_FORM_CLASS}>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
-            {/* Columna 1 */}
-            <div className="flex flex-1 flex-col gap-4">
-              <Input
-                label="Nombre del negocio"
-                placeholder="Ej: Barbería Studio"
-                value={draft.name}
-                onChange={(e) => setValue('name')(e.target.value)}
-              />
-              <Input
-                label="URL del negocio"
-                prefix="minube.site/"
-                placeholder="tu-negocio"
-                value={draft.url}
-                onChange={(e) => setValue('url')(e.target.value)}
-              />
-              <Input
-                label="Ubicación"
-                placeholder="Ciudad, dirección"
-                value={draft.location}
-                onChange={(e) => setValue('location')(e.target.value)}
-              />
-              <Input
-                label="WhatsApp del negocio"
-                placeholder="+54 9 11 2345-6789"
-                value={draft.whatsapp}
-                onChange={(e) => setValue('whatsapp')(e.target.value)}
-              />
-              <Input
-                label="Instagram del negocio"
-                prefix="@"
-                placeholder="barberiastudio"
-                value={draft.instagram}
-                onChange={(e) => setValue('instagram')(e.target.value)}
-              />
-            </div>
+          <Input
+            label="Nombre del negocio"
+            placeholder="Ej: Barbería Studio"
+            value={draft.name}
+            onChange={(e) => setValue('name')(e.target.value)}
+          />
 
-            {/* Columna 2 */}
-            <div className="flex flex-col gap-3">
-              <Label>Imagen del negocio</Label>
-              <div
-                onClick={() => {
-                  if (!draft.imageUrl) {
-                     fileInputRef.current?.click();
-                  }
-                }}
-                className="group relative flex min-h-40 w-full flex-1 items-center justify-center rounded-4xl border border-dashed border-border bg-card/30 overflow-hidden cursor-pointer hover:border-muted-foreground transition-colors"
-              >
-                {draft.imageUrl ? (
-                  <>
-                    <img
-                      src={draft.imageUrl}
-                      alt="Imagen del negocio"
-                      className="h-full w-full object-cover rounded-4xl"
-                    />
-                    <div className="absolute inset-0 bg-background/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage();
-                        }}
-                        className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-foreground hover:bg-muted/80 transition-colors cursor-pointer"
-                        aria-label="Quitar imagen"
-                      >
-                        <X size={24} />
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-muted/80 group-hover:text-foreground transition-all">
-                      <Plus size={24} />
-                    </div>
-                    <span className="mt-2 text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                      Cargar imagen
-                    </span>
-                  </div>
-                )}
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageSelect}
-              />
-            </div>
+          <div className="flex items-end gap-2">
+            <Input
+              label="URL del negocio"
+              prefix="minube.site/"
+              placeholder="tu-negocio"
+              value={draft.url}
+              onChange={(e) => setValue('url')(e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCopyLink}
+              aria-label="Copiar link"
+              title="Copiar link"
+              className="h-11 w-11 shrink-0 rounded-md p-0"
+              icon={copied ? <Check size={16} /> : <Copy size={16} />}
+            />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <AddButton
+              text="Seleccionar ubicación de tu negocio"
+              icon={<MapPin size={16} />}
+              onClick={() => setLocationPickerOpen(true)}
+              className="w-full bg-primary text-black hover:bg-primary/70 hover:text-black"
+            />
+            <Input
+              placeholder="Ciudad, dirección"
+              value={draft.location}
+              onChange={(e) => setValue('location')(e.target.value)}
+            />
+          </div>
+
+          <div className={TWO_COLUMN_GRID_CLASS}>
+            <Input
+              label="WhatsApp del negocio"
+              placeholder="+54 9 11 2345-6789"
+              value={draft.whatsapp}
+              onChange={(e) => setValue('whatsapp')(e.target.value)}
+            />
+            <Input
+              label="Instagram del negocio"
+              prefix="@"
+              placeholder="barberiastudio"
+              value={draft.instagram}
+              onChange={(e) => setValue('instagram')(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <Label>Imagen del negocio</Label>
+            <PhotoUrlPicker
+              value={draft.imageUrl}
+              onChange={(url) => setValue('imageUrl')(url)}
+              name={draft.name}
+            />
           </div>
 
           <div className={TWO_COLUMN_GRID_CLASS}>
@@ -239,22 +243,23 @@ export default function SettingsBusinessView() {
               onChange={(e) => handleAdminPinChange(e.target.value)}
             />
           </div>
-          <Link
-            to="/terminos"
-            className="w-fit text-sm text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
-          >
-            Términos y condiciones
-          </Link>
         </Form>
       }
-      right={
-        <Form className={COLUMN_FORM_CLASS}>
-          <WeekSchedule title="Horario del local" value={businessHours} onChange={setBusinessHours} />
-        </Form>
-      }
+      right={<WeekSchedule title="Horario del local" value={businessHours} onChange={setBusinessHours} />}
       confirmText="Guardar"
       onCancel={goBack}
       onConfirm={handleSave}
+    >
+      <Button variant="link" to="/terminos" className="w-fit px-0 text-foreground">
+        Términos y condiciones
+      </Button>
+    </ViewLayout>
+    <LocationPickerDialog
+      open={locationPickerOpen}
+      onOpenChange={setLocationPickerOpen}
+      initialPosition={draft.latitude != null && draft.longitude != null ? { latitude: draft.latitude, longitude: draft.longitude } : null}
+      onConfirm={handleLocationPicked}
     />
+    </>
   );
 }

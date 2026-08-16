@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { getOpeningHours, getTeamMembers } from '../../database/data';
 import type { OpeningHoursEntry, TeamMember } from '../../database/types';
@@ -7,6 +7,7 @@ import ViewLayout from '../layout/ViewLayout';
 
 import FormAddEntity from '../widgets/entityWidgets/FormAddEntity';
 import WeekSchedule from '../widgets/entityWidgets/WeekSchedule';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 export const ADD_ENTITY_VIEW_TITLE = 'Agregar un nuevo miembro';
 
@@ -17,6 +18,7 @@ interface MemberDraftValues {
   role: string;
   phone: string;
   email: string;
+  photo: string;
   services: string[];
 }
 
@@ -37,6 +39,7 @@ const EMPTY_MEMBER: MemberDraftValues = {
   role: '',
   phone: '',
   email: '',
+  photo: '',
   services: [],
 };
 
@@ -62,6 +65,7 @@ export default function AddEntityView({
           role: member?.role ?? '',
           phone: member?.phone ?? '',
           email: member?.email ?? '',
+          photo: member?.photo ?? '',
           services: member?.services ?? [],
         };
 
@@ -74,6 +78,21 @@ export default function AddEntityView({
       ? getOpeningHours()
       : member.schedule,
   );
+  const initialScheduleRef = useRef(schedule);
+
+  // "Cancelar" en medio de una edición sólo revierte y vuelve a modo
+  // lectura (sigue en la misma vista) — no hay nada que "salir sin
+  // guardar" ahí, por eso queda afuera del isDirty de más abajo.
+  const isDirty =
+    !editing &&
+    (JSON.stringify(values) !== JSON.stringify(initialValues) ||
+      JSON.stringify(schedule) !== JSON.stringify(initialScheduleRef.current));
+
+  const { setDirty } = useUnsavedChanges();
+  useEffect(() => {
+    setDirty(isDirty);
+    return () => setDirty(false);
+  }, [isDirty, setDirty]);
 
   if (!open) return null;
 
@@ -102,6 +121,7 @@ export default function AddEntityView({
       role: values.role.trim(),
       phone: values.phone.trim(),
       email: values.email.trim(),
+      photo: values.photo.trim(),
       schedule,
     });
 

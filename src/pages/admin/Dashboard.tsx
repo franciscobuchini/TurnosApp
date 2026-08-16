@@ -29,6 +29,7 @@ import {
   addAppointment,
   updateAppointment,
   removeAppointment,
+  addScheduleBlock,
   getservices,
   removeClient,
   removeService,
@@ -41,11 +42,27 @@ import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets
 import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';
 import AddShiftSidebar from '../../components/views/sidebarViews/AddShiftSidebar';
 import EditAppointmentSidebar from '../../components/views/sidebarViews/EditAppointmentSidebar';
+import Toast from '../../components/ui/toast';
+import { getFirstAvailableDate, parseServiceDurationMinutes } from '@/functions/bookingAvailability';
+
+/** Cuántos días adelante se busca disponibilidad al elegir servicio en
+    "Agregar turno" antes de avisar que no hay turnos. */
+const SHIFT_AVAILABILITY_SEARCH_DAYS = 7;
 
 /** Horario elegido en el Schedule para el turno en curso del flujo
     "Agregar turno", a la espera de que se elija el cliente. */
 export interface ShiftSlot {
   member: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
+/** Fila elegida en el Schedule para el bloqueo en curso del flujo "Crear un
+    nuevo bloqueo" > "Bloquear hora del negocio", a la espera de que se
+    confirme — mismo shape que ScheduleBlock (types.ts) sin id/member, que
+    acá siempre es "todo el negocio". */
+export interface BlockRow {
   date: string;
   startTime: string;
   endTime: string;
@@ -57,6 +74,10 @@ export interface AdminContext {
   toggleTeamFilter: (id: string, checked: boolean) => void;
   serviceFilters: DetailsPanelOption[];
   toggleServiceFilter: (id: string, checked: boolean) => void;
+  /** Persiste service.active (a diferencia de toggleServiceFilter, que sólo
+      cambia el filtro local del calendario) — desactivar un servicio lo
+      saca del turnero público. */
+  toggleServiceActive: (id: string, active: boolean) => void;
   clients: Client[];
   clientFilters: FiltersOption[];
   selectedClientName: string | null;
@@ -83,6 +104,20 @@ export interface AdminContext {
   confirmShiftWithNewClient: (client: { name: string; phone: string; notes?: string }) => void;
   /** Se incrementa cada vez que se crea un turno, para que el Schedule vuelva a leer la BBDD. */
   appointmentsVersion: number;
+  /** Tipo de bloqueo elegido en "Crear un nuevo bloqueo" (id de
+      DetailsPanelOption — ver BLOCK_OPTIONS en AddShiftSidebar). Sólo
+      'business-hour' tiene lógica real por ahora. */
+  blockType: string | null;
+  selectBlockType: (id: string) => void;
+  /** Fila elegida en el Schedule (modo bloqueo), a la espera de confirmarse. */
+  pendingBlockRow: BlockRow | null;
+  selectBlockRow: (row: BlockRow) => void;
+  /** Vuelve a la selección de fila sin cerrar el flujo (mantiene el tipo de bloqueo elegido). */
+  cancelBlockRow: () => void;
+  /** Confirma el bloqueo elegido: lo persiste y cierra el flujo. */
+  confirmBlock: () => void;
+  /** Se incrementa cada vez que se crea un bloqueo, para que el Schedule vuelva a leer la BBDD. */
+  blocksVersion: number;
   /** Hora ("HH:mm") del turno recién creado: el Schedule hace scroll a esa
       fila al montarse, para no perder de vista el turno agregado. */
   scrollToTime: string | null;
@@ -113,6 +148,7 @@ function Dashboard() {
       id: service.name.toLowerCase().replace(/\s+/g, '-'),
       label: service.name,
       checked: true,
+      active: service.active !== false,
       colorClassName: SERVICE_COLOR_BY_ID[service.colorId ?? '']?.className,
     })),
   );
@@ -122,21 +158,75 @@ function Dashboard() {
       current.map((f) => (f.id === id ? { ...f, checked } : f)),
     );
   };
+
+  const toggleServiceActive = (id: string, active: boolean) => {
+    const target = getservices().find((s) => s.name.toLowerCase().replace(/\s+/g, '-') === id);
+    if (!target) return;
+    dbUpdateService(target.name, { ...target, active });
+    setServiceFilters((current) => current.map((f) => (f.id === id ? { ...f, active } : f)));
+  };
   const [addShiftOpen, setAddShiftOpen] = useState(false);
   const openAddShift = () => setAddShiftOpen(true);
   const closeAddShift = () => {
     setAddShiftOpen(false);
     setShiftService(null);
     setShiftSlot(null);
+    setBlockType(null);
+    setPendingBlockRow(null);
   };
   const [shiftService, setShiftService] = useState<string | null>(null);
-  const selectShiftService = (serviceName: string) => setShiftService(serviceName);
+  const [shiftNoticeMessage, setShiftNoticeMessage] = useState<string | null>(null);
+  /* Si el día que se está viendo ya no tiene ningún hueco para el servicio
+     elegido, salta sola al próximo día que sí tenga (hasta 7 días
+     adelante) — así no hay que ir probando día por día a mano. Si ninguno
+     de esos 7 días tiene disponibilidad, avisa en vez de dejar al usuario
+     mirando una grilla vacía sin explicación. */
+  const selectShiftService = (serviceName: string) => {
+    setShiftService(serviceName);
+
+    const serviceInfo = getservices().find((item) => item.name === serviceName);
+    const durationMinutes = serviceInfo ? parseServiceDurationMinutes(serviceInfo.duration) : 0;
+    if (durationMinutes <= 0) return;
+
+    const nextAvailable = getFirstAvailableDate(serviceName, durationMinutes, selectedDate, SHIFT_AVAILABILITY_SEARCH_DAYS);
+
+    if (nextAvailable) {
+      selectDate(nextAvailable);
+    } else {
+      setShiftNoticeMessage(`No hay turnos disponibles para "${serviceName}" en los próximos ${SHIFT_AVAILABILITY_SEARCH_DAYS} días.`);
+    }
+  };
   const [shiftSlot, setShiftSlot] = useState<ShiftSlot | null>(null);
   const selectShiftSlot = (slot: ShiftSlot) => setShiftSlot(slot);
   const cancelShiftSlot = () => setShiftSlot(null);
   const [appointmentsVersion, setAppointmentsVersion] = useState(0);
   const [scrollToTime, setScrollToTime] = useState<string | null>(null);
   const clearScrollToTime = () => setScrollToTime(null);
+
+  /* "Crear un nuevo bloqueo": mismo patrón de a-dos-pasos que "Agregar
+     turno" (elegir tipo → elegir fila en el Schedule → confirmar), pero
+     sólo 'business-hour' hace algo (ver comentario de BlockRow más
+     arriba) — los otros 3 tipos sólo resaltan la opción en la sidebar. */
+  const [blockType, setBlockType] = useState<string | null>(null);
+  const selectBlockType = (id: string) => setBlockType(id);
+  const [pendingBlockRow, setPendingBlockRow] = useState<BlockRow | null>(null);
+  const selectBlockRow = (row: BlockRow) => setPendingBlockRow(row);
+  const cancelBlockRow = () => setPendingBlockRow(null);
+  const [blocksVersion, setBlocksVersion] = useState(0);
+
+  const confirmBlock = () => {
+    if (!pendingBlockRow) return;
+
+    addScheduleBlock({
+      id: crypto.randomUUID(),
+      date: pendingBlockRow.date,
+      startTime: pendingBlockRow.startTime,
+      endTime: pendingBlockRow.endTime,
+    });
+
+    setBlocksVersion((version) => version + 1);
+    closeAddShift();
+  };
 
   const confirmShiftClient = (clientName: string) => {
     if (!shiftSlot || !shiftService) return;
@@ -171,6 +261,8 @@ function Dashboard() {
     setAddShiftOpen(false);
     setShiftService(null);
     setShiftSlot(null);
+    setBlockType(null);
+    setPendingBlockRow(null);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -288,6 +380,7 @@ function Dashboard() {
     toggleTeamFilter,
     serviceFilters,
     toggleServiceFilter,
+    toggleServiceActive,
     clients,
     clientFilters,
     selectedClientName,
@@ -307,6 +400,13 @@ function Dashboard() {
     confirmShiftClient,
     confirmShiftWithNewClient,
     appointmentsVersion,
+    blockType,
+    selectBlockType,
+    pendingBlockRow,
+    selectBlockRow,
+    cancelBlockRow,
+    confirmBlock,
+    blocksVersion,
     scrollToTime,
     clearScrollToTime,
     editingAppointment,
@@ -330,6 +430,7 @@ function Dashboard() {
     ['/admin/metricas', '/admin/marketing'].includes(location.pathname);
 
   return (
+    <>
     <Layout
       menubar={<AppMenubar addShiftOpen={addShiftOpen} onCloseAddShift={closeAddShift} />}
       sidebar={
@@ -344,6 +445,11 @@ function Dashboard() {
             onBack={cancelShiftSlot}
             onConfirmClient={confirmShiftClient}
             onAddClientAndConfirm={confirmShiftWithNewClient}
+            blockType={blockType}
+            onSelectBlockType={selectBlockType}
+            pendingBlockRow={pendingBlockRow}
+            onConfirmBlock={confirmBlock}
+            onCancelBlockRow={cancelBlockRow}
           />
         ) : editingAppointment ? (
           <EditAppointmentSidebar
@@ -359,7 +465,7 @@ function Dashboard() {
             teamFilters={teamFilters}
             toggleTeamFilter={toggleTeamFilter}
             serviceFilters={serviceFilters}
-            toggleServiceFilter={toggleServiceFilter}
+            toggleServiceActive={toggleServiceActive}
             clientFilters={clientFilters}
           />
         )
@@ -367,6 +473,8 @@ function Dashboard() {
     >
       <Outlet context={context} />
     </Layout>
+    <Toast message={shiftNoticeMessage} onDismiss={() => setShiftNoticeMessage(null)} />
+    </>
   );
 }
 

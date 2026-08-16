@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Appointment } from '../../database/types';
 import type { FiltersOption } from '../../database/types';
-import type { ShiftSlot } from '../../pages/admin/Dashboard';
+import type { BlockRow, ShiftSlot } from '../../pages/admin/Dashboard';
 import MainContent from '../layout/MainContent';
 import WeekSelector from '../widgets/mainWidgets/WeekSelector';
 import Schedule from '../widgets/mainWidgets/Schedule';
@@ -43,6 +43,11 @@ interface ScheduleViewProps {
   teamFilters?: FiltersOption[];
   toggleTeamFilter?: (id: string, checked: boolean) => void;
   onMemberDetails?: (name: string) => void;
+  /** Flujo "Crear un nuevo bloqueo" — ver mismos props en Schedule.tsx. */
+  blockMode?: 'business-hour' | null;
+  pendingBlockRow?: BlockRow | null;
+  onBlockRowClick?: (row: BlockRow) => void;
+  blocksVersion?: number;
   children?: ReactNode;
 }
 
@@ -66,6 +71,10 @@ export default function ScheduleView({
   teamFilters,
   toggleTeamFilter,
   onMemberDetails,
+  blockMode,
+  pendingBlockRow,
+  onBlockRowClick,
+  blocksVersion,
   children,
 }: ScheduleViewProps) {
   return (
@@ -93,6 +102,10 @@ export default function ScheduleView({
         teamFilters={teamFilters}
         toggleTeamFilter={toggleTeamFilter}
         onMemberDetails={onMemberDetails}
+        blockMode={blockMode}
+        pendingBlockRow={pendingBlockRow}
+        onBlockRowClick={onBlockRowClick}
+        blocksVersion={blocksVersion}
       />
       {children}
     </MainContent>

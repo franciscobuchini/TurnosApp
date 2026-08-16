@@ -4,11 +4,13 @@
 
     - "past"     → tiempo pasado (día anterior o slot ya finalizado hoy).
     - "blocked"  → no se puede reservar: el miembro no realiza el servicio
-                   seleccionado, o la celda cae fuera del horario del negocio
-                   (día cerrado = todo bloqueado).
+                   seleccionado, la celda cae fuera del horario del negocio
+                   (día cerrado = todo bloqueado), o cae dentro de un
+                   ScheduleBlock ("Crear un nuevo bloqueo").
     - "available"→ se puede agregar un turno.
 
-  El orden de prioridad es: miembro no calificado > pasado > fuera de horario.
+  El orden de prioridad es: miembro no calificado > pasado > fuera de horario
+  > bloqueo puntual.
 */
 
 import { isSameDay } from '@/utils/dateName';
@@ -36,6 +38,24 @@ export interface CellAvailabilityInput {
   member: string;
   /** Columnas bloqueadas por no realizar el servicio seleccionado. */
   blockedMembers?: string[];
+  /** Tramos bloqueados a mano para todo el negocio ese día (ScheduleBlock
+      sin `member`), ya resueltos por el caller — ver
+      businessBlockedRanges en Schedule.tsx. */
+  businessBlockedRanges?: TimeRange[];
+}
+
+function timeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+/** Verdadero si el slot [slotMinutes, slotMinutes + durationMinutes) se
+    superpone con alguno de los rangos bloqueados. */
+function slotOverlapsRanges(slotMinutes: number, durationMinutes: number, ranges: TimeRange[]): boolean {
+  const slotEnd = slotMinutes + durationMinutes;
+  return ranges.some(
+    (range) => slotMinutes < timeToMinutes(range.endTime) && slotEnd > timeToMinutes(range.startTime),
+  );
 }
 
 function startOfDay(date: Date): Date {
@@ -65,6 +85,7 @@ export function getCellAvailability({
   memberRanges,
   member,
   blockedMembers,
+  businessBlockedRanges,
 }: CellAvailabilityInput): CellAvailability {
   if (blockedMembers?.includes(member)) {
     return 'blocked';
@@ -79,6 +100,10 @@ export function getCellAvailability({
   }
 
   if (!isSlotWithinBusinessHours(slotMinutes, SLOT_DURATION_MINUTES, businessRanges)) {
+    return 'blocked';
+  }
+
+  if (businessBlockedRanges?.length && slotOverlapsRanges(slotMinutes, SLOT_DURATION_MINUTES, businessBlockedRanges)) {
     return 'blocked';
   }
 

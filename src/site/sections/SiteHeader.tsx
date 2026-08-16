@@ -11,25 +11,27 @@ import type { SiteBusinessData } from '@/database/siteData';
 
 interface SiteHeaderProps {
   business: SiteBusinessData;
-  title: string;
   onReserveClick: () => void;
 }
 
-const HEADER_CLASS =
-  'sticky top-0 z-20 flex w-full items-center justify-between gap-4 border-b border-(--site-border) bg-(--site-surface) px-6 py-3';
+const HEADER_CLASS = 'sticky top-0 z-20 w-full border-b border-(--site-border) bg-(--site-surface) backdrop-blur-xl';
 
-export default function SiteHeader({ business, title, onReserveClick }: SiteHeaderProps) {
+const HEADER_INNER_CLASS = 'mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-6 py-3';
+
+export default function SiteHeader({ business, onReserveClick }: SiteHeaderProps) {
   return (
     <header className={HEADER_CLASS}>
-      <div className="flex min-w-0 items-center gap-3">
-        <Image src={business.logo} name={business.name} className="size-10 shrink-0" />
-        <span className={`truncate text-xl font-bold ${SITE_HEADING_CLASS}`}>
-          {title || business.name}
-        </span>
+      <div className={HEADER_INNER_CLASS}>
+        <div className="flex min-w-0 items-center gap-3">
+          <Image src={business.logo} name={business.name} className="size-10 shrink-0" />
+          <span className={`truncate text-xl font-bold ${SITE_HEADING_CLASS}`}>
+            {business.name}
+          </span>
+        </div>
+        <SiteButton size="sm" onClick={onReserveClick}>
+          Reservar turno
+        </SiteButton>
       </div>
-      <SiteButton size="sm" onClick={onReserveClick}>
-        Reservar turno
-      </SiteButton>
     </header>
   );
 }

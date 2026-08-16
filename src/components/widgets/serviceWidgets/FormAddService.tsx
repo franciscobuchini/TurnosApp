@@ -4,11 +4,11 @@ import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import DurationSelector from '@/components/ui/duration-selector';
+import PhotoUrlPicker from '@/components/ui/photo-url-picker';
 import { minutesToTime } from '@/hooks/useWeekSchedule';
 import formatCapitalizedWords from '@/utils/formatCapitalizedWords';
 
 import ColorPicker from './ColorPicker';
-import PhotoPicker from './PhotoPicker';
 
 import { SERVICE_COLORS } from './serviceColors';
 
@@ -33,7 +33,7 @@ interface FormAddServiceProps {
     duration: string;
     price: string;
     description: string;
-    photoIndex: number | null;
+    photo: string;
   }) => void;
 }
 
@@ -61,9 +61,7 @@ export default function FormAddService({
     initialValues?.colorId ?? SERVICE_COLORS[0].id,
   );
 
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<
-    number | null
-  >(null);
+  const [photo, setPhoto] = useState(initialValues?.photo ?? '');
 
   const [duration, setDuration] = useState(
     toFormDuration(initialValues?.duration),
@@ -80,7 +78,7 @@ export default function FormAddService({
     setSelectedColorId(
       initialValues?.colorId ?? SERVICE_COLORS[0].id,
     );
-    setSelectedPhotoIndex(null);
+    setPhoto(initialValues?.photo ?? '');
     setDuration(toFormDuration(initialValues?.duration));
     setPrice(initialValues?.price ?? '');
     setDescription(initialValues?.description ?? '');
@@ -88,6 +86,7 @@ export default function FormAddService({
     mode,
     initialValues?.name,
     initialValues?.colorId,
+    initialValues?.photo,
     initialValues?.duration,
     initialValues?.price,
     initialValues?.description,
@@ -126,7 +125,7 @@ export default function FormAddService({
       duration: `${duration.trim()} min`,
       price,
       description,
-      photoIndex: selectedPhotoIndex,
+      photo,
     });
   }, [
     serviceName,
@@ -134,7 +133,7 @@ export default function FormAddService({
     duration,
     price,
     description,
-    selectedPhotoIndex,
+    photo,
     onValuesChange,
   ]);
 
@@ -194,9 +193,10 @@ export default function FormAddService({
         <div className={FIELD_GROUP_CLASS}>
           <Label>Foto del servicio</Label>
 
-          <PhotoPicker
-            value={selectedPhotoIndex}
-            onChange={setSelectedPhotoIndex}
+          <PhotoUrlPicker
+            value={photo}
+            onChange={setPhoto}
+            name={serviceName}
             disabled={readOnly}
           />
         </div>

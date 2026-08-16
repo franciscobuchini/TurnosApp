@@ -24,8 +24,10 @@ interface ScheduleControlsProps {
   className?: string;
 }
 
+/* bg-(--color-surface-solid), no bg-card: es "parte" del Schedule (mismo
+   motivo — sin efecto glass, ver Schedule.tsx). */
 const SCHEDULE_CONTROLS_CLASS =
-  'absolute bottom-2 left-2 z-40 flex items-center gap-1.5 rounded-full border border-border bg-card p-1.5';
+  'absolute bottom-2 left-2 z-40 flex items-center gap-1.5 rounded-full border border-border bg-(--color-surface-solid) p-1.5';
 
 const CONTROL_BUTTON_CLASS = 'size-12 rounded-full';
 

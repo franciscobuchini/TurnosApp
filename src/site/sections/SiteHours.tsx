@@ -45,10 +45,10 @@ export default function SiteHours({ schedule }: SiteHoursProps) {
   const scheduleRows = groupScheduleRows(hoursByDay);
 
   return (
-    <SiteSection id="horarios" className="max-w-2xl">
+    <SiteSection id="horarios">
       <h2 className={`text-2xl font-semibold ${SITE_HEADING_CLASS}`}>Horarios</h2>
 
-      <div className="flex w-full flex-col rounded-(--site-radius) border border-(--site-border) bg-(--site-surface) divide-y divide-(--site-border)">
+      <div className="flex w-full flex-col rounded-(--site-radius) border border-(--site-border) bg-(--site-surface) backdrop-blur-xl divide-y divide-(--site-border)">
         {scheduleRows.map((row) => (
           <div
             key={row.label}

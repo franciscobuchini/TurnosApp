@@ -1,7 +1,7 @@
 /*
   src/components/views/sidebarViews/AddShiftSidebar.tsx
   Estado "agregar turno" de la sidebar, en dos pasos:
-  1. "Seleccionar servicio" — hasta que se elige un horario en el Schedule.
+  1. "Crear un nuevo turno" — hasta que se elige un horario en el Schedule.
   2. "Seleccionar cliente" — una vez que se hizo click en una celda disponible
      (shiftSlot ya tiene el horario elegido), para terminar de confirmar el
      turno. El campo de cliente es buscador y alta en uno: se tipea el
@@ -11,13 +11,28 @@
      opcional) se lo agrega y confirma el turno en un solo paso.
   El botón de abajo cierra todo el flujo en el paso 1, y en el paso 2 vuelve
   al paso 1 (sin perder el servicio elegido) para poder elegir otro horario.
-*/
+
+  Debajo de "Crear un nuevo turno" (mismo paso 1) va "Crear un nuevo
+  bloqueo", con las 4 formas de bloquear el Schedule: hora/día del negocio
+  (toda la fila / todo el día, para todos los miembros) y hora/día de un
+  miembro puntual (una celda / una columna entera). Por ahora sólo
+  "Bloquear horario del negocio" tiene lógica real: elegirla activa el modo
+  de click-en-una-fila del Schedule (ver blockMode en Schedule.tsx); al
+  clickear una fila se pasa a un 3er paso acá mismo ("Confirmar bloqueo",
+  mismo lugar donde "Agregar turno" muestra "Seleccionar cliente") antes de
+  persistirlo. Los otros 3 tipos sólo resaltan la opción, sin más efecto.
+  `name="add-block"` explícito para que este panel no comparta grupo de
+  exclusividad con "Crear un nuevo turno" (que fuerza `open` siempre y
+  cierra todo el flujo si se lo toggle-ea) — si compartieran nombre, abrir
+  este cerraría aquél y dispararía onClose por error. */
 
 import { useEffect, useState } from 'react';
+import { CalendarClock } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import type { FiltersOption } from '../../../database/types';
-import type { ShiftSlot } from '../../../pages/admin/Dashboard';
+import type { BlockRow, ShiftSlot } from '../../../pages/admin/Dashboard';
 import { fuzzyMatch } from '../../../utils/fuzzyMatch';
+import { getDayName, getMonthName } from '../../../utils/dateName';
 import Sidebar from '../../layout/Sidebar';
 import DetailsPanel, {
   type DetailsPanelOption,
@@ -29,6 +44,18 @@ import Image from '../../ui/image';
 import WhatsAppInput, { WHATSAPP_PREFIX } from '../../widgets/WhatsAppInput';
 import CancelButton from '../../buttons/CancelButton';
 import ConfirmButton from '../../buttons/ConfirmButton';
+import AddButton from '../../buttons/AddButton';
+
+/* Cada opción mapea a una forma de recorrer el Schedule (ver grilla en
+   Schedule.tsx): "fila" = misma hora, todos los miembros; "día entero" =
+   toda la columna de horas de ese día, todos los miembros; "celda" = un
+   solo horario de un solo miembro; "columna" = todo el día de un miembro. */
+const BLOCK_OPTIONS: DetailsPanelOption[] = [
+  { id: 'business-hour', label: 'Bloquear horario del negocio' },
+  { id: 'business-day', label: 'Bloquear día del negocio' },
+  { id: 'member-hour', label: 'Bloquear horario de un miembro' },
+  { id: 'member-day', label: 'Bloquear día de un miembro' },
+];
 
 interface AddShiftSidebarProps {
   serviceFilters: DetailsPanelOption[];
@@ -42,6 +69,14 @@ interface AddShiftSidebarProps {
   onConfirmClient: (clientName: string) => void;
   /** Da de alta un cliente nuevo y confirma el turno con él, en un solo paso. */
   onAddClientAndConfirm: (client: { name: string; phone: string; notes?: string }) => void;
+  /** Tipo de bloqueo elegido (id de BLOCK_OPTIONS) — sólo 'business-hour' tiene lógica real. */
+  blockType: string | null;
+  onSelectBlockType: (id: string) => void;
+  /** Fila elegida en el Schedule (modo bloqueo), a la espera de confirmarse. */
+  pendingBlockRow: BlockRow | null;
+  onConfirmBlock: () => void;
+  /** Vuelve a la selección de fila sin cerrar el flujo (mantiene el tipo de bloqueo elegido). */
+  onCancelBlockRow: () => void;
 }
 
 const CLIENT_CARD_CLASS = 'flex w-full flex-col gap-1 rounded-4xl border border-border bg-card p-4';
@@ -73,6 +108,11 @@ export default function AddShiftSidebar({
   onBack,
   onConfirmClient,
   onAddClientAndConfirm,
+  blockType,
+  onSelectBlockType,
+  pendingBlockRow,
+  onConfirmBlock,
+  onCancelBlockRow,
 }: AddShiftSidebarProps) {
   const selectedOptionId = serviceFilters.find((filter) => filter.label === selectedService)?.id;
   const [clientQuery, setClientQuery] = useState('');
@@ -195,10 +235,37 @@ export default function AddShiftSidebar({
     );
   }
 
+  if (pendingBlockRow) {
+    const blockedDate = new Date(`${pendingBlockRow.date}T00:00:00`);
+    const formattedDate = `${getDayName(blockedDate)} ${blockedDate.getDate()} de ${getMonthName(blockedDate)}`;
+
+    return (
+      <Sidebar
+        footer={
+          <div className="flex flex-col gap-2">
+            <ConfirmButton text="Confirmar bloqueo" onClick={onConfirmBlock} className="w-full" />
+            <CancelButton text="Volver" onClick={onCancelBlockRow} className="w-full" />
+          </div>
+        }
+      >
+        <div className={CLIENT_CARD_CLASS}>
+          <ContentHeader title="Confirmar bloqueo" className={CLIENT_HEADER_CLASS} />
+          <p className="px-1 text-sm text-muted-foreground">
+            Vas a bloquear el <span className="text-foreground">{formattedDate}</span> de{' '}
+            <span className="text-foreground">{pendingBlockRow.startTime}</span> a{' '}
+            <span className="text-foreground">{pendingBlockRow.endTime}</span> para todo el negocio. Nadie va a
+            poder solicitar turnos en ese horario ese día.
+          </p>
+        </div>
+      </Sidebar>
+    );
+  }
+
   return (
     <Sidebar>
       <DetailsPanel
-        title="Seleccionar servicio"
+        title="Crear un nuevo turno"
+        hideChevron
         options={serviceFilters}
         selectedId={selectedOptionId}
         onOptionClick={(option) => onSelectService(option.label)}
@@ -208,6 +275,18 @@ export default function AddShiftSidebar({
             onClose();
           }
         }}
+      />
+
+      <DetailsPanel
+        title="Crear un nuevo bloqueo"
+        name="add-block"
+        options={BLOCK_OPTIONS}
+        selectedId={blockType ?? undefined}
+        onOptionClick={(option) => onSelectBlockType(option.id)}
+        // Todavía no hay una vista de bloqueos ya creados a la que navegar
+        // (ver comentario de arriba) — placeholder sin onClick hasta esa
+        // pasada.
+        action={<AddButton text="Ver próximos bloqueos" icon={<CalendarClock size={16} />} />}
       />
     </Sidebar>
   );

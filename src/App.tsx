@@ -9,6 +9,7 @@ import SettingsBusinessView from './components/views/SettingsBusinessView';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Site from './pages/clients/Site';
 import { getBlockedMemberNames } from './functions/scheduleCellAvailability';
+import { UnsavedChangesProvider } from './hooks/useUnsavedChanges';
 
 import ScheduleView from './components/views/ScheduleView';
 import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from './components/views/EntityView';
@@ -26,6 +27,10 @@ function SchedulePage() {
     () => getBlockedMemberNames(ctx.addShiftOpen ? ctx.shiftService : null),
     [ctx.addShiftOpen, ctx.shiftService],
   );
+
+  // Sólo "business-hour" tiene interacción en el Schedule por ahora (ver
+  // Schedule.tsx) — los otros 3 tipos de bloqueo no activan ningún modo acá.
+  const blockMode = ctx.addShiftOpen && ctx.blockType === 'business-hour' ? 'business-hour' : null;
 
   return (
     <ScheduleView
@@ -49,6 +54,10 @@ function SchedulePage() {
       teamFilters={ctx.teamFilters}
       toggleTeamFilter={ctx.toggleTeamFilter}
       onMemberDetails={(name) => ctx.navigate(`/admin/miembro/${encodeURIComponent(name)}`)}
+      blockMode={blockMode}
+      pendingBlockRow={ctx.pendingBlockRow}
+      onBlockRowClick={ctx.selectBlockRow}
+      blocksVersion={ctx.blocksVersion}
     />
   );
 }
@@ -143,6 +152,7 @@ function ClientPage({ mode }: { mode: CrudMode }) {
 function App() {
   return (
     <BrowserRouter>
+      <UnsavedChangesProvider>
       <div className="relative isolate min-h-dvh">
       <Background />
       <Routes>
@@ -172,6 +182,7 @@ function App() {
         </Route>
       </Routes>
       </div>
+      </UnsavedChangesProvider>
     </BrowserRouter>
   );
 }

@@ -16,6 +16,8 @@ export type SiteBusinessData = {
   name: string;
   logo: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
   whatsapp: string;
   instagram: string;
   schedule: OpeningHoursEntry[];
@@ -35,14 +37,20 @@ export function getSiteBusinessData(): SiteBusinessData {
     name: business.name,
     logo: business.image,
     location: business.location,
+    latitude: business.latitude,
+    longitude: business.longitude,
     whatsapp: business.whatsapp,
     instagram: business.instagram,
     schedule: getOpeningHours(),
   };
 }
 
+/** Sólo los servicios activos: uno desactivado no aparece en "Elegí un
+    servicio" del turnero, así que no se puede reservar — ver comentario en
+    service.active (types.ts). No filtra para el admin (getservices()
+    sigue devolviendo todos, ahí se puede seguir agregando turnos a mano). */
 export function getSiteServices(): service[] {
-  return getservices();
+  return getservices().filter((s) => s.active !== false);
 }
 
 export function getSiteTeam(): SitePublicTeamMember[] {

@@ -1,6 +1,8 @@
 import { type ChangeEvent, useEffect, useState } from 'react';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import PhotoUrlPicker from '@/components/ui/photo-url-picker';
 import formatCapitalizedWords from '@/utils/formatCapitalizedWords';
 import WhatsAppInput, { WHATSAPP_PREFIX } from '../WhatsAppInput';
 import ServiceSelector from './ServiceSelector';
@@ -12,6 +14,7 @@ interface FormAddEntityProps {
     role?: string;
     phone?: string;
     email?: string;
+    photo?: string;
     services?: string[];
   };
   onValuesChange?: (values: {
@@ -19,6 +22,7 @@ interface FormAddEntityProps {
     role: string;
     phone: string;
     email: string;
+    photo: string;
     services: string[];
   }) => void;
   onValidityChange?: (isValid: boolean) => void;
@@ -26,12 +30,14 @@ interface FormAddEntityProps {
 
 const FORM_CLASS = 'flex flex-col gap-6';
 const TWO_COLUMN_GRID_CLASS = 'grid grid-cols-1 gap-4 sm:grid-cols-2';
+const FIELD_GROUP_CLASS = 'flex flex-col gap-4';
 
 export default function FormAddEntity({ mode = 'create', initialValues, onValuesChange, onValidityChange }: FormAddEntityProps) {
   const [memberName, setMemberName] = useState(initialValues?.name ?? '');
   const [role, setRole] = useState(initialValues?.role ?? '');
   const [phone, setPhone] = useState(initialValues?.phone ?? '');
   const [email, setEmail] = useState(initialValues?.email ?? '');
+  const [photo, setPhoto] = useState(initialValues?.photo ?? '');
   const [selectedServices, setSelectedServices] = useState<string[]>(initialValues?.services ?? []);
   const readOnly = mode === 'view';
 
@@ -41,9 +47,10 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
       role,
       phone,
       email,
+      photo,
       services: selectedServices,
     });
-  }, [memberName, role, phone, email, selectedServices, onValuesChange]);
+  }, [memberName, role, phone, email, photo, selectedServices, onValuesChange]);
 
   const isFormValid = Boolean(memberName.trim() && role.trim() && phone.replace(WHATSAPP_PREFIX, '').trim());
 
@@ -94,6 +101,12 @@ export default function FormAddEntity({ mode = 'create', initialValues, onValues
           onChange={(event) => setEmail(event.target.value)}
           readOnly={readOnly}
         />
+      </div>
+
+      <div className={FIELD_GROUP_CLASS}>
+        <Label>Foto de perfil</Label>
+
+        <PhotoUrlPicker value={photo} onChange={setPhoto} name={memberName} disabled={readOnly} />
       </div>
 
       <ServiceSelector value={selectedServices} onChange={setSelectedServices} disabled={readOnly} showOnlySelected={readOnly} />

@@ -80,7 +80,7 @@ function Table<T>({
       )}
       <TableBody>
         {rows.map((row, rowIndex) => (
-          <TableRow key={rowIndex} className={rowHeightClassName} style={rowHeightStyle}>
+          <TableRow key={rowIndex} className={cn("group", rowHeightClassName)} style={rowHeightStyle}>
             {columns.map((column) => {
               const resolvedCellClassName =
                 typeof column.cellClassName === "function"

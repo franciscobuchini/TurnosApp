@@ -27,6 +27,14 @@ export function rgbToHex([r, g, b]: [number, number, number]): string {
   return `#${[r, g, b].map((c) => clamp(c).toString(16).padStart(2, '0')).join('')}`;
 }
 
+/** hex a "rgb(r g b / alpha%)" — para superficies con efecto glass (ver
+    deriveSiteSurfaceColors), donde --site-surface necesita dejar pasar algo
+    del fondo detrás en vez de taparlo del todo. */
+export function hexToRgba(hex: string, alpha: number): string {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgb(${r} ${g} ${b} / ${Math.round(alpha * 100)}%)`;
+}
+
 /** RGB (0-255) a HSV: h en [0,360), s y v en [0,1]. */
 export function rgbToHsv(r: number, g: number, b: number): [number, number, number] {
   const rNorm = r / 255;
@@ -105,7 +113,10 @@ export function deriveSiteSurfaceColors(backgroundHex: string): DerivedSurfaceCo
   const isDark = getRelativeLuminance(backgroundHex) < 0.5;
 
   return {
-    surface: mix(backgroundHex, '#ffffff', isDark ? 0.08 : 0.6),
+    // Efecto glass: semitransparente en vez de un hex sólido — el blur que
+    // la deja "esmerilada" se aplica en los componentes que consumen
+    // --site-surface (backdrop-blur-xl, ver BookingWidget/SiteHours/etc).
+    surface: hexToRgba(mix(backgroundHex, '#ffffff', isDark ? 0.08 : 0.6), 0.7),
     text: isDark ? '#fafafa' : '#17171a',
     textMuted: mix(backgroundHex, isDark ? '#ffffff' : '#000000', 0.45),
     border: mix(backgroundHex, isDark ? '#ffffff' : '#000000', isDark ? 0.15 : 0.12),

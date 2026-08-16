@@ -1,11 +1,10 @@
-﻿import { useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { getservices } from '../../database/data';
 import type { service } from '../../database/types';
 import ViewLayout from '../layout/ViewLayout';
 import FormAddService from '../widgets/serviceWidgets/FormAddService';
-import ServicePreviewCard from '../widgets/serviceWidgets/ServicePreviewCard';
-import { SERVICE_COLOR_BY_ID, SERVICE_COLORS } from '../widgets/serviceWidgets/serviceColors';
 import { useEntityViewFooter } from '@/hooks/useEntityViewFooter';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 export const ADD_SERVICE_VIEW_TITLE = 'Agregar un nuevo servicio';
 
@@ -21,7 +20,7 @@ interface ServiceDraftValues {
   duration: string;
   price: string;
   description: string;
-  photoIndex: number | null;
+  photo: string;
 }
 
 export interface AddServiceViewProps {
@@ -45,7 +44,7 @@ const EMPTY_DRAFT: ServiceDraftValues = {
   duration: '',
   price: '',
   description: '',
-  photoIndex: null,
+  photo: '',
 };
 
 export default function AddServiceView({
@@ -73,7 +72,7 @@ export default function AddServiceView({
     duration: selectedService?.duration ?? '',
     price: selectedService?.price != null ? String(selectedService.price) : '',
     colorId: selectedService?.colorId ?? 'lima',
-    photo: selectedService?.photo,
+    photo: selectedService?.photo ?? '',
   };
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -87,6 +86,20 @@ export default function AddServiceView({
     onCancel,
   });
 
+  const isDirty =
+    draftValues.name !== formValues.name ||
+    draftValues.description !== formValues.description ||
+    draftValues.duration !== formValues.duration ||
+    draftValues.price !== formValues.price ||
+    draftValues.colorId !== formValues.colorId ||
+    draftValues.photo !== formValues.photo;
+
+  const { setDirty } = useUnsavedChanges();
+  useEffect(() => {
+    setDirty(isDirty);
+    return () => setDirty(false);
+  }, [isDirty, setDirty]);
+
   if (!open) return null;
 
   const buildService = (): service => ({
@@ -95,7 +108,7 @@ export default function AddServiceView({
     description: draftValues.description.trim(),
     price: Number(draftValues.price) || 0,
     duration: draftValues.duration,
-    photo: selectedService?.photo ?? '',
+    photo: draftValues.photo.trim(),
   });
 
   const handleConfirm = () => {
@@ -118,9 +131,6 @@ export default function AddServiceView({
     onEdit?.();
   };
 
-  const previewColor = SERVICE_COLOR_BY_ID[draftValues.colorId] ?? SERVICE_COLORS[0];
-  const previewDuration = draftValues.duration.replace(/\s*min$/i, '');
-
   return (
     <ViewLayout
       title={title}
@@ -131,18 +141,6 @@ export default function AddServiceView({
           onValidityChange={setIsFormValid}
           onValuesChange={setDraftValues}
         />
-      }
-      right={
-        <div className="flex flex-1 flex-col items-center justify-center rounded-4xl">
-          <ServicePreviewCard
-            name={draftValues.name}
-            description={draftValues.description}
-            duration={previewDuration}
-            price={draftValues.price}
-            colorClassName={previewColor.className}
-            selectedPhotoIndex={draftValues.photoIndex}
-          />
-        </div>
       }
       cancelText={cancelLabel}
       onCancel={handleCancel}

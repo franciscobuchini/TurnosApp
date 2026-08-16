@@ -27,15 +27,21 @@ import {
   getAvailableSlots,
   getFirstAvailableDate,
   parseServiceDurationMinutes,
+  pickAnyAvailableMember,
   type AvailableSlot,
 } from '@/functions/bookingAvailability';
 import type { service } from '@/database/types';
 
-export type BookingStep = 'service' | 'schedule' | 'professional' | 'details' | 'confirm' | 'success';
+export type BookingStep = 'service' | 'schedule' | 'professional' | 'details' | 'success';
+
+/** Cuántos días adelante se busca disponibilidad al elegir servicio, antes
+    de avisar que no hay turnos (ver selectService). */
+const SERVICE_AVAILABILITY_SEARCH_DAYS = 7;
 
 export interface ClientDetails {
   name: string;
   phone: string;
+  email: string;
   notes: string;
 }
 
@@ -56,8 +62,9 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
   const [date, setDate] = useState<Date | null>(null);
   const [slot, setSlot] = useState<AvailableSlot | null>(null);
   const [member, setMember] = useState<string | null>(null);
-  const [client, setClient] = useState<ClientDetails>({ name: '', phone: '', notes: '' });
+  const [client, setClient] = useState<ClientDetails>({ name: '', phone: '', email: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [noAvailabilityMessage, setNoAvailabilityMessage] = useState<string | null>(null);
 
   const step = stepStack[stepStack.length - 1];
 
@@ -77,6 +84,11 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
     return getAvailableSlots(date, serviceName, durationMinutes);
   }, [date, serviceName, durationMinutes]);
 
+  // Si en los próximos SERVICE_AVAILABILITY_SEARCH_DAYS días no hay ni un
+  // hueco para el servicio elegido, no tiene sentido avanzar al paso
+  // "schedule" (quedaría mostrando fecha de hoy con la grilla vacía, sin
+  // explicación): se avisa con un toast y se queda en "service" para que
+  // pruebe con otro.
   const selectService = (name: string) => {
     setServiceName(name);
 
@@ -85,8 +97,16 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
     // que se acaba de elegir. Se recalcula fresco a partir de `name`.
     const service = services.find((item) => item.name === name);
     const duration = service ? parseServiceDurationMinutes(service.duration) : 0;
-    setDate(getFirstAvailableDate(name, duration) ?? new Date());
+    const nextAvailable = getFirstAvailableDate(name, duration, new Date(), SERVICE_AVAILABILITY_SEARCH_DAYS);
 
+    if (!nextAvailable) {
+      setNoAvailabilityMessage(
+        `No hay turnos disponibles para "${name}" en los próximos ${SERVICE_AVAILABILITY_SEARCH_DAYS} días.`,
+      );
+      return;
+    }
+
+    setDate(nextAvailable);
     setSlot(null);
     setMember(null);
     setStepStack(['service', 'schedule']);
@@ -119,11 +139,17 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
     goTo('details');
   };
 
+  // "Cualquiera disponible" (ProfessionalStep): no es sólo el primero de la
+  // lista, reparte la carga entre los calificados libres — ver
+  // pickAnyAvailableMember.
+  const selectAnyMember = () => {
+    if (!slot || !date) return;
+    selectMember(pickAnyAvailableMember(slot.memberNames, date));
+  };
+
   const updateClient = (patch: Partial<ClientDetails>) => setClient((current) => ({ ...current, ...patch }));
 
   const isClientValid = client.name.trim().length > 0 && client.phone.trim().length > 0;
-
-  const goToConfirm = () => goTo('confirm');
 
   const confirmBooking = () => {
     if (!selectedService || !date || !slot || !member || !isClientValid) {
@@ -135,6 +161,7 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
     addClient({
       name: client.name.trim(),
       phone: client.phone.trim(),
+      email: client.email.trim() || undefined,
       notes: client.notes.trim() || undefined,
       appointmentsCount: 0,
       totalSpent: 0,
@@ -161,7 +188,8 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
     setDate(null);
     setSlot(null);
     setMember(null);
-    setClient({ name: '', phone: '', notes: '' });
+    setClient({ name: '', phone: '', email: '', notes: '' });
+    setNoAvailabilityMessage(null);
   };
 
   return {
@@ -177,12 +205,14 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
     selectSlot,
     member,
     selectMember,
+    selectAnyMember,
     client,
     updateClient,
     isClientValid,
-    goToConfirm,
     confirmBooking,
     submitting,
     reset,
+    noAvailabilityMessage,
+    dismissNoAvailabilityMessage: () => setNoAvailabilityMessage(null),
   };
 }

@@ -6,6 +6,11 @@
   de atención quedan deshabilitados; el mes se marca inline (arriba del
   primer día de cada mes visible) en vez de un header aparte, así no hace
   falta trackear qué mes está en pantalla al scrollear.
+
+  Sin borde salvo el día elegido (fondo sólido) — nada de recuadros en cada
+  día, sólo el fondo (hover / seleccionado) marca el estado. Hoy se destaca
+  con el color primary del sitio (fondo suave, sin llegar al fondo sólido
+  del seleccionado) para ubicarlo de un vistazo en la tira.
 */
 
 import { useMemo, useRef } from 'react';
@@ -52,14 +57,14 @@ export default function DateStep({ schedule, selectedDate, onSelect }: DateStepP
         type="button"
         onClick={() => scrollBy(-SCROLL_STEP)}
         aria-label="Días anteriores"
-        className="hidden shrink-0 cursor-pointer items-center justify-center rounded-full border border-(--site-border) p-1.5 text-(--site-text-muted) hover:text-(--site-text) sm:flex"
+        className="hidden shrink-0 cursor-pointer items-center justify-center rounded-full p-1.5 text-(--site-text-muted) transition-colors hover:bg-(--site-bg) hover:text-(--site-text) sm:flex"
       >
         <ChevronLeft className="size-4" />
       </button>
 
       <div
         ref={scrollerRef}
-        className="flex flex-1 snap-x gap-2 overflow-x-auto scroll-smooth pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex flex-1 snap-x gap-2 overflow-x-auto scroll-smooth py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {days.map(({ date, isOpen, showMonth }) => {
           const isSelected = selectedDate ? isSameDay(date, selectedDate) : false;
@@ -72,22 +77,28 @@ export default function DateStep({ schedule, selectedDate, onSelect }: DateStepP
               disabled={!isOpen}
               onClick={() => onSelect(date)}
               className={twMerge(
-                'relative flex min-w-16 shrink-0 snap-start flex-col items-center gap-1 rounded-(--site-radius) border px-5 py-3.5 text-sm transition-colors',
+                'flex min-w-[4.5rem] shrink-0 snap-start flex-col items-center gap-1 rounded-(--site-radius) px-5 py-4 text-sm transition-colors',
                 isOpen
-                  ? 'cursor-pointer border-(--site-border) hover:bg-(--site-bg)'
-                  : 'cursor-not-allowed border-(--site-border)/40 text-(--site-text-muted) opacity-50',
-                isSelected && 'border-(--site-primary) bg-(--site-primary) text-(--site-primary-foreground)',
+                  ? 'cursor-pointer text-(--site-text) hover:bg-(--site-bg)'
+                  : 'cursor-not-allowed text-(--site-text-muted) opacity-50',
+                isToday && isOpen && !isSelected && 'bg-(--site-primary)/10 text-(--site-primary) hover:bg-(--site-primary)/15',
+                isSelected && 'bg-(--site-primary) text-(--site-primary-foreground) hover:bg-(--site-primary)',
               )}
             >
-              <span className="h-3 text-[10px] leading-3 font-medium uppercase text-(--site-text-muted)">
+              <span
+                className={twMerge(
+                  'h-3 text-[10px] leading-3 font-medium uppercase',
+                  isSelected
+                    ? 'text-(--site-primary-foreground)/80'
+                    : isToday && isOpen
+                      ? 'text-(--site-primary)/70'
+                      : 'text-(--site-text-muted)',
+                )}
+              >
                 {showMonth ? getMonthName(date, 3) : ''}
               </span>
               <span className="uppercase">{getDayName(date, 3)}</span>
               <span className={twMerge('text-lg font-semibold', !isOpen && 'line-through')}>{date.getDate()}</span>
-
-              {isToday && !isSelected && (
-                <span className="absolute bottom-1.5 size-1 rounded-full bg-(--site-primary)" />
-              )}
             </button>
           );
         })}
@@ -97,7 +108,7 @@ export default function DateStep({ schedule, selectedDate, onSelect }: DateStepP
         type="button"
         onClick={() => scrollBy(SCROLL_STEP)}
         aria-label="Próximos días"
-        className="hidden shrink-0 cursor-pointer items-center justify-center rounded-full border border-(--site-border) p-1.5 text-(--site-text-muted) hover:text-(--site-text) sm:flex"
+        className="hidden shrink-0 cursor-pointer items-center justify-center rounded-full p-1.5 text-(--site-text-muted) transition-colors hover:bg-(--site-bg) hover:text-(--site-text) sm:flex"
       >
         <ChevronRight className="size-4" />
       </button>

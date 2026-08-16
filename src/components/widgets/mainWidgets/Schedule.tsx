@@ -12,9 +12,9 @@ import Image from '@/components/ui/image';
 import { Table, type TableColumn } from '@/components/ui/table';
 import { Dropdown } from '@/components/ui/dropdown';
 import CurrentTimeLine from '@/components/ui/current-time-line';
-import { getAppointmentsByDate, getOpeningHours, getservices, getTeamMembers } from '@/database/data';
+import { getAppointmentsByDate, getOpeningHours, getScheduleBlocksByDate, getservices, getTeamMembers } from '@/database/data';
 import type { Appointment, FiltersOption } from '@/database/types';
-import type { ShiftSlot } from '@/pages/admin/Dashboard';
+import type { BlockRow, ShiftSlot } from '@/pages/admin/Dashboard';
 import { getBusinessHoursByDay, minutesToTime, type TimeRange } from '@/hooks/useWeekSchedule';
 import { getCellAvailability, type CellAvailability } from '@/functions/scheduleCellAvailability';
 import { DEFAULT_ROW_HEIGHT_PX } from '@/functions/scheduleZoom';
@@ -63,30 +63,46 @@ interface ScheduleProps {
   teamFilters?: FiltersOption[];
   toggleTeamFilter?: (id: string, checked: boolean) => void;
   onMemberDetails?: (name: string) => void;
+  /** Flujo "Crear un nuevo bloqueo": sólo 'business-hour' hace algo por
+      ahora — activa el modo "click en una fila para bloquearla" en la
+      columna de horas. Los otros 3 tipos (día del negocio, hora/día de un
+      miembro) todavía no tienen lógica. */
+  blockMode?: 'business-hour' | null;
+  /** Fila ya elegida en modo bloqueo, a la espera de que se confirme en la
+      sidebar — se resalta fija (sin hover) igual que pendingSlot. */
+  pendingBlockRow?: BlockRow | null;
+  /** Se dispara al hacer click en una fila en modo bloqueo. */
+  onBlockRowClick?: (row: BlockRow) => void;
+  /** Fuerza a recalcular los bloqueos leídos de la BBDD tras crear uno nuevo. */
+  blocksVersion?: number;
 }
 
 /* Solo se redondea abajo (rounded-b-3xl): las esquinas de arriba no se ven
    igual aunque se las redondee, porque el header sticky de la tabla no
    respeta el border-radius de su contenedor con scroll (limitación de CSS,
    no un olvido) — queda pegado al borde con esquinas rectas sí o sí. */
-const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-b-3xl bg-card';
+/* bg-(--color-surface-solid) en vez de bg-card a propósito: el Schedule es
+   una grilla densa de texto/turnos, así que queda afuera del efecto glass
+   (blur) que sí llevan el resto de los contenedores de la app — ver Theme.css. */
+const SCHEDULE_CLASS = 'relative flex flex-col flex-1 p-0 overflow-hidden rounded-3xl bg-(--color-surface-solid)';
 
 const SCHEDULE_SCROLL_CLASS = 'flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden';
 
 const SCHEDULE_CONTENT_CLASS = 'relative';
 
-/* Al cambiar de día, el contenido entra deslizándose en la dirección de la
-   navegación: a un día anterior entra desde la derecha (se percibe moviendo
-   hacia la izquierda) y a un día siguiente entra desde la izquierda (se
-   percibe moviendo hacia la derecha). Sólo se aplica cuando cambia el día
-   (ver slideDirection más abajo) — no en el primer render ni en re-renders
-   por otros cambios (zoom, nuevo turno, etc.). */
+/* Al cambiar de día, el contenido entra deslizándose en sentido opuesto al
+   selector de días (WeekSelector.tsx, ver su propio comentario) a
+   propósito: acá, a un día anterior entra desde la izquierda (se percibe
+   moviendo hacia la derecha) y a un día siguiente entra desde la derecha
+   (se percibe moviendo hacia la izquierda). Sólo se aplica cuando cambia
+   el día (ver slideDirection más abajo) — no en el primer render ni en
+   re-renders por otros cambios (zoom, nuevo turno, etc.). */
 const SCHEDULE_SLIDE_FROM_RIGHT_CLASS = 'animate-in fade-in-0 slide-in-from-right-8 duration-200';
 const SCHEDULE_SLIDE_FROM_LEFT_CLASS = 'animate-in fade-in-0 slide-in-from-left-8 duration-200';
 
-const SCHEDULE_TABLE_CLASS = '';
+const SCHEDULE_TABLE_CLASS = 'bg-(--color-surface-solid)';
 
-const SCHEDULE_TABLE_HEADER_CLASS = 'bg-card';
+const SCHEDULE_TABLE_HEADER_CLASS = 'bg-(--color-surface-solid)';
 
 const SCHEDULE_LABEL_CELL_CLASS = 'relative w-16 text-center';
 
@@ -151,6 +167,28 @@ const HEADER_HEIGHT_PX = 40;
    otro color, un solo plano bg-background/50 sobre todo el espacio. */
 const SCHEDULE_OFF_HOURS_OVERLAY_CLASS =
   'absolute left-16 right-0 z-10 bg-background/50 pointer-events-none';
+
+/* Igual que la niebla de horario no laboral, pero para un ScheduleBlock ya
+   confirmado — tinte distinto (destructive en vez de background) para que
+   se note que ESTO lo bloqueó el negocio a mano, no que está fuera de
+   horario. */
+const SCHEDULE_BLOCKED_OVERLAY_CLASS =
+  'absolute left-16 right-0 z-10 bg-destructive/15 pointer-events-none';
+
+/* Click target de modo bloqueo ("Bloquear hora del negocio"): cada celda de
+   la fila (columna de horas + cada miembro) pone su propio overlay a pantalla
+   completa (inset-0, sin radio) para que, pegados unos con otros, se vean
+   como una sola franja continua — nada de "cada celda su propio recuadro".
+   El hover también tiene que sentirse de toda la fila junta, no celda por
+   celda: en vez de :hover propio de cada overlay, usa group-hover contra el
+   `group` que Table le pone a cada <tr> (ver table.tsx) — como :hover de un
+   elemento ya vale para todos sus ancestros mientras el mouse está sobre
+   cualquier hijo, el <tr> entero queda en :hover con sólo pasar por una
+   celda, y ahí prende el group-hover de las demás celdas de esa fila a la
+   vez. */
+const SCHEDULE_BLOCK_ROW_TARGET_CLASS = 'absolute inset-0 z-30 transition-colors';
+const SCHEDULE_BLOCK_ROW_PENDING_CLASS = 'bg-destructive/40';
+const SCHEDULE_BLOCK_ROW_HOVER_CLASS = 'cursor-pointer group-hover:bg-destructive/20';
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -338,6 +376,10 @@ export default function Schedule({
   teamFilters,
   toggleTeamFilter,
   onMemberDetails,
+  blockMode,
+  pendingBlockRow,
+  onBlockRowClick,
+  blocksVersion,
 }: ScheduleProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -376,6 +418,22 @@ export default function Schedule({
     setHeaderHeightPx(headerRow.getBoundingClientRect().height);
   }, [rowHeightPx]);
 
+  /* Alto real del contenedor con scroll: hace falta para saber cuántas filas
+     entran a pantalla a este zoom (ver windowStartSlot/windowEndSlot más
+     abajo) — un día laboral corto con mucho zoom out, si no se estira la
+     ventana, deja un hueco vacío debajo de la última fila en vez de mostrar
+     algo (aunque sea "fuera de horario"). Se remide en el mismo momento que
+     headerHeightPx (cambia de zoom) y también ante un resize de ventana. */
+  const [scrollHeightPx, setScrollHeightPx] = useState(0);
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (scrollRef.current) setScrollHeightPx(scrollRef.current.clientHeight);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [rowHeightPx]);
+
   /* Ticker de un minuto: refresca "now" (turnos vivos/pasados, celdas ya
      pasadas) al mismo ritmo que CurrentTimeLine, sin esperar a que cambie
      otro estado. */
@@ -400,20 +458,39 @@ export default function Schedule({
   /* Ventana visible del Schedule: desde el colchón antes de la apertura más
      temprana hasta el colchón después del cierre más tardío de ese día. Sin
      datos de horario (o día cerrado, que de todas formas no renderiza grilla)
-     se muestra el día completo. */
+     se muestra el día completo.
+
+     Si ese rango (a este rowHeightPx) no llega a llenar el alto real del
+     contenedor —día laboral corto + mucho zoom out—, se estira hacia abajo
+     (y, si ni así alcanza, también hacia arriba) hasta completarlo: las
+     filas de más quedan fuera del rango de negocio, así que
+     offHoursRegions (más abajo, calculado a partir de estos mismos límites)
+     ya las cubre solo con la niebla de "no disponible" sin ningún cambio
+     extra. */
   const { windowStartSlot, windowEndSlot } = useMemo(() => {
-    if (!businessRanges || businessRanges.length === 0) {
-      return { windowStartSlot: 0, windowEndSlot: 24 * 4 };
-    }
+    const base = !businessRanges || businessRanges.length === 0
+      ? { windowStartSlot: 0, windowEndSlot: 24 * 4 }
+      : (() => {
+          const starts = businessRanges.map((range) => timeToSlotIndex(range.startTime));
+          const ends = businessRanges.map((range) => timeToSlotIndex(range.endTime));
+          return {
+            windowStartSlot: Math.max(0, Math.min(...starts) - BUSINESS_HOURS_PADDING_SLOTS),
+            windowEndSlot: Math.min(24 * 4, Math.max(...ends) + BUSINESS_HOURS_PADDING_SLOTS),
+          };
+        })();
 
-    const starts = businessRanges.map((range) => timeToSlotIndex(range.startTime));
-    const ends = businessRanges.map((range) => timeToSlotIndex(range.endTime));
+    if (scrollHeightPx <= 0) return base;
 
-    return {
-      windowStartSlot: Math.max(0, Math.min(...starts) - BUSINESS_HOURS_PADDING_SLOTS),
-      windowEndSlot: Math.min(24 * 4, Math.max(...ends) + BUSINESS_HOURS_PADDING_SLOTS),
-    };
-  }, [businessRanges]);
+    const availableRows = Math.floor((scrollHeightPx - headerHeightPx) / rowHeightPx);
+    const currentRows = base.windowEndSlot - base.windowStartSlot;
+    if (currentRows >= availableRows) return base;
+
+    const windowEndSlot = Math.min(24 * 4, base.windowStartSlot + availableRows);
+    const stillMissingRows = availableRows - (windowEndSlot - base.windowStartSlot);
+    const windowStartSlot = stillMissingRows > 0 ? Math.max(0, base.windowStartSlot - stillMissingRows) : base.windowStartSlot;
+
+    return { windowStartSlot, windowEndSlot };
+  }, [businessRanges, scrollHeightPx, headerHeightPx, rowHeightPx]);
 
   /* Tramos del día que quedan fuera del horario laboral del negocio
      (colchones antes/después de abrir y huecos entre tramos), como rangos
@@ -474,6 +551,33 @@ export default function Schedule({
   const appointmentMap = useMemo(() => buildAppointmentMap(appointments), [appointments]);
   const now = new Date();
 
+  /* Bloqueos de todo el negocio ("Crear un nuevo bloqueo" > "Bloquear hora
+     del negocio") para el día que se está viendo — un bloqueo puntual de un
+     miembro (`member` presente) todavía no se genera desde ningún lado, así
+     que por ahora sólo importan los que no tienen `member`. blocksVersion
+     no se usa en el cálculo: sólo fuerza a releer la BBDD tras confirmar un
+     bloqueo nuevo (localStorage no es reactivo, mismo motivo que
+     appointmentsVersion). */
+  const businessBlockedRanges = useMemo(() => {
+    void blocksVersion;
+    return getScheduleBlocksByDate(selectedDate)
+      .filter((block) => !block.member)
+      .map((block) => ({ startTime: block.startTime, endTime: block.endTime }));
+  }, [selectedDate, blocksVersion]);
+
+  /* Misma idea que offHoursRegions pero para bloqueos ya confirmados:
+     convierte cada tramo bloqueado a slots y lo recorta a la ventana
+     visible, para pintar la niebla "bloqueado a mano" (ver
+     SCHEDULE_BLOCKED_OVERLAY_CLASS) sin tocar offHoursRegions. */
+  const blockedRegions = useMemo(() => {
+    return businessBlockedRanges
+      .map((range) => ({
+        startSlot: Math.max(windowStartSlot, timeToSlotIndex(range.startTime)),
+        endSlot: Math.min(windowEndSlot, timeToSlotIndex(range.endTime)),
+      }))
+      .filter((region) => region.endSlot > region.startSlot);
+  }, [businessBlockedRanges, windowStartSlot, windowEndSlot]);
+
   /* Horarios de trabajo de cada miembro, por día: undefined = sin restricción;
      lista vacía = no trabaja (celdas bloqueadas). */
   const memberRangesByDay = useMemo(() => {
@@ -494,6 +598,7 @@ export default function Schedule({
       memberRanges: memberRangesByDay[member]?.[selectedDate.getDay()],
       member,
       blockedMembers,
+      businessBlockedRanges,
     });
 
   /* Mapa servicio → color/foto y miembro → foto, para pintar cada tarjeta
@@ -616,9 +721,46 @@ export default function Schedule({
     width: '64px',
     cellClassName: SCHEDULE_LABEL_CELL_CLASS,
     cell: (slot, index) => {
-      if (index === 0) return '';
       const absoluteIndex = windowStartSlot + index;
-      return absoluteIndex % 4 === 0 ? <span className={SCHEDULE_LABEL_TEXT_CLASS}>{slot}</span> : '';
+      const labelContent =
+        index === 0 ? '' : absoluteIndex % 4 === 0 ? <span className={SCHEDULE_LABEL_TEXT_CLASS}>{slot}</span> : '';
+
+      if (blockMode !== 'business-hour') {
+        return labelContent;
+      }
+
+      /* Modo bloqueo: toda la fila se representa acá (ver comentario de
+         SCHEDULE_BLOCK_ROW_TARGET_CLASS) — clickear cualquier punto de esta
+         celda de 64px elige esa hora, sin importar qué miembro esté al lado. */
+      const rowStartTime = minutesToTime(absoluteIndex * SLOT_DURATION_MINUTES);
+      const rowEndTime = minutesToTime(absoluteIndex * SLOT_DURATION_MINUTES + SLOT_DURATION_MINUTES);
+
+      /* Ya hay una fila elegida (a la espera de confirmarse en la sidebar):
+         igual que pendingSlot en las columnas de miembros más abajo, el
+         resto deja de ofrecer el target — para cambiarla hay que volver
+         primero desde la sidebar, no clickear otra encima. La columna de
+         horas tampoco muestra el fondo de "elegida" (SCHEDULE_BLOCK_ROW_PENDING_CLASS)
+         acá — sin click ni fondo, queda igual que cualquier otra fila no
+         elegida; el resaltado de la fila lo dan las columnas de miembros. */
+      if (pendingBlockRow) {
+        return labelContent;
+      }
+
+      return (
+        <>
+          {labelContent}
+          {/* Sin group-hover acá a propósito: la columna de horas sigue
+              siendo click target (elige la fila igual que cualquier otra
+              celda), pero no muestra ningún efecto de hover propio — ni al
+              pasar el mouse por ella ni al pasarlo por el resto de la fila. */}
+          <button
+            type="button"
+            onClick={() => onBlockRowClick?.({ date: dateStr, startTime: rowStartTime, endTime: rowEndTime })}
+            aria-label={`Bloquear horario ${rowStartTime}`}
+            className={twMerge(SCHEDULE_BLOCK_ROW_TARGET_CLASS, 'cursor-pointer')}
+          />
+        </>
+      );
     },
   };
 
@@ -641,40 +783,12 @@ export default function Schedule({
           </span>
         );
 
-        return {
-          key: `member-${member}`,
-          header: (
-            <Dropdown
-              items={[
-                <TeamFilterButton
-                  key={member}
-                  option={{
-                    id: teamFilter?.id ?? member.toLowerCase().replace(/\s+/g, '-'),
-                    label: member,
-                    checked: teamFilter?.checked,
-                  }}
-                  onToggle={toggleTeamFilter}
-                  onOpenDetails={() => onMemberDetails?.(member)}
-                />,
-              ]}
-              content={memberHeader}
-              className="h-10 px-2 rounded-3xl hover:bg-transparent"
-            />
-          ),
-          cellClassName: (_slot: string, rowIndex: number) => {
-            /* Las filas donde el negocio abre y cierra llevan la línea de
-               border con opacidad completa, para marcar de un vistazo el
-               arranque y el fin del horario de atención. */
-            const absoluteRow = windowStartSlot + rowIndex;
-            const isHoursBoundary =
-              businessRanges?.some(
-                (range) =>
-                  timeToSlotIndex(range.startTime) === absoluteRow ||
-                  timeToSlotIndex(range.endTime) === absoluteRow,
-              ) ?? false;
-            return twMerge(SCHEDULE_SLOT_CELL_CLASS, isHoursBoundary && 'border-foreground/20');
-          },
-          cell: (_slot: string, rowIndex: number) => {
+        /* Contenido normal de la celda (turno existente, preview de
+           "Agregar turno", o nada) — separado de `cell` para poder
+           agregarle encima, sin pisarlo, el target de modo bloqueo (ver más
+           abajo): así una fila con turnos existentes se sigue viendo
+           mientras se elige si bloquearla. */
+        const renderCellContent = (rowIndex: number) => {
           /* rowIndex es la posición dentro de la ventana renderizada (0 =
              windowStartSlot), no el slot absoluto del día: hay que sumarle
              el offset de la ventana para todo lo que compare contra horarios
@@ -814,7 +928,88 @@ export default function Schedule({
               className={isLive ? 'z-[25]' : undefined}
             />
           );
-        },
+        };
+
+        return {
+          key: `member-${member}`,
+          header: (
+            <Dropdown
+              items={[
+                <TeamFilterButton
+                  key={member}
+                  option={{
+                    id: teamFilter?.id ?? member.toLowerCase().replace(/\s+/g, '-'),
+                    label: member,
+                    checked: teamFilter?.checked,
+                  }}
+                  onToggle={toggleTeamFilter}
+                  onOpenDetails={() => onMemberDetails?.(member)}
+                />,
+              ]}
+              content={memberHeader}
+              className="h-10 px-2 rounded-3xl hover:bg-transparent"
+            />
+          ),
+          cellClassName: (_slot: string, rowIndex: number) => {
+            /* Las filas donde el negocio abre y cierra llevan la línea de
+               border con opacidad completa, para marcar de un vistazo el
+               arranque y el fin del horario de atención. */
+            const absoluteRow = windowStartSlot + rowIndex;
+            const isHoursBoundary =
+              businessRanges?.some(
+                (range) =>
+                  timeToSlotIndex(range.startTime) === absoluteRow ||
+                  timeToSlotIndex(range.endTime) === absoluteRow,
+              ) ?? false;
+            /* Eco visual de la fila elegida en modo bloqueo: el click en sí
+               vive en cada celda (ver `cell` más abajo), esto es sólo para
+               que se note toda la fila junta. */
+            const isPendingBlockRow =
+              pendingBlockRow?.date === dateStr &&
+              pendingBlockRow.startTime === minutesToTime(absoluteRow * SLOT_DURATION_MINUTES);
+            return twMerge(
+              SCHEDULE_SLOT_CELL_CLASS,
+              isHoursBoundary && 'border-foreground/20',
+              isPendingBlockRow && 'bg-destructive/15',
+            );
+          },
+          cell: (_slot: string, rowIndex: number) => {
+            const normalContent = renderCellContent(rowIndex);
+
+            if (blockMode !== 'business-hour') return normalContent;
+
+            /* Modo bloqueo: cualquier celda de la fila sirve de target, no
+               sólo la columna de horas (ver labelColumn más arriba) — el
+               contenido normal sigue debajo (un turno existente, si lo
+               hay), no se pisa, sólo se le agrega el target encima. */
+            const absoluteRow = windowStartSlot + rowIndex;
+            const rowStartTime = minutesToTime(absoluteRow * SLOT_DURATION_MINUTES);
+            const rowEndTime = minutesToTime(absoluteRow * SLOT_DURATION_MINUTES + SLOT_DURATION_MINUTES);
+            const isPendingRow = pendingBlockRow?.date === dateStr && pendingBlockRow.startTime === rowStartTime;
+
+            if (pendingBlockRow) {
+              return (
+                <>
+                  {normalContent}
+                  {isPendingRow && (
+                    <span className={twMerge(SCHEDULE_BLOCK_ROW_TARGET_CLASS, SCHEDULE_BLOCK_ROW_PENDING_CLASS)} />
+                  )}
+                </>
+              );
+            }
+
+            return (
+              <>
+                {normalContent}
+                <button
+                  type="button"
+                  onClick={() => onBlockRowClick?.({ date: dateStr, startTime: rowStartTime, endTime: rowEndTime })}
+                  aria-label={`Bloquear horario ${rowStartTime}`}
+                  className={twMerge(SCHEDULE_BLOCK_ROW_TARGET_CLASS, SCHEDULE_BLOCK_ROW_HOVER_CLASS)}
+                />
+              </>
+            );
+          },
         };
       });
 
@@ -838,8 +1033,8 @@ export default function Schedule({
           key={selectedDate.getTime()}
           className={twMerge(
             SCHEDULE_CONTENT_CLASS,
-            slideDirection === 'left' && SCHEDULE_SLIDE_FROM_RIGHT_CLASS,
-            slideDirection === 'right' && SCHEDULE_SLIDE_FROM_LEFT_CLASS,
+            slideDirection === 'left' && SCHEDULE_SLIDE_FROM_LEFT_CLASS,
+            slideDirection === 'right' && SCHEDULE_SLIDE_FROM_RIGHT_CLASS,
           )}
         >
           <Table
@@ -864,6 +1059,17 @@ export default function Schedule({
               <div
                 key={`off-hours-${region.startSlot}`}
                 className={SCHEDULE_OFF_HOURS_OVERLAY_CLASS}
+                style={{
+                  top: headerHeightPx + (region.startSlot - windowStartSlot) * rowHeightPx,
+                  height: (region.endSlot - region.startSlot) * rowHeightPx,
+                }}
+              />
+            ))}
+          {!showBlankGrid &&
+            blockedRegions.map((region) => (
+              <div
+                key={`blocked-${region.startSlot}`}
+                className={SCHEDULE_BLOCKED_OVERLAY_CLASS}
                 style={{
                   top: headerHeightPx + (region.startSlot - windowStartSlot) * rowHeightPx,
                   height: (region.endSlot - region.startSlot) * rowHeightPx,

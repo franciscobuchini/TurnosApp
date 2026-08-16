@@ -14,7 +14,7 @@ import { getSiteCssVars } from './design/cssVars';
 interface SiteThemeProviderProps {
   config: Pick<
     SiteConfig,
-    'backgroundColor' | 'primaryColor' | 'headingColor' | 'borderRadius' | 'headingFont' | 'bodyFont'
+    'backgroundColor' | 'primaryColor' | 'borderRadius' | 'headingFont' | 'bodyFont'
   >;
   className?: string;
   children: ReactNode;

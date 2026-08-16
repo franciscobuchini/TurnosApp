@@ -1,22 +1,25 @@
 /*
   src/components/widgets/siteEditorWidgets/SitePersonalizationSidebar.tsx
-  Sidebar de la pestaña Personalización: Contenido (título/descripción) y
-  Apariencia (fondo/botones/títulos/bordes/fuentes), cada control en su
-  propio DetailsPanel — el mismo acordeón colapsable que usa AdminSidebar
-  (Equipo/Servicios/Clientes), así que abrir uno cierra los demás. Fondo,
-  botones y títulos son los 3 únicos colores que se eligen a mano (mismo
-  HexColorPicker reutilizado) — el resto de las superficies del sitio se
-  derivan del color de fondo (ver colorUtils.ts). El botón Guardar persiste
-  el SiteConfig — hasta ahí, los cambios sólo viven en el borrador de
-  Personalizacion.tsx y ya se ven reflejados en la preview.
+  Sidebar de la pestaña Personalización: Apariencia (fondo/primario/
+  bordes/fuentes), cada control en su propio DetailsPanel — el mismo
+  acordeón colapsable que usa AdminSidebar (Equipo/Servicios/Clientes), así
+  que abrir uno cierra los demás. Fondo y primario son los 2 únicos colores
+  que se eligen a mano (mismo HexColorPicker reutilizado) — el primario
+  cubre tanto botones/CTAs como títulos (antes eran 2 campos separados,
+  se unificaron); el resto de las superficies del sitio se derivan del
+  color de fondo (ver colorUtils.ts). No hay control de "Contenido" (título/descripción): el
+  título del sitio es siempre el nombre del negocio y la bajada es fija
+  (ver SiteHero.tsx) — no hace falta un campo aparte que sólo lo duplica.
+  El botón Guardar persiste el SiteConfig — hasta ahí, los cambios sólo
+  viven en el borrador de Personalizacion.tsx y ya se ven reflejados en la
+  preview.
 */
 
 import Sidebar from '@/components/layout/Sidebar';
 import DetailsPanel from '@/components/widgets/sidebarWidgets/DetailsPanel';
 import ConfirmButton from '@/components/buttons/ConfirmButton';
-import ContentSection from './ContentSection';
 import HexColorPicker from './HexColorPicker';
-import { BodyFontPicker, BorderRadiusPicker, HeadingFontPicker } from './AppearancePickers';
+import { BodyFontPicker, BorderRadiusPicker, HeadingFontPicker, ServiceCardStylePicker } from './AppearancePickers';
 import type { SiteConfig } from '@/database/types';
 
 interface SitePersonalizationSidebarProps {
@@ -45,13 +48,7 @@ export default function SitePersonalizationSidebar({
         />
       }
     >
-      <DetailsPanel title="Contenido" open>
-        <div className={PANEL_BODY_CLASS}>
-          <ContentSection config={config} onChange={onChange} />
-        </div>
-      </DetailsPanel>
-
-      <DetailsPanel title="Color de fondo">
+      <DetailsPanel title="Color de fondo" open>
         <div className={PANEL_BODY_CLASS}>
           <HexColorPicker
             value={config.backgroundColor}
@@ -60,21 +57,24 @@ export default function SitePersonalizationSidebar({
         </div>
       </DetailsPanel>
 
-      <DetailsPanel title="Color de los botones">
+      <DetailsPanel title="Color primario">
         <div className={PANEL_BODY_CLASS}>
           <HexColorPicker value={config.primaryColor} onChange={(primaryColor) => onChange({ primaryColor })} />
-        </div>
-      </DetailsPanel>
-
-      <DetailsPanel title="Color de los títulos">
-        <div className={PANEL_BODY_CLASS}>
-          <HexColorPicker value={config.headingColor} onChange={(headingColor) => onChange({ headingColor })} />
         </div>
       </DetailsPanel>
 
       <DetailsPanel title="Bordes">
         <div className={PANEL_BODY_CLASS}>
           <BorderRadiusPicker value={config.borderRadius} onChange={(borderRadius) => onChange({ borderRadius })} />
+        </div>
+      </DetailsPanel>
+
+      <DetailsPanel title="Estilo de las cards de servicios">
+        <div className={PANEL_BODY_CLASS}>
+          <ServiceCardStylePicker
+            value={config.serviceCardStyle}
+            onChange={(serviceCardStyle) => onChange({ serviceCardStyle })}
+          />
         </div>
       </DetailsPanel>
 

@@ -9,7 +9,7 @@
   sólo vive en memoria de este componente.
 */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '../../components/layout/Layout';
 import AppMenubar from '../../components/layout/AppMenubar';
 import MainContent from '../../components/layout/MainContent';
@@ -18,6 +18,7 @@ import SiteRenderer from '../../site/SiteRenderer';
 import { getClientId, getSiteConfig, saveSiteConfig } from '../../database/siteConfig';
 import { getSiteData } from '../../database/siteData';
 import type { SiteConfig } from '../../database/types';
+import { useUnsavedChanges } from '../../hooks/useUnsavedChanges';
 
 function Personalizacion() {
   const clientId = getClientId();
@@ -29,6 +30,15 @@ function Personalizacion() {
   const updateDraft = (patch: Partial<SiteConfig>) => setDraft((current) => ({ ...current, ...patch }));
 
   const hasChanges = JSON.stringify(draft) !== JSON.stringify(savedConfig);
+
+  // Esta página no usa ViewLayout (tiene su propio Layout con preview en
+  // vivo), así que se registra en la guarda global "a mano" — sin esto,
+  // AppMenubar navegaba sin avisar aunque hubiera cambios sin guardar acá.
+  const { setDirty } = useUnsavedChanges();
+  useEffect(() => {
+    setDirty(hasChanges);
+    return () => setDirty(false);
+  }, [hasChanges, setDirty]);
 
   const handleSave = () => {
     saveSiteConfig(draft);

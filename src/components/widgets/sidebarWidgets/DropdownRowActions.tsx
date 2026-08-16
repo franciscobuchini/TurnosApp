@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { ChevronRight, Eye, EyeOff, Power, PowerOff } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/ui/button';
+import { DROPDOWN_ITEM_CLASS } from '@/components/ui/dropdown';
 import AddEntityView from '@/components/views/EntityView';
 import AddClientView from '@/components/views/ClientView';
 import ServiceView from '@/components/views/ServiceView';
@@ -18,14 +19,6 @@ import ServiceView from '@/components/views/ServiceView';
   "Desactivar" no tenía su propio componente porque ES este mismo toggle,
   solo que con otro texto (ver ServiceFilterButton más abajo).
 */
-
-// ── Estilo compartido ──────────────────────────────────────────────────
-// Misma altura, padding, gap y color para CUALQUIER botón de fila (toggle o
-// ver detalles): tienen que verse iguales entre sí, solo cambia el ícono y
-// el texto. Antes cada uno traía su propia clase (una completa, la otra
-// vacía) y por eso se veían distintos.
-
-const DROPDOWN_ROW_ITEM_CLASS = 'justify-between w-full h-8 p-3 gap-6 bg-transparent text-muted-foreground hover:text-foreground';
 
 // ── Ver detalles ────────────────────────────────────────────────────────
 // Abre la View de la entidad en modo lectura. Si se pasa onOpen (caso real
@@ -57,7 +50,7 @@ function ViewDetailsButton({ className, onOpen, triggerText = 'Detalles', render
         text={triggerText}
         icon={<ChevronRight size={16} />}
         onClick={handleOpen}
-        className={twMerge(DROPDOWN_ROW_ITEM_CLASS, className)}
+        className={twMerge(DROPDOWN_ITEM_CLASS, className)}
       />
       {!onOpen && renderView({ open: isOpen, onClose: () => setIsOpen(false) })}
     </>
@@ -92,7 +85,7 @@ function ToggleVisibilityButton({
       onClick={() => onToggle?.(!visible)}
       text={visible ? (activeText ?? 'Ocultar') : (inactiveText ?? 'Mostrar')}
       icon={icon ?? (visible ? <EyeOff size={16} /> : <Eye size={16} />)}
-      className={twMerge(DROPDOWN_ROW_ITEM_CLASS, className)}
+      className={twMerge(DROPDOWN_ITEM_CLASS, className)}
     />
   );
 }
@@ -106,6 +99,9 @@ export interface DropdownRowOption {
   label: string;
   checked?: boolean;
   disabled?: boolean;
+  /** Sólo Servicios (ver ServiceFilterButton): independiente de `checked`
+      (filtro de calendario) — si el servicio se puede reservar en el sitio. */
+  active?: boolean;
 }
 
 interface TeamFilterButtonProps {
@@ -142,20 +138,32 @@ export function TeamFilterButton({ option, onToggle, onOpenDetails, className }:
 
 interface ServiceFilterButtonProps {
   option: DropdownRowOption;
-  onToggle?: (id: string, checked: boolean) => void;
+  /** A diferencia de onToggle (Equipo/Clientes, que sólo cambia un filtro
+      local), esto persiste: desactivar saca el servicio del turnero público
+      (ver getSiteServices en siteData.ts). Pide confirmación antes de
+      desactivar (no de reactivar) — pero esa confirmación NO puede vivir acá
+      adentro: este componente se renderiza como ítem de un Dropdown (ver
+      ui/dropdown.tsx), que cierra su Popover ante cualquier click adentro,
+      lo que desmontaría un ConfirmDialog declarado en este mismo árbol antes
+      de llegar a mostrarse. Por eso sólo pide el toggle acá; quien pase
+      onToggleActive (AdminSidebar) es responsable de confirmar antes de
+      llamar de verdad a la función que persiste. */
+  onToggleActive?: (id: string, active: boolean) => void;
   onOpenDetails?: () => void;
   className?: string;
 }
 
-export function ServiceFilterButton({ option, onToggle, onOpenDetails, className }: ServiceFilterButtonProps) {
+export function ServiceFilterButton({ option, onToggleActive, onOpenDetails, className }: ServiceFilterButtonProps) {
+  const isActive = option.active ?? true;
+
   return (
     <>
       <ToggleVisibilityButton
-        visible={option.checked ?? true}
-        onToggle={(visible) => onToggle?.(option.id, visible)}
+        visible={isActive}
+        onToggle={(nextActive) => onToggleActive?.(option.id, nextActive)}
         activeText="Desactivar"
         inactiveText="Activar"
-        icon={option.checked === false ? <Power size={16} /> : <PowerOff size={16} />}
+        icon={isActive ? <PowerOff size={16} /> : <Power size={16} />}
         className={className}
       />
       <ViewDetailsButton

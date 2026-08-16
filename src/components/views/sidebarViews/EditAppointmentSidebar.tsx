@@ -20,15 +20,9 @@ import { twMerge } from 'tailwind-merge';
 import Sidebar from '@/components/layout/Sidebar';
 import ContentHeader from '@/components/ui/content-header';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dropdown, DROPDOWN_ITEM_CLASS } from '@/components/ui/dropdown';
 import Calendar from '@/components/widgets/sidebarWidgets/Calendar';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import HourSelector from '@/components/ui/hour-selector';
 import { Input } from '@/components/ui/input';
@@ -68,8 +62,6 @@ const ROW_VALUE_CLASS = 'flex items-center gap-2 text-sm font-medium text-foregr
 const ROW_AVATAR_CLASS = 'h-6 w-6 shrink-0 text-[10px]';
 
 const TRIGGER_CLASS = 'h-9 gap-2 rounded-full pr-3 pl-1.5 text-sm font-medium';
-
-const OPTION_CLASS = 'w-full justify-start gap-2 px-2';
 
 const HOUR_SELECTOR_CLASS = 'h-9 w-auto min-w-0 flex-none border-transparent bg-accent/60 px-3';
 
@@ -126,41 +118,38 @@ interface SelectRowProps {
   onSelect: (option: DetailsPanelOption) => void;
 }
 
-/* Fila "Label ... Valor ⌄": el valor actual abre un popover liviano con la
-   lista de opciones, en vez del acordeón con borde que usa DetailsPanel. */
+/* Fila "Label ... Valor ⌄": el valor actual abre un dropdown liviano con la
+   lista de opciones (mismo componente/estilo que el resto de la app — ver
+   ui/dropdown.tsx), en vez del acordeón con borde que usa DetailsPanel. */
 function SelectRow({ label, value, options, onSelect }: SelectRowProps) {
-  const [open, setOpen] = useState(false);
   const selected = options.find((option) => option.label === value);
 
   return (
     <div className={ROW_CLASS}>
       <span className={ROW_LABEL_CLASS}>{label}</span>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" className={TRIGGER_CLASS}>
+      <Dropdown
+        align="end"
+        className={TRIGGER_CLASS}
+        contentClassName="max-h-64 w-56 overflow-y-auto"
+        content={
+          <>
             <Image name={value} className={twMerge(ROW_AVATAR_CLASS, selected?.colorClassName && 'text-black', selected?.colorClassName)} />
             {value}
             <ChevronDown className="size-3.5 text-muted-foreground" />
+          </>
+        }
+        items={options.map((option) => (
+          <Button
+            key={option.id}
+            variant="ghost"
+            className={twMerge(DROPDOWN_ITEM_CLASS, 'justify-start gap-2 px-2')}
+            onClick={() => onSelect(option)}
+          >
+            <Image name={option.label} className={twMerge(ROW_AVATAR_CLASS, option.colorClassName && 'text-black', option.colorClassName)} />
+            {option.label}
           </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="end"
-          onClick={() => setOpen(false)}
-          className="max-h-64 w-56 overflow-y-auto rounded-2xl p-1.5"
-        >
-          {options.map((option) => (
-            <Button
-              key={option.id}
-              variant="ghost"
-              className={OPTION_CLASS}
-              onClick={() => onSelect(option)}
-            >
-              <Image name={option.label} className={twMerge(ROW_AVATAR_CLASS, option.colorClassName && 'text-black', option.colorClassName)} />
-              {option.label}
-            </Button>
-          ))}
-        </PopoverContent>
-      </Popover>
+        ))}
+      />
     </div>
   );
 }
@@ -223,40 +212,6 @@ function InfoRow({ label, value, avatarLabel }: InfoRowProps) {
         {value}
       </span>
     </div>
-  );
-}
-
-interface ConfirmDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  description: string;
-  confirmText: string;
-  onConfirm: () => void;
-}
-
-/* Diálogo de confirmación para acciones que no se pueden deshacer (cancelar
-   un turno) o que pierden trabajo sin guardar (descartar cambios). */
-function ConfirmDialog({ open, onOpenChange, title, description, confirmText, onConfirm }: ConfirmDialogProps) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <CancelButton text="Volver" onClick={() => onOpenChange(false)} />
-          <DeleteButton
-            text={confirmText}
-            onClick={() => {
-              onOpenChange(false);
-              onConfirm();
-            }}
-          />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 

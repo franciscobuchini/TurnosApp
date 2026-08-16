@@ -8,26 +8,36 @@
   paso puede dejar el nuevo contenido (más corto) por encima del scroll
   actual. Por eso cada cambio de paso hace scrollIntoView del widget, salvo
   el primer render (no hay por qué saltar apenas se monta la página).
+
+  El "salvo el primer render" se resuelve comparando contra el step
+  anterior, no con un booleano "¿ya pasó el primer render?": ese booleano
+  se rompe bajo StrictMode (dev), que invoca el efecto de montaje dos veces
+  seguidas — la primera invocación lo marca en false y la segunda ya no
+  entra al "return" temprano, disparando un scroll no pedido apenas se
+  entra a la página. Comparando el valor real del step anterior, las dos
+  invocaciones ven "no cambió" las dos veces.
 */
 
 import { useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { twMerge } from 'tailwind-merge';
 import { useBookingFlow, type BookingStep } from './useBookingFlow';
+import BookingSummary from './BookingSummary';
 import ServiceStep from './steps/ServiceStep';
 import ScheduleStep from './steps/ScheduleStep';
 import ProfessionalStep from './steps/ProfessionalStep';
 import ClientDetailsStep from './steps/ClientDetailsStep';
-import ConfirmStep from './steps/ConfirmStep';
 import SuccessStep from './steps/SuccessStep';
 import SiteSection from '../components/SiteSection';
-import type { service } from '@/database/types';
+import SiteButton from '../components/SiteButton';
+import Toast from '@/components/ui/toast';
+import type { service, SiteServiceCardStyleId } from '@/database/types';
 import type { SiteBusinessData, SitePublicTeamMember } from '@/database/siteData';
 
 interface BookingWidgetProps {
   services: service[];
   team: SitePublicTeamMember[];
   business: SiteBusinessData;
+  serviceCardStyle?: SiteServiceCardStyleId;
 }
 
 const STEP_TITLES: Record<BookingStep, string> = {
@@ -35,25 +45,25 @@ const STEP_TITLES: Record<BookingStep, string> = {
   schedule: 'Elegí fecha y horario',
   professional: 'Elegí con quién',
   details: 'Tus datos',
-  confirm: 'Confirmá tu turno',
   success: '¡Listo!',
 };
 
-// Servicios (fotos en 2 columnas) y fecha+horario (tira de días + slots)
-// necesitan más ancho que el resto de los pasos, más chicos y tipo formulario.
-const WIDE_STEPS: BookingStep[] = ['service', 'schedule'];
+// Mismo ancho para los 5 pasos, sin excepciones — el resto de las secciones
+// del sitio (Hero, Servicios, Horarios, Ubicación) ya comparten este ancho
+// vía SiteSection, y este widget no debería ser el único que salta de
+// tamaño según qué paso muestra.
+const WIDGET_WIDTH_CLASS = 'max-w-5xl';
 
-export default function BookingWidget({ services, team, business }: BookingWidgetProps) {
+export default function BookingWidget({ services, team, business, serviceCardStyle }: BookingWidgetProps) {
   const flow = useBookingFlow({ services });
   const widgetRef = useRef<HTMLDivElement>(null);
-  const isFirstRender = useRef(true);
+  const previousStepRef = useRef(flow.step);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    if (previousStepRef.current !== flow.step) {
+      widgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    widgetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    previousStepRef.current = flow.step;
   }, [flow.step]);
 
   if (services.length === 0) {
@@ -61,13 +71,11 @@ export default function BookingWidget({ services, team, business }: BookingWidge
   }
 
   return (
+    <>
     <SiteSection className="items-center">
       <div
         ref={widgetRef}
-        className={twMerge(
-          'w-full rounded-(--site-radius) border border-(--site-border) bg-(--site-surface) p-6 transition-[max-width]',
-          WIDE_STEPS.includes(flow.step) ? 'max-w-2xl' : 'max-w-md',
-        )}
+        className={`w-full rounded-(--site-radius) border border-(--site-border) bg-(--site-surface) backdrop-blur-xl p-6 ${WIDGET_WIDTH_CLASS}`}
       >
         <div className="mb-5 flex items-center gap-3">
           {flow.canGoBack && (
@@ -83,7 +91,9 @@ export default function BookingWidget({ services, team, business }: BookingWidge
           <h2 className="text-lg font-semibold">{STEP_TITLES[flow.step]}</h2>
         </div>
 
-        {flow.step === 'service' && <ServiceStep services={services} onSelect={flow.selectService} />}
+        {flow.step === 'service' && (
+          <ServiceStep services={services} onSelect={flow.selectService} cardStyle={serviceCardStyle} />
+        )}
 
         {flow.step === 'schedule' && flow.date && (
           <ScheduleStep
@@ -96,32 +106,40 @@ export default function BookingWidget({ services, team, business }: BookingWidge
         )}
 
         {flow.step === 'professional' && flow.slot && (
-          <ProfessionalStep memberNames={flow.slot.memberNames} team={team} onSelect={flow.selectMember} />
-        )}
-
-        {flow.step === 'details' && (
-          <ClientDetailsStep
-            client={flow.client}
-            onChange={flow.updateClient}
-            isValid={flow.isClientValid}
-            onContinue={flow.goToConfirm}
+          <ProfessionalStep
+            memberNames={flow.slot.memberNames}
+            team={team}
+            onSelect={flow.selectMember}
+            onSelectAny={flow.selectAnyMember}
           />
         )}
 
-        {flow.step === 'confirm' && flow.selectedService && flow.date && flow.slot && flow.member && (
-          <ConfirmStep
+        {flow.step === 'details' && <ClientDetailsStep client={flow.client} onChange={flow.updateClient} />}
+
+        {flow.step === 'success' && <SuccessStep onReset={flow.reset} />}
+
+        {flow.step !== 'service' && flow.step !== 'success' && (
+          <BookingSummary
             service={flow.selectedService}
             date={flow.date}
             slot={flow.slot}
             member={flow.member}
             client={flow.client}
-            submitting={flow.submitting}
-            onConfirm={flow.confirmBooking}
           />
         )}
 
-        {flow.step === 'success' && <SuccessStep onReset={flow.reset} />}
+        {flow.step === 'details' && (
+          <SiteButton
+            onClick={flow.confirmBooking}
+            disabled={!flow.isClientValid || flow.submitting}
+            className="mt-6 w-full"
+          >
+            {flow.submitting ? 'Confirmando…' : 'Confirmar mi turno'}
+          </SiteButton>
+        )}
       </div>
     </SiteSection>
+    <Toast message={flow.noAvailabilityMessage} onDismiss={flow.dismissNoAvailabilityMessage} />
+    </>
   );
 }

@@ -5,6 +5,15 @@
   de la primera y última palabra (estilo WhatsApp). Si la imagen falla al
   cargar (URL rota, blob: vencido de otra sesión, etc.) cae al mismo
   placeholder en vez de mostrar un ícono roto.
+
+  El placeholder usa --avatar-text (no --foreground directo): este mismo
+  componente se usa tanto en el admin (paleta fija, --foreground ya seguía
+  el tema oscuro/claro del panel) como en el sitio público, donde el fondo
+  lo elige el dueño del negocio (puede ser claro u oscuro) — --site-* no
+  existe en el admin y --foreground no se adapta al fondo del sitio, así
+  que ninguno de los dos solo alcanza. --avatar-text se redefine en cada
+  contexto (Theme.css para el admin, cssVars.ts para el sitio) para que el
+  placeholder siempre contraste con lo que tiene detrás.
 */
 
 import { useState } from 'react';
@@ -18,7 +27,7 @@ interface ImageProps {
   className?: string;
 }
 
-const IMAGE_CLASS = 'flex items-center justify-center select-none overflow-hidden rounded-full bg-foreground/30 text-foreground text-xs font-bold object-cover';
+const IMAGE_CLASS = 'flex items-center justify-center select-none overflow-hidden rounded-full bg-(--avatar-text)/30 text-(--avatar-text) text-xs font-bold object-cover';
 
 const IMAGE_INITIALS_CLASS = '';
 

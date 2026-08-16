@@ -15,6 +15,10 @@ export type Business = {
   image: string;
   url: string;
   location: string;
+  // Pin del mapa (Ajustes > seleccionar ubicación) — independiente del
+  // texto libre de `location`, que el dueño puede escribir a mano.
+  latitude?: number;
+  longitude?: number;
   whatsapp: string;
   instagram: string;
   // Horario del local.
@@ -43,6 +47,11 @@ export type service = {
   description: string;
   price: number;
   duration: string;
+  // undefined/true = activo (default, así los servicios del seed no
+  // necesitan este campo). Sólo false lo saca del turnero público — ver
+  // getSiteServices en siteData.ts. No afecta al admin: sigue pudiendo
+  // agregarle turnos a mano a un servicio desactivado.
+  active?: boolean;
 };
 
 export type Client = {
@@ -72,6 +81,23 @@ export type Appointment = {
   notes?: string;
 };
 
+// Bloqueo puntual del Schedule (panel "Crear un nuevo bloqueo" en
+// AddShiftSidebar): una franja horaria de un día puntual que queda como si
+// fuera fuera de horario — no se pueden solicitar turnos ahí, ni desde el
+// admin ni desde el sitio público, mientras el resto del horario del día
+// sigue intacto. `member` ausente = bloqueo de todo el negocio (todos los
+// miembros); con `member` = bloqueo puntual de ese miembro nada más — ese
+// segundo caso todavía no se genera desde ningún lado (sólo "Bloquear hora
+// del negocio" está implementado por ahora, ver AddShiftSidebar.tsx), pero
+// el tipo ya lo contempla para no tener que migrarlo después.
+export type ScheduleBlock = {
+  id: string;
+  date: string;       // "YYYY-MM-DD"
+  startTime: string;  // "HH:mm"
+  endTime: string;    // "HH:mm"
+  member?: string;
+};
+
 // Identificadores de opciones de apariencia del sitio público. Las
 // definiciones (valores, labels) viven en src/site/design/ — acá sólo el ID
 // persistido, igual que colorId en `service`.
@@ -85,23 +111,27 @@ export type SiteFontId = 'font-1' | 'font-2' | 'font-3' | 'font-4' | 'font-5' | 
 // Fuente de título: sólo para h1/h2 y el nombre del negocio — "exóticas" a
 // propósito (display), no pensadas para leerse en párrafos ni botones.
 export type SiteHeadingFontId = 'heading-1' | 'heading-3' | 'heading-5' | 'heading-6' | 'heading-7' | 'heading-8' | 'heading-9' | 'heading-10' | 'heading-11' | 'heading-12' | 'heading-13' | 'heading-15';
+// Estilo visual de las cards de servicio del turnero (paso "Elegí un
+// servicio") — ver site/design/serviceCardStyles.ts para el detalle de
+// cada uno y ServiceStep.tsx para el layout que le corresponde a cada id.
+export type SiteServiceCardStyleId = 'photo-top' | 'compact-row' | 'minimal-list' | 'photo-overlay';
 
 // Personalización del sitio público de un cliente. No duplica datos del
 // negocio (servicios, horarios, ubicación, etc. siguen viniendo de Business/
-// service/TeamMember) — sólo contenido editable y apariencia.
+// service/TeamMember) — sólo apariencia. El título del sitio y la bajada
+// bajo el nombre del negocio ya no son editables acá: el título usa
+// siempre Business.name y la bajada es fija ("Reservá tu turno online en
+// simples pasos"), ver SiteHero.tsx.
 export type SiteConfig = {
   clientId: string;
-  title: string;
-  description: string;
   // Color de fondo del sitio: superficie/texto/texto-muted/borde se derivan
   // de éste automáticamente (contraste), ver deriveSiteSurfaceColors.
   backgroundColor: SiteHexColor;
-  // Color de los botones/CTAs — independiente del fondo, se combina libre.
+  // Color primario: botones/CTAs y títulos (h1/h2, nombre del negocio)
+  // comparten este mismo color — independiente del fondo.
   primaryColor: SiteHexColor;
-  // Color de los títulos (h1/h2, nombre del negocio) — independiente del
-  // fondo y del color de botones.
-  headingColor: SiteHexColor;
   borderRadius: SiteRadiusId;
   headingFont: SiteHeadingFontId;
   bodyFont: SiteFontId;
+  serviceCardStyle: SiteServiceCardStyleId;
 };

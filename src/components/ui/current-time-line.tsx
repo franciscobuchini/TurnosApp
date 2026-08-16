@@ -42,6 +42,21 @@ interface CurrentTimeLineProps {
 
 const CURRENT_TIME_LINE_CLASS = 'absolute left-16 right-0 h-0.5 scroll-mt-4 pointer-events-none bg-muted-foreground rounded-full';
 
+/* Badge con la hora actual, en la columna de horas (w-16), centrado sobre
+   la línea — mismo left-0/w-16 que las etiquetas de fila, para quedar
+   alineado con ellas. */
+const CURRENT_TIME_BADGE_CLASS =
+  'absolute left-0 z-20 flex w-16 -translate-y-1/2 justify-center pointer-events-none';
+
+const CURRENT_TIME_BADGE_PILL_CLASS =
+  'rounded-full bg-muted-foreground px-1.5 py-px text-[11px] font-normal leading-tight text-background tabular-nums';
+
+function formatHoursMinutes(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
 /* Capa sobre todo lo que ya pasó (desde arriba hasta la línea de hora
    actual): la misma niebla de BlockedCell. z-20 (no z-30): por debajo del
    header sticky de la tabla, para no taparlo al scrollear. */
@@ -144,6 +159,11 @@ export default function CurrentTimeLine({
           className={twMerge(CURRENT_TIME_LINE_CLASS, className)}
           style={lineTop !== null ? { top: `${lineTop}px` } : undefined}
         />
+      )}
+      {isWithinWindow && lineTop !== null && (
+        <div data-current-time-badge className={CURRENT_TIME_BADGE_CLASS} style={{ top: `${lineTop}px` }}>
+          <span className={CURRENT_TIME_BADGE_PILL_CLASS}>{formatHoursMinutes(now)}</span>
+        </div>
       )}
     </>
   );

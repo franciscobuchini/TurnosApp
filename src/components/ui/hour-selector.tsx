@@ -49,7 +49,7 @@ const SELECTOR_CLASS =
   'flex h-9 min-w-0 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-border bg-input px-4 py-2 text-sm text-foreground outline-none focus:border-foreground';
 
 const POPOVER_CLASS =
-  'fixed z-[9999] flex gap-4 rounded-2xl border border-border bg-card p-4 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-150';
+  'fixed z-[9999] flex gap-4 rounded-2xl border border-border bg-popover p-4 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-150';
 
 const LIST_CLASS = 'flex max-h-56 flex-col gap-1 overflow-y-auto pr-1';
 

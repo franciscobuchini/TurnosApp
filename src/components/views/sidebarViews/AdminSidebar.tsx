@@ -10,15 +10,23 @@
   mostrar/ocultar (no acepta `onToggle`, a diferencia de Team/Service), por
   eso cada entrada arma su propia fila vía `renderRow` en vez de pasar un
   componente + props genéricas.
+
+  La confirmación de "Desactivar" un servicio vive acá (no adentro de
+  ServiceFilterButton): ese botón se renderiza como ítem de un Dropdown, que
+  se cierra y desmonta su contenido ante cualquier click adentro — un
+  ConfirmDialog declarado ahí nunca llegaría a mostrarse. Acá, en cambio,
+  este componente no está dentro de ningún Popover, así que el dialog
+  sobrevive al cierre del menú.
 */
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../layout/Sidebar';
 import Calendar from '../../widgets/sidebarWidgets/Calendar';
 import DetailsPanel, {
   type DetailsPanelOption,
 } from '../../widgets/sidebarWidgets/DetailsPanel';
+import ConfirmDialog from '../../ui/confirm-dialog';
 import type { FiltersOption } from '../../../database/types';
 import AddEntityLauncherButton from '../../buttons/AddEntityLauncherButton';
 import { TeamFilterButton, ServiceFilterButton, ClientFilterButton } from '../../widgets/sidebarWidgets/DropdownRowActions';
@@ -32,7 +40,7 @@ interface AdminSidebarProps {
   teamFilters: FiltersOption[];
   toggleTeamFilter: (id: string, checked: boolean) => void;
   serviceFilters: DetailsPanelOption[];
-  toggleServiceFilter: (id: string, checked: boolean) => void;
+  toggleServiceActive: (id: string, active: boolean) => void;
   clientFilters: FiltersOption[];
 }
 
@@ -51,10 +59,24 @@ export default function AdminSidebar({
   teamFilters,
   toggleTeamFilter,
   serviceFilters,
-  toggleServiceFilter,
+  toggleServiceActive,
   clientFilters,
 }: AdminSidebarProps) {
   const navigate = useNavigate();
+
+  // Id del servicio que se está por desactivar, a la espera de confirmación
+  // (null = no hay ninguna pendiente). Reactivar no pasa por acá: no hay
+  // nada que perder, se aplica directo.
+  const [pendingDeactivateId, setPendingDeactivateId] = useState<string | null>(null);
+  const pendingService = serviceFilters.find((f) => f.id === pendingDeactivateId);
+
+  const handleToggleServiceActive = (id: string, active: boolean) => {
+    if (!active) {
+      setPendingDeactivateId(id);
+      return;
+    }
+    toggleServiceActive(id, true);
+  };
 
   const panels: SidebarPanelConfig[] = [
     {
@@ -81,7 +103,7 @@ export default function AdminSidebar({
       renderRow: (option) => (
         <ServiceFilterButton
           option={option}
-          onToggle={toggleServiceFilter}
+          onToggleActive={handleToggleServiceActive}
           onOpenDetails={() => navigate(`/admin/servicio/${encodeURIComponent(option.label)}`)}
         />
       ),
@@ -107,23 +129,39 @@ export default function AdminSidebar({
   ];
 
   return (
-    <Sidebar>
-      <Calendar selectedDate={selectedDate} onSelectDate={onSelectDate} />
-      {panels.map((panel) => (
-        <DetailsPanel
-          key={panel.title}
-          title={panel.title}
-          options={panel.options}
-          renderDropdownItems={(option) => [panel.renderRow(option)]}
-          action={
-            <AddEntityLauncherButton
-              title={panel.addViewTitle}
-              onOpen={() => navigate(`/admin/${panel.routeSegment}`)}
-              renderView={panel.renderAddView}
-            />
-          }
+    <>
+      <Sidebar>
+        <Calendar selectedDate={selectedDate} onSelectDate={onSelectDate} />
+        {panels.map((panel) => (
+          <DetailsPanel
+            key={panel.title}
+            title={panel.title}
+            options={panel.options}
+            renderDropdownItems={(option) => [panel.renderRow(option)]}
+            action={
+              <AddEntityLauncherButton
+                title={panel.addViewTitle}
+                onOpen={() => navigate(`/admin/${panel.routeSegment}`)}
+                renderView={panel.renderAddView}
+              />
+            }
+          />
+        ))}
+      </Sidebar>
+
+      {pendingService && (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => !open && setPendingDeactivateId(null)}
+          title={`¿Desactivar "${pendingService.label}"?`}
+          description="Los clientes no van a poder reservar este servicio desde el sitio público. Los turnos que ya estén agendados van a seguir estando."
+          confirmText="Desactivar"
+          onConfirm={() => {
+            toggleServiceActive(pendingService.id, false);
+            setPendingDeactivateId(null);
+          }}
         />
-      ))}
-    </Sidebar>
+      )}
+    </>
   );
 }

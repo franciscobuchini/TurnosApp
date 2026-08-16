@@ -3,7 +3,7 @@
   Panel colapsable reutilizable con details/summary.
 */
 
-import type { DetailsHTMLAttributes, ReactNode } from 'react';
+import { useRef, type DetailsHTMLAttributes, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Dropdown } from '@/components/ui/dropdown';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,10 @@ export interface DetailsPanelOption {
   checked?: boolean;
   disabled?: boolean;
   colorClassName?: string;
+  /** Sólo la usa el panel Servicios (ver ServiceFilterButton): independiente
+      de `checked`, que es nada más el filtro de "mostrar en mi calendario" —
+      `active` es si el servicio se puede reservar desde el sitio público. */
+  active?: boolean;
 }
 
 interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
@@ -29,6 +33,11 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   actionLabel?: string;
   onActionClick?: () => void;
   hideHeader?: boolean;
+  /** Saca la flechita (SummaryButton) del título, sin ocultar el resto del
+      summary — para paneles que técnicamente son un <details> pero no se
+      quieren mostrar como un acordeón más (ver "Crear un nuevo turno" en
+      AddShiftSidebar). */
+  hideChevron?: boolean;
   /** Id de la opción seleccionada (se resalta) y callback al hacer click en la fila. */
   selectedId?: string;
   onOptionClick?: (option: DetailsPanelOption) => void;
@@ -56,6 +65,97 @@ const DETAILS_PANEL_TRIGGER_CLASS =
   'w-full h-12 gap-4 shrink-0 justify-center text-muted-foreground hover:text-foreground rounded-3xl animate-in fade-in-0 slide-in-from-top-1 duration-200';
 const DETAILS_PANEL_TRIGGER_OPEN_CLASS = 'bg-background';
 
+/* El <details> nativo no anima: el contenido aparece/desaparece de golpe
+   con display:none al tocar `open`. En vez de reimplementar el toggle a
+   mano, se deja que siga siendo el <details> nativo el que manda (así
+   sigue funcionando gratis la exclusividad por `name` entre paneles del
+   mismo grupo, y el onToggle de abajo con su lógica de resize/fallback del
+   calendario) — sólo se intercepta el click en <summary> para animar la
+   altura con la Web Animations API antes de sincronizar `details.open`, en
+   vez de dejar que el toggle nativo la cambie de una. Patrón estándar (ver
+   "Building an open/close accordion" de web.dev): al abrir, se fija la
+   altura cerrada actual, se pone `open = true` (dispara el toggle nativo
+   ya mismo, como siempre) y recién en el frame siguiente se anima hasta la
+   altura natural; al cerrar, se anima primero desde la altura abierta
+   hasta la cerrada y `open` pasa a false (dispara el toggle nativo) al
+   terminar. La altura "cerrada" no sale de sumar summary + padding a mano
+   (frágil si cambia el CSS): sale de restarle a la altura total la del
+   body — así da lo mismo qué combinación de padding/borde tenga el panel. */
+const DETAILS_TOGGLE_ANIMATION_DURATION = 200;
+const DETAILS_TOGGLE_ANIMATION_EASING = 'ease-out';
+
+function useDetailsToggleAnimation(detailsRef: React.RefObject<HTMLDetailsElement | null>) {
+  const animationRef = useRef<Animation | null>(null);
+  const isClosingRef = useRef(false);
+  const isExpandingRef = useRef(false);
+
+  const onAnimationFinish = (details: HTMLDetailsElement, open: boolean) => {
+    details.open = open;
+    details.style.height = '';
+    animationRef.current = null;
+    isClosingRef.current = false;
+    isExpandingRef.current = false;
+  };
+
+  const shrink = (details: HTMLDetailsElement) => {
+    isClosingRef.current = true;
+
+    const body = details.querySelector<HTMLElement>('[data-filter-panel-body]');
+    const openHeight = details.offsetHeight;
+    const closedHeight = body ? openHeight - body.offsetHeight : openHeight;
+
+    animationRef.current?.cancel();
+    animationRef.current = details.animate(
+      { height: [`${openHeight}px`, `${closedHeight}px`] },
+      { duration: DETAILS_TOGGLE_ANIMATION_DURATION, easing: DETAILS_TOGGLE_ANIMATION_EASING },
+    );
+    animationRef.current.onfinish = () => onAnimationFinish(details, false);
+    animationRef.current.oncancel = () => {
+      isClosingRef.current = false;
+    };
+  };
+
+  const expand = (details: HTMLDetailsElement, closedHeight: number) => {
+    isExpandingRef.current = true;
+
+    // Saca el lock de altura para medir la natural (abierta) ya con el
+    // contenido montado, y lo vuelve a poner en el valor cerrado antes de
+    // animar — todo en el mismo frame, sin pintar de por medio.
+    details.style.height = '';
+    const openHeight = details.offsetHeight;
+    details.style.height = `${closedHeight}px`;
+
+    animationRef.current?.cancel();
+    animationRef.current = details.animate(
+      { height: [`${closedHeight}px`, `${openHeight}px`] },
+      { duration: DETAILS_TOGGLE_ANIMATION_DURATION, easing: DETAILS_TOGGLE_ANIMATION_EASING },
+    );
+    animationRef.current.onfinish = () => onAnimationFinish(details, true);
+    animationRef.current.oncancel = () => {
+      isExpandingRef.current = false;
+    };
+  };
+
+  return (event: ReactMouseEvent<HTMLElement>) => {
+    const details = detailsRef.current;
+    if (!details) return;
+
+    // Reduced motion: nada de interceptar, toggle nativo de siempre.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    event.preventDefault();
+
+    if (isClosingRef.current || !details.open) {
+      const closedHeight = details.offsetHeight;
+      details.style.height = `${closedHeight}px`;
+      details.open = true;
+      window.requestAnimationFrame(() => expand(details, closedHeight));
+    } else {
+      shrink(details);
+    }
+  };
+}
+
 export default function DetailsPanel({
   title,
   options = [],
@@ -66,6 +166,7 @@ export default function DetailsPanel({
   className,
   name,
   hideHeader = false,
+  hideChevron = false,
   selectedId,
   onOptionClick,
   children,
@@ -74,10 +175,13 @@ export default function DetailsPanel({
   /* Si no se pasa un name explícito, usa el del contenedor (sidebar/maincontent)
      para que abrir este panel cierre a los demás del mismo contenedor. */
   const groupName = useFiltersGroup();
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const onSummaryClick = useDetailsToggleAnimation(detailsRef);
 
   return (
     <details
       {...props}
+      ref={detailsRef}
       data-filter-panel
       data-panel-title={title}
       name={name ?? groupName}
@@ -108,8 +212,8 @@ export default function DetailsPanel({
       }}
       className={twMerge(FILTER_PANEL_CLASS, className)}
     >
-      <summary hidden={hideHeader}>
-        <ContentHeader title={title} action={<SummaryButton />} />
+      <summary hidden={hideHeader} onClick={onSummaryClick}>
+        <ContentHeader title={title} action={hideChevron ? undefined : <SummaryButton />} />
       </summary>
 
       <div data-filter-panel-body className={FILTER_PANEL_BODY_CLASS}>
@@ -121,7 +225,7 @@ export default function DetailsPanel({
                   data-details-panel-content
                   className={twMerge(
                     DETAILS_PANEL_CONTENT_CLASS,
-                    option.checked === false && 'opacity-40',
+                    (option.checked === false || option.active === false) && 'opacity-40',
                   )}
                 >
                   <span className={DETAILS_PANEL_AVATAR_CLASS}>

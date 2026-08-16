@@ -13,7 +13,7 @@
 */
 
 import { isSameDay } from '@/utils/dateName';
-import { getAppointmentsByDate, getOpeningHours, getTeamMembers } from '@/database/data';
+import { getAppointmentsByDate, getOpeningHours, getScheduleBlocksByDate, getTeamMembers } from '@/database/data';
 import { getBusinessHoursByDay, type TimeRange } from '@/hooks/useWeekSchedule';
 import type { TeamMember } from '@/database/types';
 
@@ -94,6 +94,29 @@ export function getQualifiedMembers(serviceName: string): TeamMember[] {
   return getTeamMembers().filter((member) => member.services.includes(serviceName));
 }
 
+/**
+ * "Cualquiera disponible" (ProfessionalStep): entre los profesionales
+ * calificados y libres en el horario elegido, reparte la carga en vez de
+ * ofrecerle siempre el primero de la lista al mismo — elige el que menos
+ * turnos tenga asignados ese día. Empate (incluida la falta total de
+ * turnos, el caso más común) se resuelve al azar entre los empatados.
+ */
+export function pickAnyAvailableMember(memberNames: string[], date: Date): string {
+  const appointmentsThatDay = getAppointmentsByDate(date);
+  const countByMember = new Map<string, number>(memberNames.map((name) => [name, 0]));
+
+  for (const appointment of appointmentsThatDay) {
+    if (countByMember.has(appointment.member)) {
+      countByMember.set(appointment.member, countByMember.get(appointment.member)! + 1);
+    }
+  }
+
+  const minCount = Math.min(...memberNames.map((name) => countByMember.get(name)!));
+  const leastBooked = memberNames.filter((name) => countByMember.get(name) === minCount);
+
+  return leastBooked[Math.floor(Math.random() * leastBooked.length)];
+}
+
 /** service.duration se guarda como "45 min" — conversión mínima a minutos. */
 export function parseServiceDurationMinutes(duration: string): number {
   const parsed = parseInt(duration, 10);
@@ -104,8 +127,9 @@ export function parseServiceDurationMinutes(duration: string): number {
  * Slots disponibles para reservar `serviceName` (duración `durationMinutes`)
  * en `date`, agregados entre todos los profesionales calificados. Un slot
  * sólo se ofrece si entra completo dentro de un hueco libre (horario del
- * negocio ∩ horario del profesional, menos sus turnos ya reservados ese
- * día). En el día de hoy se descartan los horarios ya pasados.
+ * negocio ∩ horario del profesional, menos sus turnos ya reservados y menos
+ * cualquier ScheduleBlock de todo el negocio para ese día — ver "Crear un
+ * nuevo bloqueo"). En el día de hoy se descartan los horarios ya pasados.
  */
 export function getAvailableSlots(
   date: Date,
@@ -129,6 +153,12 @@ export function getAvailableSlots(
   }
 
   const appointmentsThatDay = getAppointmentsByDate(date);
+  // Sólo los bloqueos de todo el negocio (sin `member`) afectan acá — un
+  // bloqueo puntual de un miembro (todavía no implementado, ver
+  // ScheduleBlock en types.ts) restaría sólo de ese profesional.
+  const businessBlockedRanges: TimeRange[] = getScheduleBlocksByDate(date)
+    .filter((block) => !block.member)
+    .map((block) => ({ startTime: block.startTime, endTime: block.endTime }));
   const isToday = isSameDay(date, now);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -153,7 +183,7 @@ export function getAvailableSlots(
       .filter((appointment) => appointment.member === member.name)
       .map((appointment) => ({ startTime: appointment.startTime, endTime: appointment.endTime }));
 
-    const freeRanges = subtractRanges(openRanges, busyRanges);
+    const freeRanges = subtractRanges(openRanges, [...busyRanges, ...businessBlockedRanges]);
 
     for (const range of freeRanges) {
       const rangeStart = timeToMinutes(range.startTime);
@@ -182,25 +212,34 @@ export function getAvailableSlots(
 }
 
 /**
- * Primer día, desde `from` (inclusive) hasta DATE_RANGE_DAYS después, en el
- * que `serviceName` tiene al menos un horario reservable de verdad (ver
- * getAvailableSlots) — a diferencia de "el negocio abre ese día", esto
- * también descarta un día donde el negocio abre pero ningún profesional
- * calificado para este servicio tiene un hueco (ya reservado, fuera de su
- * propio horario, etc.). `null` si ningún día del rango tiene
- * disponibilidad (o el servicio no existe / nadie calificado lo hace).
+ * Primer día, desde `from` (inclusive) hasta `maxDays` después (por defecto
+ * DATE_RANGE_DAYS), en el que `serviceName` tiene al menos un horario
+ * reservable de verdad (ver getAvailableSlots) — a diferencia de "el
+ * negocio abre ese día", esto también descarta un día donde el negocio
+ * abre pero ningún profesional calificado para este servicio tiene un
+ * hueco (ya reservado, fuera de su propio horario, etc.). `null` si ningún
+ * día del rango tiene disponibilidad (o el servicio no existe / nadie
+ * calificado lo hace).
  */
 export function getFirstAvailableDate(
   serviceName: string,
   durationMinutes: number,
   from: Date = new Date(),
+  maxDays: number = DATE_RANGE_DAYS,
 ): Date | null {
   const start = new Date(from.getFullYear(), from.getMonth(), from.getDate());
 
-  for (let offset = 0; offset < DATE_RANGE_DAYS; offset++) {
+  for (let offset = 0; offset < maxDays; offset++) {
     const date = new Date(start);
     date.setDate(date.getDate() + offset);
-    if (getAvailableSlots(date, serviceName, durationMinutes, from).length > 0) {
+    // OJO: no reenviar `from` acá como `now` — cuando el llamador pasa un
+    // `from` sin hora (p.ej. una fecha ya "pisada" a medianoche por un salto
+    // anterior), haría que hoy parezca no tener nada pasado todavía y
+    // ofrecería horarios ya vencidos. `getAvailableSlots` sin 4° argumento
+    // usa la hora real (new Date()), que es lo que corresponde para decidir
+    // qué horarios de HOY ya pasaron, sin importar desde qué día se ancló
+    // la búsqueda.
+    if (getAvailableSlots(date, serviceName, durationMinutes).length > 0) {
       return date;
     }
   }

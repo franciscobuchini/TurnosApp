@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getClients } from '../../database/data';
 import type { Client } from '../../database/types';
 import ViewLayout from '../layout/ViewLayout';
-import ComingSoonPanel from '../layout/ComingSoonPanel';
 import FormAddClient from '../widgets/clientWidgets/FormAddClient';
 import { useEntityViewFooter } from '@/hooks/useEntityViewFooter';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 export const ADD_CLIENT_VIEW_TITLE = 'Agregar un nuevo cliente';
 
@@ -71,14 +71,26 @@ export default function AddClientView({
     ? clients.find((client) => normalizeClientName(client.name) === normalizeClientName(clientName))
     : undefined;
 
-  if (!open) return null;
-
   const formValues = {
     fullName: selectedClient?.name ?? '',
     whatsapp: selectedClient?.phone ?? '',
     email: selectedClient?.email ?? '',
     notes: selectedClient?.notes ?? '',
   };
+
+  const isDirty =
+    draftValues.fullName !== formValues.fullName ||
+    draftValues.whatsapp !== formValues.whatsapp ||
+    draftValues.email !== formValues.email ||
+    draftValues.notes !== formValues.notes;
+
+  const { setDirty } = useUnsavedChanges();
+  useEffect(() => {
+    setDirty(isDirty);
+    return () => setDirty(false);
+  }, [isDirty, setDirty]);
+
+  if (!open) return null;
 
   const handleConfirm = () => {
     if (mode === 'create') {
@@ -124,7 +136,6 @@ export default function AddClientView({
       left={
         <FormAddClient mode={resolvedMode} initialValues={formValues} onValidityChange={setIsFormValid} onValuesChange={setDraftValues} />
       }
-      right={<ComingSoonPanel subtitle="Sistema de fidelización de clientes" />}
       cancelText={cancelLabel}
       onCancel={handleCancel}
       confirmText={actionLabel}

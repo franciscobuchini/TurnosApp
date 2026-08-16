@@ -5,11 +5,10 @@
   real) como Personalizacion.tsx (preview en vivo) — misma implementación,
   nunca una preview aparte.
 
-  Orden pensado para "entrar → entender qué ofrece el negocio → reservar":
-  el turnero (BookingWidget) va inmediato después del hero, antes de
-  cualquier contenido secundario — no hace falta explorar el sitio para
-  llegar a reservar. La elección de servicio vive en el propio wizard
-  (ServiceStep), no hay un listado de servicios aparte.
+  Orden: título → ubicación → horarios → turnero (servicios). Primero se
+  ubica al negocio (dónde y cuándo), y recién después se ofrece reservar.
+  La elección de servicio vive en el propio wizard (ServiceStep), no hay
+  un listado de servicios aparte.
 */
 
 import type { SiteConfig } from '@/database/types';
@@ -37,15 +36,21 @@ function scrollToBooking() {
 export default function SiteRenderer({ config, data, className }: SiteRendererProps) {
   return (
     <SiteThemeProvider config={config} className={className}>
-      <SiteHeader business={data.business} title={config.title} onReserveClick={scrollToBooking} />
-      <SiteHero title={config.title} description={config.description} />
+      <SiteHeader business={data.business} onReserveClick={scrollToBooking} />
+      <SiteHero businessName={data.business.name} />
+
+      <SiteLocation business={data.business} backgroundColor={config.backgroundColor} />
+      <SiteHours schedule={data.business.schedule} />
 
       <div id={BOOKING_ANCHOR_ID}>
-        <BookingWidget services={data.services} team={data.team} business={data.business} />
+        <BookingWidget
+          services={data.services}
+          team={data.team}
+          business={data.business}
+          serviceCardStyle={config.serviceCardStyle}
+        />
       </div>
 
-      <SiteHours schedule={data.business.schedule} />
-      <SiteLocation business={data.business} />
       <SiteFooter business={data.business} />
     </SiteThemeProvider>
   );
