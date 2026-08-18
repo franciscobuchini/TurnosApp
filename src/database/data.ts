@@ -5,7 +5,7 @@
   de modo que lo creado/guardado sobrevive a recargas.
 */
 
-import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry, Business, Appointment, ScheduleBlock } from './types.ts';
+import type { TeamMember, service, Client, FiltersOption, OpeningHoursEntry, Business, Appointment, ScheduleBlock, BookingRequest, BookingRequestStatus } from './types.ts';
 import teamMembersJson from './teamMembers.json';
 import servicesJson from './service.json';
 import clientsJson from './client.json';
@@ -18,6 +18,8 @@ const TEAM_MEMBERS_STORAGE_KEY = 'turnosapp.teamMembers';
 const BUSINESS_STORAGE_KEY = 'turnosapp.business';
 const APPOINTMENTS_STORAGE_KEY = 'turnosapp.appointments';
 const SCHEDULE_BLOCKS_STORAGE_KEY = 'turnosapp.scheduleBlocks';
+const BOOKING_REQUESTS_STORAGE_KEY = 'turnosapp.bookingRequests';
+
 
 export const DATA_CHANGE_EVENT = 'turnosapp:datachange';
 
@@ -315,6 +317,85 @@ export function removeAppointment(id: string): Appointment[] {
   const next = current.filter((a) => a.id !== id);
   saveAppointments(next);
   return next;
+}
+
+/* ── Solicitudes de Turno (Booking Requests del sitio público) ──── */
+
+export function getBookingRequests(): BookingRequest[] {
+  return readCollection(BOOKING_REQUESTS_STORAGE_KEY, [] as BookingRequest[]);
+}
+
+export function getPendingBookingRequests(): BookingRequest[] {
+  return getBookingRequests().filter((r) => r.status === 'pending');
+}
+
+export function saveBookingRequests(requests: BookingRequest[]) {
+  writeCollection(BOOKING_REQUESTS_STORAGE_KEY, requests);
+}
+
+export function addBookingRequest(request: BookingRequest): BookingRequest[] {
+  const current = getBookingRequests();
+  const next = [request, ...current];
+  saveBookingRequests(next);
+  return next;
+}
+
+export function updateBookingRequestStatus(id: string, status: BookingRequestStatus): BookingRequest[] {
+  const current = getBookingRequests();
+  const next = current.map((r) => (r.id === id ? { ...r, status } : r));
+  saveBookingRequests(next);
+  return next;
+}
+
+export function removeBookingRequest(id: string): BookingRequest[] {
+  const current = getBookingRequests();
+  const next = current.filter((r) => r.id !== id);
+  saveBookingRequests(next);
+  return next;
+}
+
+export function confirmBookingRequest(id: string): { appointment: Appointment; client: Client } | null {
+  const requests = getBookingRequests();
+  const target = requests.find((r) => r.id === id);
+  if (!target) return null;
+
+  const newClient: Client = {
+    name: target.client.name.trim(),
+    phone: target.client.phone.trim(),
+    email: target.client.email?.trim() || undefined,
+    notes: target.client.notes?.trim() || undefined,
+    appointmentsCount: 1,
+    totalSpent: target.price ?? 0,
+  };
+  addClient(newClient);
+
+  const newAppointment: Appointment = {
+    id: crypto.randomUUID(),
+    date: target.date,
+    startTime: target.startTime,
+    endTime: target.endTime,
+    member: target.member,
+    client: target.client.name.trim(),
+    service: target.service,
+    notes: target.client.notes?.trim() || undefined,
+  };
+  addAppointment(newAppointment);
+
+  const updatedRequests = requests.map((r) =>
+    r.id === id ? { ...r, status: 'confirmed' as BookingRequestStatus } : r,
+  );
+  saveBookingRequests(updatedRequests);
+
+  return { appointment: newAppointment, client: newClient };
+}
+
+export function rejectBookingRequest(id: string): BookingRequest[] {
+  const requests = getBookingRequests();
+  const updatedRequests = requests.map((r) =>
+    r.id === id ? { ...r, status: 'rejected' as BookingRequestStatus } : r,
+  );
+  saveBookingRequests(updatedRequests);
+  return updatedRequests;
 }
 
 /* ── Bloqueos del Schedule (ver ScheduleBlock en types.ts) ───── */

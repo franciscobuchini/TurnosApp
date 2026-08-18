@@ -22,7 +22,8 @@
 */
 
 import { useEffect, useMemo, useState } from 'react';
-import { addAppointment, addClient, DATA_CHANGE_EVENT } from '@/database/data';
+import { addBookingRequest, DATA_CHANGE_EVENT } from '@/database/data';
+
 import {
   DATE_RANGE_DAYS,
   getAvailableSlots,
@@ -169,24 +170,22 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
 
     setSubmitting(true);
 
-    addClient({
-      name: client.name.trim(),
-      phone: client.phone.trim(),
-      email: client.email.trim() || undefined,
-      notes: client.notes.trim() || undefined,
-      appointmentsCount: 1,
-      totalSpent: selectedService.price ?? 0,
-    });
-
-    addAppointment({
+    addBookingRequest({
       id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
       date: toDateKey(date),
       startTime: slot.startTime,
       endTime: slot.endTime,
       member,
-      client: client.name.trim(),
       service: selectedService.name,
-      notes: client.notes.trim() || undefined,
+      price: selectedService.price ?? 0,
+      client: {
+        name: client.name.trim(),
+        phone: client.phone.trim(),
+        email: client.email.trim() || undefined,
+        notes: client.notes.trim() || undefined,
+      },
+      status: 'pending',
     });
 
     setSubmitting(false);

@@ -41,10 +41,11 @@
   sea el acceso que se use para salir.
 */
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
 import {
+  Bell,
   Calendar,
   ChartColumn,
   ExternalLink,
@@ -60,7 +61,8 @@ import { Dropdown, DROPDOWN_ITEM_CLASS } from '@/components/ui/dropdown';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import Logo from '@/components/ui/logo';
 import Image from '@/components/ui/image';
-import { getBusiness } from '@/database/data';
+import { getBookingRequests, getBusiness, DATA_CHANGE_EVENT } from '@/database/data';
+import type { BookingRequest } from '@/database/types';
 import { useTheme } from '@/hooks/useTheme';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
@@ -89,25 +91,50 @@ const MAIN_ITEMS: MenubarItem[] = [
   { to: '/admin/marketing', label: 'Marketing', icon: <Megaphone className={ICON_CLASS} /> },
 ];
 
-
 interface AppMenubarProps {
   /* Sidebar de "agregar turno" abierto: "Inicio" deja de marcarse activo
      aunque la ruta sea /admin (el flujo tapa la agenda normal). */
   addShiftOpen?: boolean;
   /* Callback para cerrar el panel de agregar turno cuando se navega a otro menú */
   onCloseAddShift?: () => void;
+  /* Estado del sidebar de notificaciones */
+  notificationsOpen?: boolean;
+  onToggleNotifications?: () => void;
 }
 
-export default function AppMenubar({ addShiftOpen = false, onCloseAddShift }: AppMenubarProps) {
+export default function AppMenubar({
+  addShiftOpen = false,
+  onCloseAddShift,
+  notificationsOpen = false,
+  onToggleNotifications,
+}: AppMenubarProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const business = getBusiness();
   const { theme, toggleTheme } = useTheme();
   const { confirmNavigation } = useUnsavedChanges();
 
+  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => getBookingRequests());
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
-  const isActive = (to: string) => !addShiftOpen && pathname === to;
+  useEffect(() => {
+    const handleDataChange = () => {
+      setBookingRequests(getBookingRequests());
+    };
+
+    window.addEventListener(DATA_CHANGE_EVENT, handleDataChange);
+    window.addEventListener('storage', handleDataChange);
+
+    return () => {
+      window.removeEventListener(DATA_CHANGE_EVENT, handleDataChange);
+      window.removeEventListener('storage', handleDataChange);
+    };
+  }, []);
+
+  const pendingCount = bookingRequests.filter((r) => r.status === 'pending').length;
+
+  const isActive = (to: string) => !addShiftOpen && !notificationsOpen && pathname === to;
+
 
   /* Con panel de "agregar turno" abierto, los botones de nav lo cierran Y
      navegan en el mismo click: un solo toque saca de cualquier vista. Pasa
@@ -117,6 +144,9 @@ export default function AppMenubar({ addShiftOpen = false, onCloseAddShift }: Ap
     confirmNavigation(() => {
       if (addShiftOpen && onCloseAddShift) {
         onCloseAddShift();
+      }
+      if (notificationsOpen && onToggleNotifications) {
+        onToggleNotifications();
       }
       navigate(to);
     });
@@ -167,6 +197,30 @@ export default function AppMenubar({ addShiftOpen = false, onCloseAddShift }: Ap
       <div className="flex-1" />
 
       <div className={GROUP_CLASS}>
+        <div className="relative">
+          <Button
+            onClick={() => {
+              if (onToggleNotifications) {
+                onToggleNotifications();
+              } else {
+                /* Desde páginas que no controlan notificationsOpen
+                   (ej. Personalización), navegar a /admin con state
+                   para que Dashboard abra las notificaciones. */
+                navigate('/admin', { state: { openNotifications: true } });
+              }
+            }}
+            variant={notificationsOpen ? 'default' : 'ghost'}
+            size="icon-lg"
+            icon={<Bell className={ICON_CLASS} />}
+            aria-label={pendingCount > 0 ? `Notificaciones (${pendingCount} pendientes)` : 'Notificaciones'}
+            title={pendingCount > 0 ? `Notificaciones (${pendingCount} pendientes)` : 'Notificaciones'}
+          />
+          {pendingCount > 0 && (
+            <span className="pointer-events-none absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-destructive text-[11px] font-bold text-destructive-foreground shadow-md animate-in zoom-in-50">
+              {pendingCount > 9 ? '9+' : pendingCount}
+            </span>
+          )}
+        </div>
         {MAIN_ITEMS.map(({ to, label, icon }) => (
           <Button
             key={to}

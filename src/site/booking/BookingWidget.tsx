@@ -136,7 +136,7 @@ export default function BookingWidget({ services, team, business, serviceCardSty
             disabled={!flow.isClientValid || flow.submitting}
             className="mt-6 w-full"
           >
-            {flow.submitting ? 'Confirmando…' : 'Confirmar mi turno'}
+            {flow.submitting ? 'Enviando solicitud…' : 'Confirmar solicitud'}
           </SiteButton>
         )}
       </div>

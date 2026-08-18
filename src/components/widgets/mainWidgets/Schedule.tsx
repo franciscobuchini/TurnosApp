@@ -13,6 +13,7 @@ import { Table, type TableColumn } from '@/components/ui/table';
 import { Dropdown } from '@/components/ui/dropdown';
 import CurrentTimeLine from '@/components/ui/current-time-line';
 import { getAppointmentsByDate, getOpeningHours, getScheduleBlocksByDate, getservices, getTeamMembers } from '@/database/data';
+
 import type { Appointment, FiltersOption, ScheduleBlock } from '@/database/types';
 import type { ShiftSlot } from '@/pages/admin/Dashboard';
 import { getBusinessHoursByDay, minutesToTime, rangesCoverFullDay, type TimeRange } from '@/hooks/useWeekSchedule';
@@ -66,6 +67,8 @@ interface ScheduleProps {
   /** Modo unificado de "Bloqueos / Desbloqueos" interactivo */
   blockModeOpen?: boolean;
   onToggleBlockMode?: () => void;
+  onSaveBlockMode?: () => void;
+  onCancelBlockMode?: () => void;
   onNoticeMessage?: (message: string) => void;
   onBlocksVersionChange?: () => void;
   /** Filtros del equipo: el header de cada columna de miembro abre el mismo
@@ -177,9 +180,17 @@ const HEADER_HEIGHT_PX = 40;
    SCHEDULE_BLOCK_PENDING_CLASS) — sólo cambia el hover, que sí tiene que
    sentirse distinto según el alcance de cada modo (ver los dos hover de
    abajo). */
-const SCHEDULE_BLOCK_TARGET_CLASS = 'absolute inset-0 z-30 transition-colors';
 const SCHEDULE_BLOCK_CELL_HOVER_CLASS = 'cursor-pointer hover:bg-destructive/20';
 const SCHEDULE_UNBLOCK_CELL_HOVER_CLASS = 'cursor-pointer hover:bg-(--palette-01)/30';
+
+
+/* Target de modo bloqueo para las celdas de un miembro (member-hour): a
+   diferencia del de fila (SCHEDULE_BLOCK_TARGET_CLASS, celda completa), el
+   hover acá tiene las mismas dimensiones y esquinas que una AppointmentCard
+   — un "objeto" dentro de la celda con airs lateral/arriba y esquinas
+   rounded (inset-x-1 + top 2px + alto rowHeightPx - 4, ver el style en el
+   button), no la celda entera pintada. */
+const SCHEDULE_BLOCK_CELL_TARGET_CLASS = 'absolute inset-x-1 z-20 rounded-3xl transition-colors';
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -499,6 +510,8 @@ export default function Schedule({
   onCloseAddShift,
   blockModeOpen = false,
   onToggleBlockMode,
+  onSaveBlockMode,
+  onCancelBlockMode,
   onNoticeMessage,
   onBlocksVersionChange,
   teamFilters,
@@ -916,6 +929,7 @@ export default function Schedule({
       dateStr,
       member,
       isMemberDayOpen,
+      now: new Date(),
     });
 
     if (!result.success && result.message) {
@@ -955,10 +969,11 @@ export default function Schedule({
             aria-label={`${isRowOpen ? 'Bloquear' : 'Desbloquear'} horario ${rowStartTime} del negocio`}
             title={`${isRowOpen ? 'Bloquear' : 'Desbloquear'} ${rowStartTime} a ${rowEndTime} para todo el negocio`}
             className={twMerge(
-              SCHEDULE_BLOCK_TARGET_CLASS,
+              SCHEDULE_BLOCK_CELL_TARGET_CLASS,
               'cursor-pointer',
               isRowOpen ? 'hover:bg-destructive/30' : 'hover:bg-(--palette-01)/40',
             )}
+            style={{ height: `${rowHeightPx - 4}px`, top: '2px' }}
           />
         </>
       );
@@ -1181,25 +1196,7 @@ export default function Schedule({
           key: `member-${member}`,
           header: headerElement,
           cellClassName: (_slot: string, rowIndex: number) => {
-            const absoluteRow = windowStartSlot + rowIndex;
-            const isRowHovered = blockModeOpen && hoveredRowSlot === absoluteRow;
-            const isMemberColumnHovered = blockModeOpen && hoveredMemberColumn === member;
-
-            if (isRowHovered) {
-              const isRowOpen = isRowBlockable(absoluteRow);
-              return twMerge(
-                SCHEDULE_SLOT_CELL_CLASS,
-                isRowOpen ? 'bg-destructive/25' : 'bg-(--palette-01)/35',
-              );
-            }
-
-            if (isMemberColumnHovered) {
-              return twMerge(
-                SCHEDULE_SLOT_CELL_CLASS,
-                isMemberDayOpen ? 'bg-destructive/20' : 'bg-(--palette-01)/30',
-              );
-            }
-
+            void rowIndex;
             return SCHEDULE_SLOT_CELL_CLASS;
           },
           cell: (_slot: string, rowIndex: number) => {
@@ -1210,22 +1207,46 @@ export default function Schedule({
               const isCellAvailable = computeAvailabilityFor(member, absoluteRow) === 'available';
               const cellStartTime = minutesToTime(absoluteRow * SLOT_DURATION_MINUTES);
               const cellEndTime = minutesToTime(absoluteRow * SLOT_DURATION_MINUTES + SLOT_DURATION_MINUTES);
+              const isRowHovered = hoveredRowSlot === absoluteRow;
+              const isRowOpen = isRowBlockable(absoluteRow);
+              const isMemberColumnHovered = hoveredMemberColumn === member;
+              const visibleRowsCount = windowEndSlot - windowStartSlot;
 
               return (
                 <>
                   {normalContent}
+                  {isRowHovered && (
+                    <span
+                      className={twMerge(
+                        'absolute inset-x-1 rounded-3xl pointer-events-none',
+                        isRowOpen ? 'bg-destructive/25' : 'bg-(--palette-01)/35',
+                      )}
+                      style={{ height: `${rowHeightPx - 4}px`, top: '2px' }}
+                    />
+                  )}
+                  {isMemberColumnHovered && (
+                    <span
+                      className={twMerge(
+                        'absolute inset-x-1 top-0 bottom-0 pointer-events-none',
+                        rowIndex === 0 && 'rounded-t-3xl',
+                        rowIndex === visibleRowsCount - 1 && 'rounded-b-3xl',
+                        isMemberDayOpen ? 'bg-destructive/20' : 'bg-(--palette-01)/30',
+                      )}
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={() => handleCellClick(member, absoluteRow)}
                     aria-label={`${isCellAvailable ? 'Bloquear' : 'Desbloquear'} horario ${cellStartTime} de ${member}`}
                     title={`${isCellAvailable ? 'Bloquear' : 'Desbloquear'} ${cellStartTime} a ${cellEndTime} (${member})`}
                     className={twMerge(
-                      SCHEDULE_BLOCK_TARGET_CLASS,
+                      SCHEDULE_BLOCK_CELL_TARGET_CLASS,
                       'cursor-pointer',
                       isCellAvailable
                         ? SCHEDULE_BLOCK_CELL_HOVER_CLASS
                         : SCHEDULE_UNBLOCK_CELL_HOVER_CLASS,
                     )}
+                    style={{ height: `${rowHeightPx - 4}px`, top: '2px' }}
                   />
                 </>
               );
@@ -1259,6 +1280,8 @@ export default function Schedule({
         onCloseAddShift={onCloseAddShift}
         blockModeOpen={blockModeOpen}
         onToggleBlockMode={onToggleBlockMode}
+        onSaveBlockMode={onSaveBlockMode}
+        onCancelBlockMode={onCancelBlockMode}
       />
       <div data-schedule-scroll ref={scrollRef} className={SCHEDULE_SCROLL_CLASS}>
         <div

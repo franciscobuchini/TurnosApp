@@ -26,7 +26,7 @@ const ACTION_BUTTON_CLASS = 'h-12 rounded-2xl px-8 text-base';
 
 const ACTION_BUTTON_VARIANT: Record<ActionButtonVariant, { buttonVariant: 'ghost' | 'default' | 'destructive'; className?: string }> = {
   cancel: { buttonVariant: 'ghost', className: 'text-foreground' },
-  confirm: { buttonVariant: 'default' },
+  confirm: { buttonVariant: 'default', className: 'text-black [&_svg]:text-black' },
   delete: { buttonVariant: 'destructive' },
 };
 

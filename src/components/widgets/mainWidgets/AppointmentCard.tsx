@@ -30,27 +30,38 @@ const CARD_INNER_CLASS = 'flex flex-col h-full p-2.5 gap-4';
 
 const CARD_HEADER_ROW_CLASS = 'flex min-w-0 items-center gap-2';
 
-const CARD_SERVICE_AVATAR_CLASS = 'size-8 shrink-0 text-sm font-bold text-black';
+const CARD_SERVICE_AVATAR_CLASS = 'size-8 shrink-0 text-sm font-bold';
 
 const CARD_TEXT_COLUMN_CLASS = 'flex min-w-0 flex-1 flex-col';
 
-const CARD_SERVICE_CLASS = 'font-semibold truncate text-black';
+const CARD_SERVICE_CLASS = 'font-semibold truncate';
 
 const CARD_CLIENT_ROW_CLASS = 'flex min-w-0 items-center gap-1';
 
-const CARD_CLIENT_ICON_CLASS = 'size-3 shrink-0 text-black/50';
+const CARD_CLIENT_ICON_CLASS = 'size-3 shrink-0';
 
-const CARD_CLIENT_CLASS = 'truncate text-black/50';
+const CARD_CLIENT_CLASS = 'truncate';
 
-const CARD_NOTES_CLASS = 'truncate text-black/50';
+const CARD_NOTES_CLASS = 'truncate';
 
 /* La hora va anclada al borde inferior de la tarjeta (referencia siempre
      bottom, aunque la tarjeta sea chica): absoluta respecto de la card. */
-const CARD_TIME_CLASS = 'absolute bottom-4.5 right-4.5 max-w-[calc(100%-1rem)] truncate text-right text-xs text-black/50 pointer-events-none';
+const CARD_TIME_CLASS = 'absolute bottom-4.5 right-4.5 max-w-[calc(100%-1rem)] truncate text-right text-xs pointer-events-none';
 
-/* Todos los turnos ya finalizados se ven con este mismo gris, sin importar
-   el color del servicio — así se distinguen de un vistazo del resto. */
-const CARD_PAST_COLOR_CLASS = 'bg-gray-past';
+/* Colores de texto por estado: en una tarjeta normal el fondo es el color
+   del servicio (pastel), así que el texto va en negro; en una finalizada
+   el fondo pasa a ser background/50 (ver CARD_PAST_COLOR_CLASS), que en
+   dark theme es oscuro — por eso ahí el texto usa los tokens del tema
+   (foreground = claro en dark, oscuro en light). */
+const TEXT_PRIMARY_CLASS = 'text-black';
+const TEXT_PRIMARY_PAST_CLASS = 'text-foreground';
+const TEXT_SECONDARY_CLASS = 'text-black/50';
+const TEXT_SECONDARY_PAST_CLASS = 'text-foreground/60';
+
+/* Todos los turnos ya finalizados se ven con este mismo estilo, sin importar
+   el color del servicio — mismo background y borde que las cards de bloqueo
+   (BlockedSlotCard), así se distinguen de un vistazo del resto. */
+const CARD_PAST_COLOR_CLASS = 'border border-border bg-background/50';
 
 function isPastAppointment(appointment: Appointment): boolean {
   const end = new Date(`${appointment.date}T${appointment.endTime}`);
@@ -71,7 +82,10 @@ export default function AppointmentCard({
      previews/pending del flujo "Agregar turno" todavía no). */
   const showClient = spanSlots >= 2 && Boolean(appointment.client);
   const showNotes = spanSlots >= 3 && Boolean(appointment.notes);
-  const resolvedColorClassName = isPastAppointment(appointment) ? CARD_PAST_COLOR_CLASS : colorClassName;
+  const isPast = isPastAppointment(appointment);
+  const resolvedColorClassName = isPast ? CARD_PAST_COLOR_CLASS : colorClassName;
+  const textPrimaryClass = isPast ? TEXT_PRIMARY_PAST_CLASS : TEXT_PRIMARY_CLASS;
+  const textSecondaryClass = isPast ? TEXT_SECONDARY_PAST_CLASS : TEXT_SECONDARY_CLASS;
 
   return (
     <div
@@ -84,23 +98,23 @@ export default function AppointmentCard({
           <Image
             src={servicePhoto}
             name={appointment.service}
-            className={CARD_SERVICE_AVATAR_CLASS}
+            className={twMerge(CARD_SERVICE_AVATAR_CLASS, textPrimaryClass)}
           />
           <div className={CARD_TEXT_COLUMN_CLASS}>
-            <span className={CARD_SERVICE_CLASS}>{appointment.service}</span>
+            <span className={twMerge(CARD_SERVICE_CLASS, textPrimaryClass)}>{appointment.service}</span>
             {showClient && (
               <div className={CARD_CLIENT_ROW_CLASS}>
-                <User className={CARD_CLIENT_ICON_CLASS} />
-                <span className={CARD_CLIENT_CLASS}>{appointment.client}</span>
+                <User className={twMerge(CARD_CLIENT_ICON_CLASS, textSecondaryClass)} />
+                <span className={twMerge(CARD_CLIENT_CLASS, textSecondaryClass)}>{appointment.client}</span>
               </div>
             )}
           </div>
         </div>
         {showNotes && (
-          <span className={CARD_NOTES_CLASS}>{appointment.notes}</span>
+          <span className={twMerge(CARD_NOTES_CLASS, textSecondaryClass)}>{appointment.notes}</span>
         )}
       </div>
-      <span className={CARD_TIME_CLASS}>
+      <span className={twMerge(CARD_TIME_CLASS, textSecondaryClass)}>
         {appointment.startTime} – {appointment.endTime}
       </span>
     </div>

@@ -12,8 +12,6 @@ interface WeekSelectorProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
   onViewDateChange: (date: Date) => void;
-  blockModeOpen?: boolean;
-  onToggleBusinessDayBlock?: (date: Date) => void;
   className?: string;
   prevButtonClassName?: string;
   nextButtonClassName?: string;
@@ -50,8 +48,6 @@ export default function WeekSelector({
   selectedDate,
   onSelectDate,
   onViewDateChange,
-  blockModeOpen,
-  onToggleBusinessDayBlock,
   className,
 }: WeekSelectorProps) {
   /* Misma técnica que Schedule.tsx (ver previousSelectedDate ahí): se
@@ -120,8 +116,6 @@ export default function WeekSelector({
           weekDays={weekDays}
           selectedDate={selectedDate}
           onSelectDate={onSelectDate}
-          blockModeOpen={blockModeOpen}
-          onToggleBusinessDayBlock={onToggleBusinessDayBlock}
         />
       </div>
 

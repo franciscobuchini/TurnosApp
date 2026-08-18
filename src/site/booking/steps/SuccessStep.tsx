@@ -15,8 +15,8 @@ export default function SuccessStep({ onReset }: SuccessStepProps) {
   return (
     <div className="flex flex-col items-center gap-3 py-4 text-center">
       <CircleCheck className="size-10 text-(--site-primary)" />
-      <p className="font-medium">Tu turno quedó reservado</p>
-      <p className="text-sm text-(--site-text-muted)">Te esperamos. Cualquier cambio, escribinos por WhatsApp.</p>
+      <p className="font-medium">Tu turno ha sido solicitado</p>
+      <p className="text-sm text-(--site-text-muted)">La confirmación va a llegar muy pronto!</p>
       <SiteButton variant="outline" onClick={onReset} className="mt-2">
         Reservar otro turno
       </SiteButton>

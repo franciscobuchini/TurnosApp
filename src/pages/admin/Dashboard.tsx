@@ -6,7 +6,7 @@
   src/components/views y tienen ruta propia.
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   type NavigateFunction,
   Outlet,
@@ -29,6 +29,11 @@ import {
   addAppointment,
   updateAppointment,
   removeAppointment,
+  confirmBookingRequest,
+  rejectBookingRequest,
+
+  getBookingRequests,
+  getPendingBookingRequests,
   addScheduleBlock,
   removeScheduleBlock,
   getservices,
@@ -37,9 +42,11 @@ import {
   removeTeamMember,
   getTeamMembers,
   getOpeningHours,
+  getScheduleBlocks,
+  saveScheduleBlocks,
   DATA_CHANGE_EVENT,
 } from '../../database/data';
-import type { Appointment, Client, FiltersOption, ScheduleBlock, service, TeamMember } from '../../database/types';
+import type { Appointment, Client, FiltersOption, ScheduleBlock, service, TeamMember, BookingRequest } from '../../database/types';
 import { getBusinessHoursByDay, type TimeRange } from '@/hooks/useWeekSchedule';
 import { useTeamFilters } from '@/hooks/useTeamFilters';
 import { SERVICE_COLOR_BY_ID } from '../../components/widgets/serviceWidgets/serviceColors';
@@ -51,7 +58,11 @@ import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';
 import AddShiftSidebar from '../../components/views/sidebarViews/AddShiftSidebar';
 import EditAppointmentSidebar from '../../components/views/sidebarViews/EditAppointmentSidebar';
 import EditBlockSidebar from '../../components/views/sidebarViews/EditBlockSidebar';
+import NotificationsSidebar from '../../components/views/sidebarViews/NotificationsSidebar';
+import Sidebar from '../../components/layout/Sidebar';
+import Calendar from '../../components/widgets/sidebarWidgets/Calendar';
 import Toast from '../../components/ui/toast';
+
 import { DATE_RANGE_DAYS, getFirstAvailableDate, parseServiceDurationMinutes } from '@/functions/bookingAvailability';
 
 /** Cuántos días adelante se busca disponibilidad al elegir servicio en
@@ -120,9 +131,10 @@ export interface AdminContext {
   addShiftOpen: boolean;
   openAddShift: () => void;
   closeAddShift: () => void;
-  /** Modo "Bloqueos / Desbloqueos" activo en el Schedule. */
   blockModeOpen: boolean;
   toggleBlockMode: () => void;
+  saveBlockMode: () => void;
+  cancelBlockMode: () => void;
   closeBlockMode: () => void;
   setShiftNoticeMessage: (message: string | null) => void;
   toggleBusinessDayBlock: (date: Date) => void;
@@ -246,8 +258,29 @@ function Dashboard() {
   };
   const [addShiftOpen, setAddShiftOpen] = useState(false);
   const [blockModeOpen, setBlockModeOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => getBookingRequests());
+
+  const openNotifications = () => {
+    setEditingAppointment(null);
+    setEditingBlock(null);
+    setBlockModeOpen(false);
+    setAddShiftOpen(false);
+    setNotificationsOpen(true);
+  };
+
+  const toggleNotifications = () => {
+    if (!notificationsOpen) {
+      openNotifications();
+    } else {
+      setNotificationsOpen(false);
+    }
+  };
+
+
 
   const openAddShift = () => {
+    setNotificationsOpen(false);
     setEditingAppointment(null);
     setEditingBlock(null);
     setBlockModeOpen(false);
@@ -265,18 +298,40 @@ function Dashboard() {
     setBlockReason('');
   };
 
+  const [blockModeSnapshot, setBlockModeSnapshot] = useState<ScheduleBlock[] | null>(null);
+
   const toggleBlockMode = () => {
     if (!blockModeOpen) {
+      setNotificationsOpen(false);
       closeAddShift();
       setEditingAppointment(null);
       setEditingBlock(null);
+      setBlockModeSnapshot(getScheduleBlocks());
       setBlockModeOpen(true);
     } else {
-      setBlockModeOpen(false);
+      saveBlockMode();
     }
   };
 
-  const closeBlockMode = () => setBlockModeOpen(false);
+
+  const saveBlockMode = () => {
+    setBlockModeSnapshot(null);
+    setBlockModeOpen(false);
+    setBlocksVersion((v) => v + 1);
+  };
+
+  const cancelBlockMode = () => {
+    if (blockModeSnapshot !== null) {
+      saveScheduleBlocks(blockModeSnapshot);
+      setBlockModeSnapshot(null);
+      setBlocksVersion((v) => v + 1);
+    }
+    setBlockModeOpen(false);
+  };
+
+  const closeBlockMode = () => {
+    cancelBlockMode();
+  };
 
   const toggleBusinessDayBlock = (date: Date) => {
     const hoursByDay = getBusinessHoursByDay(getOpeningHours());
@@ -650,10 +705,16 @@ function Dashboard() {
      turno" vía location.state) para que, si ambos disparan en el mismo
      commit, ese efecto tenga la última palabra y el flujo quede abierto. */
   useEffect(() => {
+    if (blockModeSnapshot !== null) {
+      saveScheduleBlocks(blockModeSnapshot);
+      setBlockModeSnapshot(null);
+      setBlocksVersion((v) => v + 1);
+    }
     setEditingAppointment(null);
     setEditingBlock(null);
     setAddShiftOpen(false);
     setBlockModeOpen(false);
+    setNotificationsOpen(false);
     setShiftService(null);
     setShiftSlot(null);
     setBlockType(null);
@@ -665,14 +726,19 @@ function Dashboard() {
   }, [location.pathname]);
 
   useEffect(() => {
-    const state = location.state as { openAddShift?: boolean } | null;
+    const state = location.state as { openAddShift?: boolean; openNotifications?: boolean } | null;
     if (state?.openAddShift) {
       setAddShiftOpen(true);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+    if (state?.openNotifications) {
+      openNotifications();
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location.state, location.pathname, navigate]);
 
   const openEditAppointment = (appointment: Appointment) => {
+    setNotificationsOpen(false);
     setEditingBlock(null);
     setEditingAppointment(appointment);
   };
@@ -692,6 +758,7 @@ function Dashboard() {
 
   const [editingBlock, setEditingBlock] = useState<ScheduleBlock | null>(null);
   const openEditBlock = (block: ScheduleBlock) => {
+    setNotificationsOpen(false);
     setEditingAppointment(null);
     setEditingBlock(block);
   };
@@ -705,16 +772,33 @@ function Dashboard() {
   const { viewDate, selectedDate, setViewDate, setSelectedDate, selectDate } = useAgendaDate();
   const [clients, setClients] = useState<Client[]>(() => getClients());
   const [selectedClientName, setSelectedClientName] = useState<string | null>(null);
+  const previousPendingIdsRef = useRef<Set<string>>(
+    new Set(getPendingBookingRequests().map((r) => r.id)),
+  );
 
   /* Sincronización en tiempo real: ante cualquier alta/baja/modificación
-     de turnos, clientes o bloqueos (desde la web del cliente o desde el panel),
+     de turnos, clientes, bloqueos o solicitudes de turnos (desde la web del cliente o desde el panel),
      se actualizan las versiones para que Schedule y los filtros se refresquen al instante. */
   useEffect(() => {
     const handleDataChange = () => {
       setAppointmentsVersion((version) => version + 1);
       setBlocksVersion((version) => version + 1);
       setClients(getClients());
+      setBookingRequests(getBookingRequests());
+
+      // Detectar nuevas solicitudes de turno entrantes para notificar al admin
+      const currentPending = getPendingBookingRequests();
+      const currentIds = new Set(currentPending.map((r) => r.id));
+      const newlyAdded = currentPending.filter((r) => !previousPendingIdsRef.current.has(r.id));
+
+      if (newlyAdded.length > 0) {
+        const latest = newlyAdded[0];
+        setShiftNoticeMessage(`🔔 Nueva solicitud de turno: ${latest.client.name} (${latest.service})`);
+      }
+
+      previousPendingIdsRef.current = currentIds;
     };
+
 
     window.addEventListener(DATA_CHANGE_EVENT, handleDataChange);
     window.addEventListener('storage', handleDataChange);
@@ -724,6 +808,32 @@ function Dashboard() {
       window.removeEventListener('storage', handleDataChange);
     };
   }, []);
+
+  const handleConfirmBookingRequest = (request: BookingRequest) => {
+    const result = confirmBookingRequest(request.id);
+    if (result) {
+      setAppointmentsVersion((version) => version + 1);
+      setClients(getClients());
+
+      const [yyyy, mm, dd] = request.date.split('-').map(Number);
+      if (yyyy && mm && dd) {
+        selectDate(new Date(yyyy, mm - 1, dd));
+      }
+      setScrollToTime(request.startTime);
+
+      if (location.pathname !== '/admin') {
+        navigate('/admin');
+      }
+
+      setShiftNoticeMessage(`Turno de ${request.client.name} confirmado y agregado a la agenda`);
+    }
+  };
+
+  const handleRejectBookingRequest = (request: BookingRequest) => {
+    rejectBookingRequest(request.id);
+    setShiftNoticeMessage(`Solicitud de ${request.client.name} rechazada`);
+  };
+
 
   const clientFilters = useMemo<FiltersOption[]>(() => {
     const seen = new Set<string>();
@@ -828,6 +938,8 @@ function Dashboard() {
     closeAddShift,
     blockModeOpen,
     toggleBlockMode,
+    saveBlockMode,
+    cancelBlockMode,
     closeBlockMode,
     setShiftNoticeMessage,
     toggleBusinessDayBlock,
@@ -887,7 +999,14 @@ function Dashboard() {
   return (
     <>
       <Layout
-        menubar={<AppMenubar addShiftOpen={addShiftOpen} onCloseAddShift={closeAddShift} />}
+        menubar={
+          <AppMenubar
+            addShiftOpen={addShiftOpen}
+            onCloseAddShift={closeAddShift}
+            notificationsOpen={notificationsOpen}
+            onToggleNotifications={toggleNotifications}
+          />
+        }
         sidebar={
           addShiftOpen ? (
             <AddShiftSidebar
@@ -923,7 +1042,23 @@ function Dashboard() {
             />
           ) : editingBlock ? (
             <EditBlockSidebar block={editingBlock} onClose={closeEditBlock} onCancelBlock={cancelBlock} />
-          ) : isSidebarlessPage ? null : (
+          ) : notificationsOpen ? (
+            <NotificationsSidebar
+              requests={bookingRequests}
+              onConfirm={handleConfirmBookingRequest}
+              onReject={handleRejectBookingRequest}
+            />
+          ) : isSidebarlessPage ? null : blockModeOpen ? (
+
+            <Sidebar>
+              <Calendar
+                selectedDate={selectedDate}
+                onSelectDate={selectDate}
+                blockModeOpen
+                onToggleBusinessDayBlock={toggleBusinessDayBlock}
+              />
+            </Sidebar>
+          ) : (
             <AdminSidebar
               selectedDate={selectedDate}
               onSelectDate={selectDate}

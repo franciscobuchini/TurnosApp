@@ -6,6 +6,8 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Table, type TableColumn } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Dropdown, DROPDOWN_ITEM_CLASS } from '@/components/ui/dropdown';
 import ContentHeader from '@/components/ui/content-header';
 import CalendarNavigationButtons from '../../buttons/CalendarNavigationButtons';
 import { getOpeningHours } from '@/database/data';
@@ -23,6 +25,11 @@ interface CalendarProps {
   selectedDates?: Date[];
   selectedDatesVariant?: 'destructive' | 'unblock';
   onSelectDate?: (date: Date) => void;
+  /** Modo bloqueos/desbloqueos activo: al hacer click en un día se
+      bloquea o desbloquea ese día completo del negocio (mismo
+      comportamiento que DaySelectorButtons con blockModeOpen). */
+  blockModeOpen?: boolean;
+  onToggleBusinessDayBlock?: (date: Date) => void;
   className?: string;
 }
 
@@ -30,7 +37,11 @@ const CALENDAR_CLASS = 'flex w-full shrink-0 flex-col gap-2 p-2 py-4 bg-card rou
 
 const CALENDAR_ACTIONS_CLASS = 'flex gap-3';
 
-const CALENDAR_TABLE_CLASS = 'text-foreground';
+/* La Table del calendario no debe pintar la fila entera cuando un día es
+   trigger de dropdown (aria-expanded) ni por data-state: la selección se
+   marca solo en el círculo del día (ver CALENDAR_*_CIRCLE_CLASS). */
+const CALENDAR_TABLE_CLASS =
+  'text-foreground [&_tr:has([aria-expanded=true])]:bg-transparent [&_tr[data-state=selected]]:bg-transparent';
 
 const CALENDAR_TABLE_HEADER_CLASS = 'bg-transparent';
 
@@ -56,6 +67,14 @@ const CALENDAR_SELECTED_CIRCLE_CLASS = 'bg-(--palette-01) text-black font-medium
    Mismo par bg/text que la variant "destructive" de Button (ver button.tsx). */
 const CALENDAR_SELECTED_DATES_CIRCLE_CLASS = 'bg-destructive text-background font-medium rounded-full';
 const CALENDAR_SELECTED_DATES_UNBLOCK_CIRCLE_CLASS = 'bg-(--palette-01) text-black font-medium rounded-full';
+
+/* Modo bloqueos: solo ring para marcar qué hace el click (bloquear con
+   destructive, desbloquear con palette-01) — sin hover de celda/fila.
+   Invertido a propósito: los días cerrados (day-off) se marcan con
+   destructive (rojo) y los días de trabajo con palette-01 (lima, primary)
+   — el rojo siempre significa "sin disponibilidad". */
+const CALENDAR_BLOCK_MODE_DAY_OFF_CLASS = 'ring-1 ring-destructive/40';
+const CALENDAR_BLOCK_MODE_OPEN_CLASS = 'ring-1 ring-(--palette-01)/50';
 
 const CALENDAR_COLUMN_ALIGN_CLASS = 'align-middle px-2 py-1 text-center';
 const CALENDAR_ROW_HEIGHT_CLASS = 'h-auto';
@@ -134,6 +153,8 @@ export default function Calendar({
   selectedDates,
   selectedDatesVariant = 'destructive',
   onSelectDate,
+  blockModeOpen = false,
+  onToggleBusinessDayBlock,
   className,
 }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -180,7 +201,84 @@ export default function Calendar({
       const isSelected = !isMultiSelected && selectedDate ? isSameDay(cell.date, selectedDate) : false;
       const isDayOff = (hoursByDay[cell.date.getDay()] ?? []).length === 0;
       const isAnyUnblocked = isBusinessDayAnyUnblocked(cell.date);
-      const isMuted = (isDayOff && !isAnyUnblocked) || isBusinessDayFullyBlocked(cell.date);
+      const isDayBlocked = isBusinessDayFullyBlocked(cell.date);
+      const isMuted = (isDayOff && !isAnyUnblocked) || isDayBlocked;
+      const isEffectiveDayOff = (isDayOff || isDayBlocked) && !isAnyUnblocked;
+
+      /* Solo se pueden bloquear/desbloquear hoy y días posteriores: los días
+   pasados no muestran el ring de estado (CALENDAR_BLOCK_MODE_*). Compara
+   contra el inicio de hoy para que "hoy" siga teniendo ring. */
+      const nowDate = new Date();
+      const todayStart = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate());
+      const isPastDate = cell.date < todayStart;
+
+      const dayCircle = (
+        <div
+          className={twMerge(
+            CALENDAR_DAY_CIRCLE_CLASS,
+            isMultiSelected
+              ? selectedDatesVariant === 'unblock'
+                ? CALENDAR_SELECTED_DATES_UNBLOCK_CIRCLE_CLASS
+                : CALENDAR_SELECTED_DATES_CIRCLE_CLASS
+              : isSelected
+                ? CALENDAR_SELECTED_CIRCLE_CLASS
+                : isToday
+                  ? CALENDAR_TODAY_CIRCLE_CLASS
+                  : isMuted
+                    ? CALENDAR_DAY_CIRCLE_MUTED_CLASS
+                    : CALENDAR_DAY_CIRCLE_DEFAULT_CLASS,
+            !cell.isCurrentMonth ? CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS : '',
+            blockModeOpen ? 'hover:bg-transparent' : '',
+            blockModeOpen && cell.isCurrentMonth && !isPastDate && (isEffectiveDayOff
+              ? CALENDAR_BLOCK_MODE_DAY_OFF_CLASS
+              : CALENDAR_BLOCK_MODE_OPEN_CLASS),
+          )}
+        >
+          {cell.day}
+        </div>
+      );
+
+      if (blockModeOpen && onToggleBusinessDayBlock && !isPastDate) {
+        const actionLabel = isEffectiveDayOff ? 'Desbloquear' : 'Bloquear';
+
+        return (
+          <div
+            className={CALENDAR_DAY_CELL_CLASS}
+            title={isEffectiveDayOff ? 'Desbloquear día completo del negocio' : 'Bloquear día completo del negocio'}
+          >
+            <Dropdown
+              items={[
+                <Button
+                  key="toggle-day"
+                  type="button"
+                  variant="ghost"
+                  className={twMerge(
+                    DROPDOWN_ITEM_CLASS,
+                    'justify-center hover:bg-transparent',
+                    isEffectiveDayOff
+                      ? 'text-(--palette-01) hover:text-(--palette-01)'
+                      : 'text-destructive hover:text-destructive',
+                  )}
+                  onClick={() => onToggleBusinessDayBlock(cell.date)}
+                >
+                  {actionLabel}
+                </Button>,
+              ]}
+              content={dayCircle}
+              align="center"
+              className="flex items-center justify-center cursor-pointer hover:bg-transparent"
+            />
+          </div>
+        );
+      }
+
+      if (blockModeOpen) {
+        return (
+          <div className={CALENDAR_DAY_CELL_CLASS}>
+            {dayCircle}
+          </div>
+        );
+      }
 
       return (
         <div
@@ -190,25 +288,7 @@ export default function Calendar({
           }}
           className={CALENDAR_DAY_CELL_CLASS}
         >
-          <div
-            className={twMerge(
-              CALENDAR_DAY_CIRCLE_CLASS,
-              isMultiSelected
-                ? selectedDatesVariant === 'unblock'
-                  ? CALENDAR_SELECTED_DATES_UNBLOCK_CIRCLE_CLASS
-                  : CALENDAR_SELECTED_DATES_CIRCLE_CLASS
-                : isSelected
-                  ? CALENDAR_SELECTED_CIRCLE_CLASS
-                  : isToday
-                    ? CALENDAR_TODAY_CIRCLE_CLASS
-                    : isMuted
-                      ? CALENDAR_DAY_CIRCLE_MUTED_CLASS
-                      : CALENDAR_DAY_CIRCLE_DEFAULT_CLASS,
-              !cell.isCurrentMonth ? CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS : '',
-            )}
-          >
-            {cell.day}
-          </div>
+          {dayCircle}
         </div>
       );
     },

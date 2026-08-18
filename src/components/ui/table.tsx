@@ -58,7 +58,7 @@ function Table<T>({
         ))}
       </colgroup>
       {shouldShowHeader && (
-        <TableHeader>
+        <TableHeader className={stickyHeader ? "sticky top-0 z-30" : undefined}>
           <TableRow className={rowHeightClassName} style={rowHeightStyle}>
             {columns.map((column) => (
               <TableHead

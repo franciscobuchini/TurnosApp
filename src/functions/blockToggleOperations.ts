@@ -177,14 +177,23 @@ export function toggleMemberDayBlockState(params: {
   dateStr: string;
   member: string;
   isMemberDayOpen: boolean;
+  now?: Date;
 }): BlockOperationResult {
-  const { dateStr, member, isMemberDayOpen } = params;
+  const { dateStr, member, isMemberDayOpen, now = new Date() } = params;
   const currentBlocks = getScheduleBlocks();
+
+  const todayStr = now.toISOString().split('T')[0];
+  const isToday = dateStr === todayStr;
+  const startTime = isToday && isMemberDayOpen
+    ? now.toTimeString().slice(0, 5)
+    : '00:00';
 
   if (isMemberDayOpen) {
     // Bloquear día del miembro
     const apts = getAppointments().filter((a) => a.date === dateStr);
-    const hasConflict = apts.some((apt) => apt.member === member);
+    const hasConflict = apts.some((apt) =>
+      apt.member === member && apt.endTime > startTime
+    );
     if (hasConflict) {
       return {
         success: false,
@@ -199,7 +208,7 @@ export function toggleMemberDayBlockState(params: {
     nextBlocks.push({
       id: crypto.randomUUID(),
       date: dateStr,
-      startTime: '00:00',
+      startTime,
       endTime: '24:00',
       member,
       type: 'block',

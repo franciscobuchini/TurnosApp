@@ -50,8 +50,9 @@ function SchedulePage() {
       onCloseAddShift={ctx.closeAddShift}
       blockModeOpen={ctx.blockModeOpen}
       onToggleBlockMode={ctx.toggleBlockMode}
+      onSaveBlockMode={ctx.saveBlockMode}
+      onCancelBlockMode={ctx.cancelBlockMode}
       onNoticeMessage={ctx.setShiftNoticeMessage}
-      onToggleBusinessDayBlock={ctx.toggleBusinessDayBlock}
       onBlocksVersionChange={ctx.incrementBlocksVersion}
       teamFilters={ctx.teamFilters}
       toggleTeamFilter={ctx.toggleTeamFilter}

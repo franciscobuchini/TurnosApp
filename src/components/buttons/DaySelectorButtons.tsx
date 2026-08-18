@@ -10,8 +10,6 @@ interface DaySelectorButtonsProps {
   weekDays: Date[];
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
-  blockModeOpen?: boolean;
-  onToggleBusinessDayBlock?: (date: Date) => void;
 }
 
 const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-24 flex-1 p-3 shrink-0 justify-center items-center bg-transparent rounded-3xl';
@@ -37,8 +35,6 @@ export default function DaySelectorButtons({
   weekDays,
   selectedDate,
   onSelectDate,
-  blockModeOpen = false,
-  onToggleBusinessDayBlock,
 }: DaySelectorButtonsProps) {
   const centerIdx = Math.floor(weekDays.length / 2);
   /* Horario del negocio por día de semana — para apagar los días sin
@@ -59,11 +55,6 @@ export default function DaySelectorButtons({
 
         const handleDayClick = () => {
           onSelectDate(date);
-
-          if (blockModeOpen && onToggleBusinessDayBlock) {
-            onToggleBusinessDayBlock(date);
-            return;
-          }
 
           if (!isToday || !isSelected) return;
 
@@ -86,9 +77,7 @@ export default function DaySelectorButtons({
               WEEK_SELECTOR_DAY_BUTTON_CLASS,
               visibilityClassName,
               weekSelectorStateClass(isSelected, isToday, isDayOff),
-              blockModeOpen && (isDayOff ? 'hover:bg-(--palette-01)/30 cursor-pointer ring-1 ring-(--palette-01)/50' : 'hover:bg-destructive/30 cursor-pointer ring-1 ring-destructive/40'),
             )}
-            title={blockModeOpen ? (isDayOff ? 'Desbloquear día completo del negocio' : 'Bloquear día completo del negocio') : undefined}
           >
             <span className={WEEK_SELECTOR_DAY_COLUMN_CLASS}>
               <span className={WEEK_SELECTOR_DAY_LABEL_CLASS}>

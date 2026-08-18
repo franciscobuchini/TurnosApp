@@ -7,7 +7,7 @@
 */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { Ban, Plus, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { CalendarX, Check, Plus, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/ui/button';
 import { canZoomIn, canZoomOut, zoomIn, zoomOut } from '@/functions/scheduleZoom';
@@ -23,6 +23,8 @@ interface ScheduleControlsProps {
   /** Modo "Bloqueos / Desbloqueos" activo en el Schedule. */
   blockModeOpen?: boolean;
   onToggleBlockMode?: () => void;
+  onSaveBlockMode?: () => void;
+  onCancelBlockMode?: () => void;
   className?: string;
 }
 
@@ -43,33 +45,60 @@ export default function ScheduleControls({
   onCloseAddShift,
   blockModeOpen = false,
   onToggleBlockMode,
+  onSaveBlockMode,
+  onCancelBlockMode,
   className,
 }: ScheduleControlsProps) {
   return (
     <div className={twMerge(SCHEDULE_CONTROLS_CLASS, className)}>
-      <Button
-        type="button"
-        variant={addShiftOpen ? 'destructive' : 'default'}
-        size="icon-lg"
-        className={twMerge(CONTROL_BUTTON_CLASS, addShiftOpen && 'text-white')}
-        icon={addShiftOpen ? <X className={ICON_CLASS} /> : <Plus className={ICON_CLASS} />}
-        aria-label={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
-        title={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
-        onClick={addShiftOpen ? onCloseAddShift : onAddShift}
-      />
-      <Button
-        type="button"
-        variant={blockModeOpen ? 'destructive' : 'ghost'}
-        size="icon-lg"
-        className={twMerge(
-          CONTROL_BUTTON_CLASS,
-          blockModeOpen ? 'text-white' : 'hover:bg-destructive/15 text-muted-foreground hover:text-destructive',
-        )}
-        icon={blockModeOpen ? <X className={ICON_CLASS} /> : <Ban className={ICON_CLASS} />}
-        aria-label={blockModeOpen ? 'Cerrar modo bloqueos' : 'Bloquear o desbloquear horarios'}
-        title={blockModeOpen ? 'Cerrar modo bloqueos' : 'Bloquear / Desbloquear'}
-        onClick={onToggleBlockMode}
-      />
+      {blockModeOpen ? (
+        <>
+          <Button
+            type="button"
+            variant="default"
+            size="icon-lg"
+            className={twMerge(CONTROL_BUTTON_CLASS, 'text-black')}
+            icon={<Check className={twMerge(ICON_CLASS, 'text-black')} />}
+            aria-label="Guardar cambios"
+            title="Guardar cambios"
+            onClick={onSaveBlockMode ?? onToggleBlockMode}
+          />
+          <Button
+            type="button"
+            variant="destructive"
+            size="icon-lg"
+            className={twMerge(CONTROL_BUTTON_CLASS, 'text-white')}
+            icon={<X className={ICON_CLASS} />}
+            aria-label="Cancelar cambios"
+            title="Cancelar cambios"
+            onClick={onCancelBlockMode ?? onToggleBlockMode}
+          />
+        </>
+      ) : (
+        <>
+          <Button
+            type="button"
+            variant={addShiftOpen ? 'destructive' : 'default'}
+            size="icon-lg"
+            className={twMerge(CONTROL_BUTTON_CLASS, addShiftOpen ? 'text-white' : 'text-black')}
+            icon={addShiftOpen ? <X className={ICON_CLASS} /> : <Plus className={twMerge(ICON_CLASS, 'text-black')} />}
+            aria-label={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
+            title={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
+            onClick={addShiftOpen ? onCloseAddShift : onAddShift}
+          />
+          {!addShiftOpen && (
+            <Button
+              type="button"
+              size="icon-lg"
+              className={twMerge(CONTROL_BUTTON_CLASS, 'bg-(--palette-02) text-black hover:bg-(--palette-02)/80')}
+              icon={<CalendarX className={ICON_CLASS} />}
+              aria-label="Bloquear o desbloquear horarios"
+              title="Bloquear / Desbloquear"
+              onClick={onToggleBlockMode}
+            />
+          )}
+        </>
+      )}
       <Button
         type="button"
         variant="ghost"

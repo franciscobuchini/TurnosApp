@@ -81,6 +81,27 @@ export type Appointment = {
   notes?: string;
 };
 
+export type BookingRequestStatus = 'pending' | 'confirmed' | 'rejected';
+
+export type BookingRequest = {
+  id: string;
+  createdAt: string;  // ISO string
+  date: string;       // "YYYY-MM-DD"
+  startTime: string;  // "HH:mm"
+  endTime: string;    // "HH:mm"
+  member: string;
+  service: string;
+  price?: number;
+  client: {
+    name: string;
+    phone: string;
+    email?: string;
+    notes?: string;
+  };
+  status: BookingRequestStatus;
+};
+
+
 // Bloqueo puntual del Schedule (panel "Crear un nuevo bloqueo" en
 // AddShiftSidebar): una franja horaria de un día puntual que queda como si
 // fuera fuera de horario — no se pueden solicitar turnos ahí, ni desde el

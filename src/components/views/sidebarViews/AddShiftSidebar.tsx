@@ -70,29 +70,12 @@ import WhatsAppInput, { WHATSAPP_PREFIX } from '../../widgets/WhatsAppInput';
 import CancelButton from '../../buttons/CancelButton';
 import ConfirmButton from '../../buttons/ConfirmButton';
 
-/* Cada opción mapea a una forma de recorrer el Schedule (ver grilla en
-   Schedule.tsx): "fila" = misma hora, todos los miembros; "día entero" =
-   toda la columna de horas de ese día, todos los miembros; "celda" = un
-   solo horario de un solo miembro; "columna" = todo el día de un miembro. */
-const BLOCK_OPTIONS: DetailsPanelOption[] = [
-  { id: 'business-hour', label: 'Bloquear horario del negocio' },
-  { id: 'business-day', label: 'Bloquear día del negocio' },
-  { id: 'member-hour', label: 'Bloquear horario de un miembro' },
-  { id: 'member-day', label: 'Bloquear día de un miembro' },
-];
-
-const UNBLOCK_OPTIONS: DetailsPanelOption[] = [
-  { id: 'unblock-business-hour', label: 'Desbloquear horario del negocio' },
-  { id: 'unblock-business-day', label: 'Desbloquear día del negocio' },
-  { id: 'unblock-member-hour', label: 'Desbloquear horario de un miembro' },
-  { id: 'unblock-member-day', label: 'Desbloquear día de un miembro' },
-];
-
 interface AddShiftSidebarProps {
   serviceFilters: DetailsPanelOption[];
   clientFilters: FiltersOption[];
   onClose: () => void;
   selectedService?: string | null;
+
   onSelectService: (serviceName: string) => void;
   shiftSlot: ShiftSlot | null;
   onBack: () => void;
@@ -174,7 +157,7 @@ export default function AddShiftSidebar({
   onConfirmClient,
   onAddClientAndConfirm,
   blockType,
-  onSelectBlockType,
+  onSelectBlockType: _onSelectBlockType,
   pendingBlockRows,
   pendingBlockRanges,
   pendingMemberDays,
@@ -464,7 +447,7 @@ export default function AddShiftSidebar({
             </div>
           )}
         </>
-      ) : (
+) : (
         <>
           <DetailsPanel
             title="Crear un nuevo turno"
@@ -479,34 +462,7 @@ export default function AddShiftSidebar({
               }
             }}
           />
-
-          <DetailsPanel
-            title="Crear o editar un bloqueo"
-            name="add-block"
-            options={BLOCK_OPTIONS}
-            selectedId={blockType ?? undefined}
-            onOptionClick={(option) => {
-              if (blockType === option.id) {
-                onSelectBlockType('');
-              } else {
-                onSelectBlockType(option.id);
-              }
-            }}
-          />
-
-          <DetailsPanel
-            title="Crear o editar un desbloqueo"
-            name="add-unblock"
-            options={UNBLOCK_OPTIONS}
-            selectedId={blockType ?? undefined}
-            onOptionClick={(option) => {
-              if (blockType === option.id) {
-                onSelectBlockType('');
-              } else {
-                onSelectBlockType(option.id);
-              }
-            }}
-          />
+          
         </>
       )}
     </Sidebar>

@@ -41,8 +41,9 @@ interface ScheduleViewProps {
   /** Modo unificado de Bloqueos / Desbloqueos */
   blockModeOpen?: boolean;
   onToggleBlockMode?: () => void;
+  onSaveBlockMode?: () => void;
+  onCancelBlockMode?: () => void;
   onNoticeMessage?: (message: string) => void;
-  onToggleBusinessDayBlock?: (date: Date) => void;
   onBlocksVersionChange?: () => void;
   /** Filtros del equipo: para el dropdown de acciones del header de cada
       miembro (ocultar/mostrar + ver perfil). */
@@ -74,8 +75,9 @@ export default function ScheduleView({
   onCloseAddShift,
   blockModeOpen,
   onToggleBlockMode,
+  onSaveBlockMode,
+  onCancelBlockMode,
   onNoticeMessage,
-  onToggleBusinessDayBlock,
   onBlocksVersionChange,
   teamFilters,
   toggleTeamFilter,
@@ -91,8 +93,6 @@ export default function ScheduleView({
         selectedDate={selectedDate}
         onSelectDate={onSelectDate}
         onViewDateChange={onViewDateChange}
-        blockModeOpen={blockModeOpen}
-        onToggleBusinessDayBlock={onToggleBusinessDayBlock}
       />
       <Schedule
         selectedDate={selectedDate}
@@ -110,6 +110,8 @@ export default function ScheduleView({
         onCloseAddShift={onCloseAddShift}
         blockModeOpen={blockModeOpen}
         onToggleBlockMode={onToggleBlockMode}
+        onSaveBlockMode={onSaveBlockMode}
+        onCancelBlockMode={onCancelBlockMode}
         onNoticeMessage={onNoticeMessage}
         onBlocksVersionChange={onBlocksVersionChange}
         teamFilters={teamFilters}

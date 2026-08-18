@@ -43,3 +43,11 @@ export const toDateKey = (date: Date): string => {
   const dd = String(date.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 };
+
+/* formatDateKeyToDisplay: convierte "YYYY-MM-DD" a texto legible ej. "Miércoles, 19 de Agosto" */
+export const formatDateKeyToDisplay = (dateKey: string): string => {
+  const [yyyy, mm, dd] = dateKey.split('-').map(Number);
+  if (!yyyy || !mm || !dd) return dateKey;
+  const d = new Date(yyyy, mm - 1, dd);
+  return `${getDayName(d)}, ${dd} de ${getMonthName(d)}`;
+};
