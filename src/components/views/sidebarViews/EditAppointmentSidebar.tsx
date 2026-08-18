@@ -347,7 +347,7 @@ export default function EditAppointmentSidebar({
 
   if (!editing) {
     return (
-      <Sidebar>
+      <Sidebar footer={<CancelButton text="Volver" onClick={onClose} className="w-full" />}>
         <div className={CARD_CLASS}>
           <ContentHeader
             title={service}
@@ -357,12 +357,11 @@ export default function EditAppointmentSidebar({
           <InfoRow label="Miembro" value={member} avatarLabel={member} />
           <InfoRow label="Cliente" value={client} avatarLabel={client} />
           {appointment.notes && <InfoRow label="Notas" value={appointment.notes} />}
-          <div className={ACTIONS_CLASS}>
-            <CancelButton text="Volver" onClick={onClose} className={ACTION_BUTTON_CLASS} />
-            {!isPast && (
-              <ConfirmButton text="Editar" onClick={() => setEditing(true)} className={ACTION_BUTTON_CLASS} />
-            )}
-          </div>
+          {!isPast && (
+            <div className={ACTIONS_CLASS}>
+              <ConfirmButton text="Editar" onClick={() => setEditing(true)} className="w-full" />
+            </div>
+          )}
         </div>
       </Sidebar>
     );

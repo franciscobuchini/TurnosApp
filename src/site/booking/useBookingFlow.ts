@@ -21,9 +21,10 @@
   turno reservado acá aparece de inmediato en la agenda del admin.
 */
 
-import { useMemo, useState } from 'react';
-import { addAppointment, addClient } from '@/database/data';
+import { useEffect, useMemo, useState } from 'react';
+import { addAppointment, addClient, DATA_CHANGE_EVENT } from '@/database/data';
 import {
+  DATE_RANGE_DAYS,
   getAvailableSlots,
   getFirstAvailableDate,
   parseServiceDurationMinutes,
@@ -31,12 +32,13 @@ import {
   type AvailableSlot,
 } from '@/functions/bookingAvailability';
 import type { service } from '@/database/types';
+import { toDateKey } from '@/utils/dateName';
 
 export type BookingStep = 'service' | 'schedule' | 'professional' | 'details' | 'success';
 
 /** Cuántos días adelante se busca disponibilidad al elegir servicio, antes
     de avisar que no hay turnos (ver selectService). */
-const SERVICE_AVAILABILITY_SEARCH_DAYS = 7;
+const SERVICE_AVAILABILITY_SEARCH_DAYS = DATE_RANGE_DAYS;
 
 export interface ClientDetails {
   name: string;
@@ -49,13 +51,6 @@ interface UseBookingFlowOptions {
   services: service[];
 }
 
-function toDateKey(date: Date): string {
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
 export function useBookingFlow({ services }: UseBookingFlowOptions) {
   const [stepStack, setStepStack] = useState<BookingStep[]>(['service']);
   const [serviceName, setServiceName] = useState<string | null>(null);
@@ -65,6 +60,21 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
   const [client, setClient] = useState<ClientDetails>({ name: '', phone: '', email: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [noAvailabilityMessage, setNoAvailabilityMessage] = useState<string | null>(null);
+  const [dataVersion, setDataVersion] = useState(0);
+
+  useEffect(() => {
+    const handleDataChange = () => {
+      setDataVersion((v) => v + 1);
+    };
+
+    window.addEventListener(DATA_CHANGE_EVENT, handleDataChange);
+    window.addEventListener('storage', handleDataChange);
+
+    return () => {
+      window.removeEventListener(DATA_CHANGE_EVENT, handleDataChange);
+      window.removeEventListener('storage', handleDataChange);
+    };
+  }, []);
 
   const step = stepStack[stepStack.length - 1];
 
@@ -78,11 +88,12 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
   const durationMinutes = selectedService ? parseServiceDurationMinutes(selectedService.duration) : 0;
 
   const availableSlots = useMemo(() => {
+    void dataVersion;
     if (!date || !serviceName || durationMinutes <= 0) {
       return [];
     }
     return getAvailableSlots(date, serviceName, durationMinutes);
-  }, [date, serviceName, durationMinutes]);
+  }, [date, serviceName, durationMinutes, dataVersion]);
 
   // Si en los próximos SERVICE_AVAILABILITY_SEARCH_DAYS días no hay ni un
   // hueco para el servicio elegido, no tiene sentido avanzar al paso
@@ -163,8 +174,8 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
       phone: client.phone.trim(),
       email: client.email.trim() || undefined,
       notes: client.notes.trim() || undefined,
-      appointmentsCount: 0,
-      totalSpent: 0,
+      appointmentsCount: 1,
+      totalSpent: selectedService.price ?? 0,
     });
 
     addAppointment({
@@ -197,6 +208,7 @@ export function useBookingFlow({ services }: UseBookingFlowOptions) {
     goBack,
     canGoBack: stepStack.length > 1 && step !== 'success',
     selectedService,
+    durationMinutes,
     selectService,
     date,
     selectDate,

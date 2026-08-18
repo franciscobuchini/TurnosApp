@@ -96,6 +96,12 @@ export type ScheduleBlock = {
   startTime: string;  // "HH:mm"
   endTime: string;    // "HH:mm"
   member?: string;
+  // 'block' (default) para bloquear horarios/días; 'unblock' para desbloquear/habilitar
+  // horarios fuera de horario laboral o días cerrados.
+  type?: 'block' | 'unblock';
+  // Texto libre, opcional ("mantenimiento", "feriado", "horario especial", etc.) — se carga en
+  // el paso "Confirmar bloqueo/desbloqueo" de AddShiftSidebar.tsx.
+  reason?: string;
 };
 
 // Identificadores de opciones de apariencia del sitio público. Las

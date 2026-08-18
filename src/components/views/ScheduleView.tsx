@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import type { Appointment } from '../../database/types';
+import type { Appointment, ScheduleBlock } from '../../database/types';
 import type { FiltersOption } from '../../database/types';
-import type { BlockRow, ShiftSlot } from '../../pages/admin/Dashboard';
+import type { ShiftSlot } from '../../pages/admin/Dashboard';
 import MainContent from '../layout/MainContent';
 import WeekSelector from '../widgets/mainWidgets/WeekSelector';
 import Schedule from '../widgets/mainWidgets/Schedule';
@@ -38,15 +38,19 @@ interface ScheduleViewProps {
       ser una "X" que lo cierra. */
   addShiftOpen?: boolean;
   onCloseAddShift?: () => void;
+  /** Modo unificado de Bloqueos / Desbloqueos */
+  blockModeOpen?: boolean;
+  onToggleBlockMode?: () => void;
+  onNoticeMessage?: (message: string) => void;
+  onToggleBusinessDayBlock?: (date: Date) => void;
+  onBlocksVersionChange?: () => void;
   /** Filtros del equipo: para el dropdown de acciones del header de cada
       miembro (ocultar/mostrar + ver perfil). */
   teamFilters?: FiltersOption[];
   toggleTeamFilter?: (id: string, checked: boolean) => void;
   onMemberDetails?: (name: string) => void;
-  /** Flujo "Crear un nuevo bloqueo" — ver mismos props en Schedule.tsx. */
-  blockMode?: 'business-hour' | null;
-  pendingBlockRow?: BlockRow | null;
-  onBlockRowClick?: (row: BlockRow) => void;
+  /** Se dispara al hacer click en una tarjeta "Horario bloqueado" ya confirmada. */
+  onBlockClick?: (block: ScheduleBlock) => void;
   blocksVersion?: number;
   children?: ReactNode;
 }
@@ -68,12 +72,15 @@ export default function ScheduleView({
   onOpenAddShift,
   addShiftOpen,
   onCloseAddShift,
+  blockModeOpen,
+  onToggleBlockMode,
+  onNoticeMessage,
+  onToggleBusinessDayBlock,
+  onBlocksVersionChange,
   teamFilters,
   toggleTeamFilter,
   onMemberDetails,
-  blockMode,
-  pendingBlockRow,
-  onBlockRowClick,
+  onBlockClick,
   blocksVersion,
   children,
 }: ScheduleViewProps) {
@@ -84,6 +91,8 @@ export default function ScheduleView({
         selectedDate={selectedDate}
         onSelectDate={onSelectDate}
         onViewDateChange={onViewDateChange}
+        blockModeOpen={blockModeOpen}
+        onToggleBusinessDayBlock={onToggleBusinessDayBlock}
       />
       <Schedule
         selectedDate={selectedDate}
@@ -99,12 +108,14 @@ export default function ScheduleView({
         onOpenAddShift={onOpenAddShift}
         addShiftOpen={addShiftOpen}
         onCloseAddShift={onCloseAddShift}
+        blockModeOpen={blockModeOpen}
+        onToggleBlockMode={onToggleBlockMode}
+        onNoticeMessage={onNoticeMessage}
+        onBlocksVersionChange={onBlocksVersionChange}
         teamFilters={teamFilters}
         toggleTeamFilter={toggleTeamFilter}
         onMemberDetails={onMemberDetails}
-        blockMode={blockMode}
-        pendingBlockRow={pendingBlockRow}
-        onBlockRowClick={onBlockRowClick}
+        onBlockClick={onBlockClick}
         blocksVersion={blocksVersion}
       />
       {children}

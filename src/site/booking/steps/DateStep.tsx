@@ -18,13 +18,15 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { getBusinessHoursByDay } from '@/hooks/useWeekSchedule';
 import { getDayName, getMonthName, isSameDay } from '@/utils/dateName';
-import { DATE_RANGE_DAYS } from '@/functions/bookingAvailability';
+import { DATE_RANGE_DAYS, isDateAvailable } from '@/functions/bookingAvailability';
 import type { OpeningHoursEntry } from '@/database/types';
 
 interface DateStepProps {
   schedule: OpeningHoursEntry[];
   selectedDate: Date | null;
   onSelect: (date: Date) => void;
+  serviceName?: string | null;
+  durationMinutes?: number;
 }
 
 const SCROLL_STEP = 280;
@@ -34,7 +36,7 @@ function startOfToday(): Date {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 
-export default function DateStep({ schedule, selectedDate, onSelect }: DateStepProps) {
+export default function DateStep({ schedule, selectedDate, onSelect, serviceName, durationMinutes }: DateStepProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const hoursByDay = useMemo(() => getBusinessHoursByDay(schedule), [schedule]);
   const today = useMemo(() => startOfToday(), []);
@@ -43,11 +45,14 @@ export default function DateStep({ schedule, selectedDate, onSelect }: DateStepP
     return Array.from({ length: DATE_RANGE_DAYS }, (_, index) => {
       const date = new Date(today);
       date.setDate(date.getDate() + index);
-      const isOpen = (hoursByDay[date.getDay()] ?? []).length > 0;
+      const isOpen =
+        serviceName && durationMinutes && durationMinutes > 0
+          ? isDateAvailable(date, serviceName, durationMinutes)
+          : (hoursByDay[date.getDay()] ?? []).length > 0;
       const showMonth = index === 0 || date.getDate() === 1;
       return { date, isOpen, showMonth };
     });
-  }, [hoursByDay, today]);
+  }, [hoursByDay, today, serviceName, durationMinutes]);
 
   const scrollBy = (delta: number) => scrollerRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
 

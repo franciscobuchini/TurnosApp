@@ -8,11 +8,20 @@ import { twMerge } from 'tailwind-merge';
 import { Table, type TableColumn } from '@/components/ui/table';
 import ContentHeader from '@/components/ui/content-header';
 import CalendarNavigationButtons from '../../buttons/CalendarNavigationButtons';
+import { getOpeningHours } from '@/database/data';
+import { getBusinessHoursByDay } from '@/hooks/useWeekSchedule';
+import { isBusinessDayAnyUnblocked, isBusinessDayFullyBlocked } from '@/functions/scheduleCellAvailability';
 import { DAY_NAMES, MONTH_NAMES, isSameDay } from '@/utils/dateName';
 
 interface CalendarProps {
   weekDaysNames?: string[];
   selectedDate?: Date;
+  /** Selección múltiple (ej. "Bloquear día del negocio"): si se pasa, un
+      día se resalta cuando matchea cualquiera de estos, en vez de contra
+      selectedDate. onSelectDate se sigue disparando por cada click (uno a
+      la vez); es quien la usa el que decide si suma/saca del array. */
+  selectedDates?: Date[];
+  selectedDatesVariant?: 'destructive' | 'unblock';
   onSelectDate?: (date: Date) => void;
   className?: string;
 }
@@ -27,12 +36,26 @@ const CALENDAR_TABLE_HEADER_CLASS = 'bg-transparent';
 
 const CALENDAR_DAY_CIRCLE_CLASS = 'flex items-center justify-center w-8 h-8 mx-auto text-sm cursor-pointer rounded-full';
 const CALENDAR_DAY_CIRCLE_DEFAULT_CLASS = 'hover:bg-muted';
+/* Día sin horario de atención ("día libre") o bloqueado entero a mano
+   ("Bloquear día del negocio"): mismo hover que el default, pero con el
+   texto más apagado para distinguirlos de un vistazo de los días
+   normales — pisado por seleccionado/hoy (ver isSelected/isToday más
+   abajo), estos días se siguen pudiendo elegir igual. */
+const CALENDAR_DAY_CIRCLE_MUTED_CLASS = 'text-muted-foreground/50 hover:bg-muted';
 const CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS = 'opacity-30';
 const CALENDAR_DAY_CELL_CLASS = 'flex items-center justify-center cursor-pointer';
 
 const CALENDAR_TODAY_CIRCLE_CLASS = 'bg-(--palette-02) text-black font-medium rounded-full';
 
 const CALENDAR_SELECTED_CIRCLE_CLASS = 'bg-(--palette-01) text-black font-medium rounded-full';
+
+/* Selección múltiple (selectedDates, ej. "Bloquear día del negocio"): color
+   destructive en vez del palette-01 de selectedDate — ahí "seleccionado" es
+   sólo "estoy viendo este día", acá es "este día va a quedar bloqueado",
+   mismo rojo sólido que ya usan fila/columna bloqueadas en Schedule.tsx.
+   Mismo par bg/text que la variant "destructive" de Button (ver button.tsx). */
+const CALENDAR_SELECTED_DATES_CIRCLE_CLASS = 'bg-destructive text-background font-medium rounded-full';
+const CALENDAR_SELECTED_DATES_UNBLOCK_CIRCLE_CLASS = 'bg-(--palette-01) text-black font-medium rounded-full';
 
 const CALENDAR_COLUMN_ALIGN_CLASS = 'align-middle px-2 py-1 text-center';
 const CALENDAR_ROW_HEIGHT_CLASS = 'h-auto';
@@ -108,6 +131,8 @@ const getDaysInMonth = (year: number, month: number): CalendarCell[] => {
 export default function Calendar({
   weekDaysNames = MONDAY_FIRST_DAY_NAMES,
   selectedDate,
+  selectedDates,
+  selectedDatesVariant = 'destructive',
   onSelectDate,
   className,
 }: CalendarProps) {
@@ -123,6 +148,12 @@ export default function Calendar({
   for (let i = 0; i < cells.length; i += 7) {
     weeks.push(cells.slice(i, i + 7));
   }
+
+  /* Horario del negocio por día de semana — para apagar los días sin
+     ningún tramo de apertura ("día libre") y distinguirlos de los que sí
+     abren, mismo criterio que ya usa Schedule.tsx (businessRanges vacío =
+     cerrado). */
+  const hoursByDay = getBusinessHoursByDay(getOpeningHours());
 
   const prevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -145,7 +176,11 @@ export default function Calendar({
       if (!cell) return null;
 
       const isToday = isSameDay(cell.date, new Date());
-      const isSelected = selectedDate ? isSameDay(cell.date, selectedDate) : false;
+      const isMultiSelected = selectedDates?.some((date) => isSameDay(cell.date, date)) ?? false;
+      const isSelected = !isMultiSelected && selectedDate ? isSameDay(cell.date, selectedDate) : false;
+      const isDayOff = (hoursByDay[cell.date.getDay()] ?? []).length === 0;
+      const isAnyUnblocked = isBusinessDayAnyUnblocked(cell.date);
+      const isMuted = (isDayOff && !isAnyUnblocked) || isBusinessDayFullyBlocked(cell.date);
 
       return (
         <div
@@ -158,11 +193,17 @@ export default function Calendar({
           <div
             className={twMerge(
               CALENDAR_DAY_CIRCLE_CLASS,
-              isSelected
-                ? CALENDAR_SELECTED_CIRCLE_CLASS
-                : isToday
-                  ? CALENDAR_TODAY_CIRCLE_CLASS
-                  : CALENDAR_DAY_CIRCLE_DEFAULT_CLASS,
+              isMultiSelected
+                ? selectedDatesVariant === 'unblock'
+                  ? CALENDAR_SELECTED_DATES_UNBLOCK_CIRCLE_CLASS
+                  : CALENDAR_SELECTED_DATES_CIRCLE_CLASS
+                : isSelected
+                  ? CALENDAR_SELECTED_CIRCLE_CLASS
+                  : isToday
+                    ? CALENDAR_TODAY_CIRCLE_CLASS
+                    : isMuted
+                      ? CALENDAR_DAY_CIRCLE_MUTED_CLASS
+                      : CALENDAR_DAY_CIRCLE_DEFAULT_CLASS,
               !cell.isCurrentMonth ? CALENDAR_DAY_CIRCLE_OTHER_MONTH_CLASS : '',
             )}
           >

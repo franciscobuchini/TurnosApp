@@ -7,7 +7,7 @@
 */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { Plus, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Ban, Plus, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { Button } from '@/components/ui/button';
 import { canZoomIn, canZoomOut, zoomIn, zoomOut } from '@/functions/scheduleZoom';
@@ -17,10 +17,12 @@ interface ScheduleControlsProps {
   onRowHeightChange: Dispatch<SetStateAction<number>>;
   onAddShift: () => void;
   /** Flujo "Agregar turno" abierto: el botón de crear pasa a ser una "X"
-      (bg-destructive) que cierra el flujo, reemplazando al botón de
-      cancelar del sidebar. */
+      (bg-destructive) que cierra el flujo. */
   addShiftOpen?: boolean;
   onCloseAddShift?: () => void;
+  /** Modo "Bloqueos / Desbloqueos" activo en el Schedule. */
+  blockModeOpen?: boolean;
+  onToggleBlockMode?: () => void;
   className?: string;
 }
 
@@ -39,6 +41,8 @@ export default function ScheduleControls({
   onAddShift,
   addShiftOpen = false,
   onCloseAddShift,
+  blockModeOpen = false,
+  onToggleBlockMode,
   className,
 }: ScheduleControlsProps) {
   return (
@@ -52,6 +56,19 @@ export default function ScheduleControls({
         aria-label={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
         title={addShiftOpen ? 'Cancelar turno' : 'Crear turno'}
         onClick={addShiftOpen ? onCloseAddShift : onAddShift}
+      />
+      <Button
+        type="button"
+        variant={blockModeOpen ? 'destructive' : 'ghost'}
+        size="icon-lg"
+        className={twMerge(
+          CONTROL_BUTTON_CLASS,
+          blockModeOpen ? 'text-white' : 'hover:bg-destructive/15 text-muted-foreground hover:text-destructive',
+        )}
+        icon={blockModeOpen ? <X className={ICON_CLASS} /> : <Ban className={ICON_CLASS} />}
+        aria-label={blockModeOpen ? 'Cerrar modo bloqueos' : 'Bloquear o desbloquear horarios'}
+        title={blockModeOpen ? 'Cerrar modo bloqueos' : 'Bloquear / Desbloquear'}
+        onClick={onToggleBlockMode}
       />
       <Button
         type="button"

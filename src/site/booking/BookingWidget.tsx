@@ -102,6 +102,8 @@ export default function BookingWidget({ services, team, business, serviceCardSty
             onSelectDate={flow.selectDate}
             slots={flow.availableSlots}
             onSelectSlot={flow.selectSlot}
+            serviceName={flow.selectedService?.name}
+            durationMinutes={flow.durationMinutes}
           />
         )}
 

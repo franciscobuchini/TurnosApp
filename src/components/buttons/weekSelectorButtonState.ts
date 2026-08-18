@@ -15,8 +15,17 @@ const WEEK_SELECTOR_TODAY_CLASS = 'bg-transparent border border-border text-fore
 
 const WEEK_SELECTOR_SELECTED_CLASS = 'bg-muted border border-foreground/15 text-foreground hover:bg-muted';
 
-export function weekSelectorStateClass(isSelected: boolean, isToday: boolean): string {
+/* Día sin horario de atención ("día libre") o bloqueado entero a mano
+   ("Bloquear día del negocio"): bastante más apagado que el default (que
+   ya usa text-muted-foreground) para distinguirlo de un vistazo de los
+   días normales — mismo criterio de prioridad que el resto
+   (seleccionado/hoy pisan esto igual, estos días se siguen pudiendo
+   elegir). */
+const WEEK_SELECTOR_DAY_OFF_CLASS = 'bg-transparent text-muted-foreground/25 hover:bg-muted/60 hover:text-muted-foreground/60';
+
+export function weekSelectorStateClass(isSelected: boolean, isToday: boolean, isDayOff = false): string {
   if (isSelected) return WEEK_SELECTOR_SELECTED_CLASS;
   if (isToday) return WEEK_SELECTOR_TODAY_CLASS;
+  if (isDayOff) return WEEK_SELECTOR_DAY_OFF_CLASS;
   return WEEK_SELECTOR_DEFAULT_CLASS;
 }

@@ -18,14 +18,30 @@ interface ScheduleStepProps {
   onSelectDate: (date: Date) => void;
   slots: AvailableSlot[];
   onSelectSlot: (slot: AvailableSlot) => void;
+  serviceName?: string | null;
+  durationMinutes?: number;
 }
 
-export default function ScheduleStep({ schedule, selectedDate, onSelectDate, slots, onSelectSlot }: ScheduleStepProps) {
+export default function ScheduleStep({
+  schedule,
+  selectedDate,
+  onSelectDate,
+  slots,
+  onSelectSlot,
+  serviceName,
+  durationMinutes,
+}: ScheduleStepProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="px-1 text-sm text-(--site-text-muted)">Día</span>
-        <DateStep schedule={schedule} selectedDate={selectedDate} onSelect={onSelectDate} />
+        <DateStep
+          schedule={schedule}
+          selectedDate={selectedDate}
+          onSelect={onSelectDate}
+          serviceName={serviceName}
+          durationMinutes={durationMinutes}
+        />
       </div>
 
       <div className="flex flex-col gap-2">

@@ -28,6 +28,7 @@ import DetailsPanel, {
 } from '../../widgets/sidebarWidgets/DetailsPanel';
 import ConfirmDialog from '../../ui/confirm-dialog';
 import type { FiltersOption } from '../../../database/types';
+import { getAppointments } from '../../../database/data';
 import AddEntityLauncherButton from '../../buttons/AddEntityLauncherButton';
 import { TeamFilterButton, ServiceFilterButton, ClientFilterButton } from '../../widgets/sidebarWidgets/DropdownRowActions';
 import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from '../EntityView';
@@ -72,7 +73,21 @@ export default function AdminSidebar({
 
   const handleToggleServiceActive = (id: string, active: boolean) => {
     if (!active) {
-      setPendingDeactivateId(id);
+      // Solo pide confirmación si hay turnos futuros (o sin fecha pasada) con ese servicio.
+      const serviceLabel = serviceFilters.find((f) => f.id === id)?.label;
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const hasAppointments = serviceLabel
+        ? getAppointments().some((apt) => apt.service === serviceLabel && apt.date >= todayStr)
+        : false;
+
+      if (hasAppointments) {
+        setPendingDeactivateId(id);
+        return;
+      }
+
+      // Sin turnos afectados: desactivar sin confirmación.
+      toggleServiceActive(id, false);
       return;
     }
     toggleServiceActive(id, true);
@@ -154,7 +169,7 @@ export default function AdminSidebar({
           open
           onOpenChange={(open) => !open && setPendingDeactivateId(null)}
           title={`¿Desactivar "${pendingService.label}"?`}
-          description="Los clientes no van a poder reservar este servicio desde el sitio público. Los turnos que ya estén agendados van a seguir estando."
+          description={`Este servicio se va a desactivar para tus clientes. Los turnos ya asignados de "${pendingService.label}" se van a mantener.`}
           confirmText="Desactivar"
           onConfirm={() => {
             toggleServiceActive(pendingService.id, false);

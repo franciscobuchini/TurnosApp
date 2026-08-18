@@ -28,10 +28,6 @@ function SchedulePage() {
     [ctx.addShiftOpen, ctx.shiftService],
   );
 
-  // Sólo "business-hour" tiene interacción en el Schedule por ahora (ver
-  // Schedule.tsx) — los otros 3 tipos de bloqueo no activan ningún modo acá.
-  const blockMode = ctx.addShiftOpen && ctx.blockType === 'business-hour' ? 'business-hour' : null;
-
   return (
     <ScheduleView
       selectedMembers={ctx.selectedMembers}
@@ -45,18 +41,21 @@ function SchedulePage() {
       pendingSlot={ctx.shiftSlot}
       onSlotClick={ctx.selectShiftSlot}
       onAppointmentClick={ctx.addShiftOpen ? undefined : ctx.openEditAppointment}
+      onBlockClick={ctx.addShiftOpen ? undefined : ctx.openEditBlock}
       appointmentsVersion={ctx.appointmentsVersion}
       scrollToTime={ctx.scrollToTime}
       onScrollConsumed={ctx.clearScrollToTime}
       onOpenAddShift={ctx.openAddShift}
       addShiftOpen={ctx.addShiftOpen}
       onCloseAddShift={ctx.closeAddShift}
+      blockModeOpen={ctx.blockModeOpen}
+      onToggleBlockMode={ctx.toggleBlockMode}
+      onNoticeMessage={ctx.setShiftNoticeMessage}
+      onToggleBusinessDayBlock={ctx.toggleBusinessDayBlock}
+      onBlocksVersionChange={ctx.incrementBlocksVersion}
       teamFilters={ctx.teamFilters}
       toggleTeamFilter={ctx.toggleTeamFilter}
       onMemberDetails={(name) => ctx.navigate(`/admin/miembro/${encodeURIComponent(name)}`)}
-      blockMode={blockMode}
-      pendingBlockRow={ctx.pendingBlockRow}
-      onBlockRowClick={ctx.selectBlockRow}
       blocksVersion={ctx.blocksVersion}
     />
   );

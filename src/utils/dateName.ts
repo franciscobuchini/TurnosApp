@@ -33,3 +33,13 @@ export const isSameDay = (date1: Date, date2: Date): boolean => {
     date1.getFullYear() === date2.getFullYear()
   );
 };
+
+/* toDateKey: fecha en formato "YYYY-MM-DD" en horario local (no UTC, a
+   diferencia de toISOString) — el formato que usan los campos `date` de
+   ScheduleBlock/Appointment/etc. */
+export const toDateKey = (date: Date): string => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};

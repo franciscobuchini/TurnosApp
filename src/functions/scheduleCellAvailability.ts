@@ -6,16 +6,17 @@
     - "blocked"  → no se puede reservar: el miembro no realiza el servicio
                    seleccionado, la celda cae fuera del horario del negocio
                    (día cerrado = todo bloqueado), o cae dentro de un
-                   ScheduleBlock ("Crear un nuevo bloqueo").
+                   ScheduleBlock — de todo el negocio o de este miembro
+                   puntual ("Crear un nuevo bloqueo").
     - "available"→ se puede agregar un turno.
 
   El orden de prioridad es: miembro no calificado > pasado > fuera de horario
-  > bloqueo puntual.
+  > bloqueo puntual (negocio o miembro).
 */
 
 import { isSameDay } from '@/utils/dateName';
-import { getTeamMembers } from '@/database/data';
-import { isSlotWithinBusinessHours, type TimeRange } from '@/hooks/useWeekSchedule';
+import { getScheduleBlocksByDate, getTeamMembers } from '@/database/data';
+import { isSlotWithinBusinessHours, rangesCoverFullDay, type TimeRange } from '@/hooks/useWeekSchedule';
 
 export type CellAvailability = 'available' | 'past' | 'blocked';
 
@@ -42,6 +43,16 @@ export interface CellAvailabilityInput {
       sin `member`), ya resueltos por el caller — ver
       businessBlockedRanges en Schedule.tsx. */
   businessBlockedRanges?: TimeRange[];
+  /** Tramos bloqueados a mano para ESTE miembro puntual ese día
+      (ScheduleBlock con `member` igual al de esta columna) — ver
+      "Bloquear día de un miembro". */
+  memberBlockedRanges?: TimeRange[];
+  /** Tramos desbloqueados a mano para todo el negocio ese día (ScheduleBlock
+      con type === 'unblock' sin `member`). */
+  businessUnblockedRanges?: TimeRange[];
+  /** Tramos desbloqueados a mano para ESTE miembro puntual ese día
+      (ScheduleBlock con type === 'unblock' y `member`). */
+  memberUnblockedRanges?: TimeRange[];
 }
 
 function timeToMinutes(time: string): number {
@@ -50,8 +61,8 @@ function timeToMinutes(time: string): number {
 }
 
 /** Verdadero si el slot [slotMinutes, slotMinutes + durationMinutes) se
-    superpone con alguno de los rangos bloqueados. */
-function slotOverlapsRanges(slotMinutes: number, durationMinutes: number, ranges: TimeRange[]): boolean {
+    superpone con alguno de los rangos bloqueados o desbloqueados. */
+export function slotOverlapsRanges(slotMinutes: number, durationMinutes: number, ranges: TimeRange[]): boolean {
   const slotEnd = slotMinutes + durationMinutes;
   return ranges.some(
     (range) => slotMinutes < timeToMinutes(range.endTime) && slotEnd > timeToMinutes(range.startTime),
@@ -64,7 +75,7 @@ function startOfDay(date: Date): Date {
 
 /** Solo es pasado si el slot terminó por completo; el slot en curso (sobre el
     que está la línea horaria) sigue siendo reservable. */
-function isPastSlot(selectedDate: Date, slotMinutes: number, now: Date): boolean {
+export function isPastSlot(selectedDate: Date, slotMinutes: number, now: Date): boolean {
   if (selectedDate < startOfDay(now)) {
     return true;
   }
@@ -86,6 +97,9 @@ export function getCellAvailability({
   member,
   blockedMembers,
   businessBlockedRanges,
+  memberBlockedRanges,
+  businessUnblockedRanges,
+  memberUnblockedRanges,
 }: CellAvailabilityInput): CellAvailability {
   if (blockedMembers?.includes(member)) {
     return 'blocked';
@@ -95,19 +109,69 @@ export function getCellAvailability({
     return 'past';
   }
 
-  if (!isSlotWithinBusinessHours(slotMinutes, SLOT_DURATION_MINUTES, memberRanges)) {
-    return 'blocked';
-  }
-
-  if (!isSlotWithinBusinessHours(slotMinutes, SLOT_DURATION_MINUTES, businessRanges)) {
-    return 'blocked';
-  }
-
   if (businessBlockedRanges?.length && slotOverlapsRanges(slotMinutes, SLOT_DURATION_MINUTES, businessBlockedRanges)) {
     return 'blocked';
   }
 
+  if (memberBlockedRanges?.length && slotOverlapsRanges(slotMinutes, SLOT_DURATION_MINUTES, memberBlockedRanges)) {
+    return 'blocked';
+  }
+
+  const isBusinessUnblocked = businessUnblockedRanges?.length
+    ? slotOverlapsRanges(slotMinutes, SLOT_DURATION_MINUTES, businessUnblockedRanges)
+    : false;
+  const isMemberUnblocked = memberUnblockedRanges?.length
+    ? slotOverlapsRanges(slotMinutes, SLOT_DURATION_MINUTES, memberUnblockedRanges)
+    : false;
+
+  const isWithinMemberHours = isSlotWithinBusinessHours(slotMinutes, SLOT_DURATION_MINUTES, memberRanges);
+  if (!isWithinMemberHours && !isMemberUnblocked && !isBusinessUnblocked) {
+    return 'blocked';
+  }
+
+  const isWithinBusinessHours = isSlotWithinBusinessHours(slotMinutes, SLOT_DURATION_MINUTES, businessRanges);
+  if (!isWithinBusinessHours && !isBusinessUnblocked && !isMemberUnblocked) {
+    return 'blocked';
+  }
+
   return 'available';
+}
+
+/** Verdadero si hay uno o más ScheduleBlock de todo el negocio (sin
+    `member` y type !== 'unblock') que, fundidos entre sí, cubren esa fecha entera —
+    "Bloquear día del negocio", o el resultado de bloquear a mano cada
+    hora hasta completar el día. Se usa para apagar esos días en
+    Calendar/DaySelectorButtons, igual que un día sin horario de
+    atención.
+    Si hay cualquier desbloqueo de negocio ese día (parcial o total), no se
+    considera bloqueado (el desbloqueo abre el día aunque sea parcialmente). */
+export function isBusinessDayFullyBlocked(date: Date): boolean {
+  const blocks = getScheduleBlocksByDate(date).filter((block) => !block.member);
+  const unblocks = blocks.filter((block) => block.type === 'unblock');
+  // Cualquier desbloqueo de negocio ese día deja de considerarse "día bloqueado"
+  if (unblocks.length > 0) {
+    return false;
+  }
+
+  const businessRanges = blocks
+    .filter((block) => block.type !== 'unblock')
+    .map((block) => ({ startTime: block.startTime, endTime: block.endTime }));
+
+  return rangesCoverFullDay(businessRanges);
+}
+
+/** Verdadero si hay un desbloqueo que cubre el día completo del negocio (00:00-24:00). */
+export function isBusinessDayFullyUnblocked(date: Date): boolean {
+  const unblocks = getScheduleBlocksByDate(date)
+    .filter((block) => !block.member && block.type === 'unblock')
+    .map((block) => ({ startTime: block.startTime, endTime: block.endTime }));
+
+  return rangesCoverFullDay(unblocks);
+}
+
+/** Verdadero si hay al menos un desbloqueo de negocio ese día (parcial o total). */
+export function isBusinessDayAnyUnblocked(date: Date): boolean {
+  return getScheduleBlocksByDate(date).some((block) => !block.member && block.type === 'unblock');
 }
 
 /** Nombres de los miembros que NO tienen marcado el servicio seleccionado

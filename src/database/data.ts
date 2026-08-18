@@ -19,6 +19,14 @@ const BUSINESS_STORAGE_KEY = 'turnosapp.business';
 const APPOINTMENTS_STORAGE_KEY = 'turnosapp.appointments';
 const SCHEDULE_BLOCKS_STORAGE_KEY = 'turnosapp.scheduleBlocks';
 
+export const DATA_CHANGE_EVENT = 'turnosapp:datachange';
+
+function notifyDataChange(key: string) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(DATA_CHANGE_EVENT, { detail: { key } }));
+  }
+}
+
 function readObject<T>(key: string, seed: T): T {
   if (typeof localStorage === 'undefined') {
     return seed;
@@ -42,6 +50,7 @@ function writeObject<T>(key: string, value: T) {
   }
 
   localStorage.setItem(key, JSON.stringify(value));
+  notifyDataChange(key);
 }
 
 function readCollection<T>(key: string, seed: T[]): T[] {
@@ -67,6 +76,7 @@ function writeCollection<T>(key: string, value: T[]) {
   }
 
   localStorage.setItem(key, JSON.stringify(value));
+  notifyDataChange(key);
 }
 
 /* ── Getters y mutaciones de entidades ─────────────────────── */
@@ -224,6 +234,29 @@ export function saveClients(clients: Client[]) {
 
 export function addClient(client: Client): Client[] {
   const current = getClients();
+  const existing = current.find(
+    (c) =>
+      c.name.trim().toLowerCase() === client.name.trim().toLowerCase() ||
+      (client.phone && c.phone && c.phone.trim() === client.phone.trim()),
+  );
+
+  if (existing) {
+    const next = current.map((c) =>
+      c === existing
+        ? {
+            ...c,
+            appointmentsCount: (c.appointmentsCount ?? 0) + (client.appointmentsCount ?? 1),
+            totalSpent: (c.totalSpent ?? 0) + (client.totalSpent ?? 0),
+            phone: client.phone || c.phone,
+            email: client.email || c.email,
+            notes: client.notes ? (c.notes ? `${c.notes} | ${client.notes}` : client.notes) : c.notes,
+          }
+        : c,
+    );
+    saveClients(next);
+    return next;
+  }
+
   const next = [...current, client];
   saveClients(next);
   return next;

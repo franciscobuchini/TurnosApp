@@ -239,6 +239,27 @@ export function getBusinessHoursByDay(
   return byDay;
 }
 
+// Verdadero si los rangos, fundidos entre sí, cubren el día completo (00:00
+// a 24:00) sin huecos — la forma exacta en que persiste un bloqueo de
+// "Bloquear día del negocio" (ver confirmBlock en Dashboard.tsx), y también
+// el resultado de bloquear a mano cada slot del día uno por uno hasta
+// completarlo. Se usa tanto para el Schedule (mostrar "Día bloqueado") como
+// para apagar esos días en Calendar/DaySelectorButtons.
+export function rangesCoverFullDay(ranges: TimeRange[]): boolean {
+  if (ranges.length === 0) return false;
+
+  const sorted = [...ranges].sort((a, b) => a.startTime.localeCompare(b.startTime));
+  if (sorted[0].startTime !== '00:00') return false;
+
+  let cursor = sorted[0].endTime;
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].startTime > cursor) return false;
+    if (sorted[i].endTime > cursor) cursor = sorted[i].endTime;
+  }
+
+  return cursor === '24:00';
+}
+
 // Verdadero si `totalMinutes` cae dentro de alguno de los tramos en que el
 // local está abierto ese día. Límites inclusive: un horario elegido justo en
 // la apertura o el cierre es válido (se usa para habilitar/deshabilitar

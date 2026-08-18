@@ -34,6 +34,11 @@
   /* Acento */
   --color-accent: #e4f77a;     /* botón "primary": lima, con texto oscuro encima */
   --color-danger: #ef4444;     /* eliminar, errores */
+  --color-blocked: #5c1f1f;    /* fila/columna/celda bloqueada en el Schedule (Crear un nuevo bloqueo) — sólido
+                                   a propósito, no un --color-danger translúcido: si dos bloqueos se superponen
+                                   (ej. hora del negocio + día de un miembro, el mismo horario), pintar el mismo
+                                   sólido dos veces se ve igual que pintarlo una — con transparencia, en cambio,
+                                   se ven encima y componen un tercer tono que no significa nada. */
 
   /* Paleta pastel decorativa: colores de servicio (ColorPicker) y
      resaltados del Calendar (hoy/seleccionado). No confundir con
@@ -94,6 +99,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-blocked: var(--blocked);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -117,6 +123,7 @@
   --accent: var(--color-field);
   --accent-foreground: var(--color-text);
   --destructive: var(--color-danger);
+  --blocked: var(--color-blocked);
   --border: var(--color-border);
   --input: var(--color-field);
   --ring: var(--color-text-muted);

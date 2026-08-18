@@ -128,8 +128,9 @@ export function parseServiceDurationMinutes(duration: string): number {
  * en `date`, agregados entre todos los profesionales calificados. Un slot
  * sólo se ofrece si entra completo dentro de un hueco libre (horario del
  * negocio ∩ horario del profesional, menos sus turnos ya reservados y menos
- * cualquier ScheduleBlock de todo el negocio para ese día — ver "Crear un
- * nuevo bloqueo"). En el día de hoy se descartan los horarios ya pasados.
+ * cualquier ScheduleBlock que aplique — de todo el negocio o de ese
+ * profesional puntual, ver "Crear un nuevo bloqueo"). En el día de hoy se
+ * descartan los horarios ya pasados.
  */
 export function getAvailableSlots(
   date: Date,
@@ -142,10 +143,7 @@ export function getAvailableSlots(
   }
 
   const dayOfWeek = date.getDay();
-  const businessRanges = getBusinessHoursByDay(getOpeningHours())[dayOfWeek] ?? [];
-  if (businessRanges.length === 0) {
-    return [];
-  }
+  const rawBusinessRanges = getBusinessHoursByDay(getOpeningHours())[dayOfWeek] ?? [];
 
   const qualifiedMembers = getQualifiedMembers(serviceName);
   if (qualifiedMembers.length === 0) {
@@ -153,28 +151,85 @@ export function getAvailableSlots(
   }
 
   const appointmentsThatDay = getAppointmentsByDate(date);
-  // Sólo los bloqueos de todo el negocio (sin `member`) afectan acá — un
-  // bloqueo puntual de un miembro (todavía no implementado, ver
-  // ScheduleBlock en types.ts) restaría sólo de ese profesional.
-  const businessBlockedRanges: TimeRange[] = getScheduleBlocksByDate(date)
-    .filter((block) => !block.member)
+
+  const blocksThatDay = getScheduleBlocksByDate(date);
+  const businessBlockedRanges: TimeRange[] = blocksThatDay
+    .filter((block) => !block.member && block.type !== 'unblock')
     .map((block) => ({ startTime: block.startTime, endTime: block.endTime }));
+  const businessUnblockedRanges: TimeRange[] = blocksThatDay
+    .filter((block) => !block.member && block.type === 'unblock')
+    .map((block) => ({ startTime: block.startTime, endTime: block.endTime }));
+
+  const memberBlockedRangesByMember = new Map<string, TimeRange[]>();
+  const memberUnblockedRangesByMember = new Map<string, TimeRange[]>();
+  for (const block of blocksThatDay) {
+    if (!block.member) continue;
+    if (block.type === 'unblock') {
+      const ranges = memberUnblockedRangesByMember.get(block.member) ?? [];
+      ranges.push({ startTime: block.startTime, endTime: block.endTime });
+      memberUnblockedRangesByMember.set(block.member, ranges);
+    } else {
+      const ranges = memberBlockedRangesByMember.get(block.member) ?? [];
+      ranges.push({ startTime: block.startTime, endTime: block.endTime });
+      memberBlockedRangesByMember.set(block.member, ranges);
+    }
+  }
+
+  // Tramos efectivos del negocio: horario base + desbloqueos de negocio
+  const businessRanges: TimeRange[] = [];
+  const mergedBusiness = [...rawBusinessRanges, ...businessUnblockedRanges];
+  if (mergedBusiness.length > 0) {
+    const sorted = [...mergedBusiness].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    businessRanges.push({ ...sorted[0] });
+    for (let i = 1; i < sorted.length; i++) {
+      const last = businessRanges[businessRanges.length - 1];
+      if (sorted[i].startTime <= last.endTime) {
+        if (sorted[i].endTime > last.endTime) last.endTime = sorted[i].endTime;
+      } else {
+        businessRanges.push({ ...sorted[i] });
+      }
+    }
+  }
+
+  if (businessRanges.length === 0) {
+    return [];
+  }
+
   const isToday = isSameDay(date, now);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
   const membersByStart = new Map<number, Set<string>>();
 
   for (const member of qualifiedMembers) {
-    // getTeamMembers() ya normaliza schedule a OpeningHoursEntry[] en runtime;
-    // el tipo lo declara más ancho (OpeningHoursEntry[] | string) porque
-    // matchea la forma cruda del seed. Guard defensivo, no debería pegar.
     const memberSchedule = Array.isArray(member.schedule) ? member.schedule : [];
-    const memberRanges = getBusinessHoursByDay(memberSchedule)[dayOfWeek] ?? [];
-    if (memberRanges.length === 0) {
+    const baseMemberRanges = getBusinessHoursByDay(memberSchedule)[dayOfWeek] ?? [];
+    const memberUnblocks = memberUnblockedRangesByMember.get(member.name) ?? [];
+
+    const memberHasFullDayUnblock = memberUnblocks.some((u) => u.startTime === '00:00' && u.endTime === '24:00');
+    let effectiveMemberRanges: TimeRange[] = [];
+    if (memberHasFullDayUnblock) {
+      effectiveMemberRanges = businessRanges;
+    } else {
+      const combined = [...baseMemberRanges, ...memberUnblocks];
+      if (combined.length > 0) {
+        const sorted = [...combined].sort((a, b) => a.startTime.localeCompare(b.startTime));
+        effectiveMemberRanges.push({ ...sorted[0] });
+        for (let i = 1; i < sorted.length; i++) {
+          const last = effectiveMemberRanges[effectiveMemberRanges.length - 1];
+          if (sorted[i].startTime <= last.endTime) {
+            if (sorted[i].endTime > last.endTime) last.endTime = sorted[i].endTime;
+          } else {
+            effectiveMemberRanges.push({ ...sorted[i] });
+          }
+        }
+      }
+    }
+
+    if (effectiveMemberRanges.length === 0) {
       continue;
     }
 
-    const openRanges = intersectRanges(businessRanges, memberRanges);
+    const openRanges = intersectRanges(businessRanges, effectiveMemberRanges);
     if (openRanges.length === 0) {
       continue;
     }
@@ -183,7 +238,9 @@ export function getAvailableSlots(
       .filter((appointment) => appointment.member === member.name)
       .map((appointment) => ({ startTime: appointment.startTime, endTime: appointment.endTime }));
 
-    const freeRanges = subtractRanges(openRanges, [...busyRanges, ...businessBlockedRanges]);
+    const memberBlockedRanges = memberBlockedRangesByMember.get(member.name) ?? [];
+
+    const freeRanges = subtractRanges(openRanges, [...busyRanges, ...businessBlockedRanges, ...memberBlockedRanges]);
 
     for (const range of freeRanges) {
       const rangeStart = timeToMinutes(range.startTime);
@@ -191,7 +248,7 @@ export function getAvailableSlots(
       const firstSlot = Math.ceil(rangeStart / SLOT_STEP_MINUTES) * SLOT_STEP_MINUTES;
 
       for (let slotStart = firstSlot; slotStart + durationMinutes <= rangeEnd; slotStart += SLOT_STEP_MINUTES) {
-        if (isToday && slotStart < nowMinutes) {
+        if (isToday && slotStart <= nowMinutes) {
           continue;
         }
         if (!membersByStart.has(slotStart)) {
@@ -209,6 +266,16 @@ export function getAvailableSlots(
       endTime: minutesToTime(startMinutes + durationMinutes),
       memberNames: Array.from(members),
     }));
+}
+
+/** Consulta rápida si una fecha tiene al menos un horario disponible para el servicio y duración. */
+export function isDateAvailable(
+  date: Date,
+  serviceName: string,
+  durationMinutes: number,
+  now: Date = new Date(),
+): boolean {
+  return getAvailableSlots(date, serviceName, durationMinutes, now).length > 0;
 }
 
 /**
