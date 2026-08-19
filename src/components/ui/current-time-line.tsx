@@ -38,13 +38,17 @@ interface CurrentTimeLineProps {
       calcular la posición (se mide el alto real renderizado), solo dispara
       que se vuelva a medir cuando cambia el zoom. */
   rowHeightPx: number;
+  /** Ancho actual de la columna de horarios del Schedule. */
+  labelColumnWidthPx: number;
 }
 
-const CURRENT_TIME_LINE_CLASS = 'absolute left-16 right-0 h-0.5 scroll-mt-4 pointer-events-none bg-muted-foreground rounded-full';
+const CURRENT_TIME_LINE_CLASS = 'absolute right-0 h-0.5 scroll-mt-4 pointer-events-none bg-muted-foreground rounded-full';
 
-/* Badge con la hora actual, en la columna de horas (w-16), centrado sobre
-   la línea — mismo left-0/w-16 que las etiquetas de fila, para quedar
-   alineado con ellas. */
+const CURRENT_TIME_BADGE_WIDTH_PX = 64;
+
+/* Badge con la hora actual: mantiene el ancho normal aunque la columna de
+   horas se compacte, pero recalcula su left para seguir centrado sobre esa
+   columna y correrse un poco hacia la izquierda en tamaño reducido. */
 const CURRENT_TIME_BADGE_CLASS =
   'absolute left-0 z-20 flex w-16 -translate-y-1/2 justify-center pointer-events-none';
 
@@ -61,7 +65,7 @@ function formatHoursMinutes(date: Date): string {
    actual): la misma niebla de BlockedCell. z-20 (no z-30): por debajo del
    header sticky de la tabla, para no taparlo al scrollear. */
 const PAST_TIME_OVERLAY_CLASS = twMerge(
-  'absolute left-16 right-0 top-0 z-20 pointer-events-none',
+  'absolute right-0 top-0 z-20 pointer-events-none',
   SCHEDULE_FOG_CLASS,
 );
 
@@ -71,6 +75,7 @@ export default function CurrentTimeLine({
   windowStartSlot,
   windowEndSlot,
   rowHeightPx,
+  labelColumnWidthPx,
 }: CurrentTimeLineProps) {
   const [now, setNow] = useState(new Date());
   const [lineTop, setLineTop] = useState<number | null>(null);
@@ -140,28 +145,30 @@ export default function CurrentTimeLine({
     } else {
       setLineTop(null);
     }
-  }, [isToday, isBeforeWindow, isWithinWindow, minutesElapsed, windowStartSlot, windowEndSlot, rowHeightPx]);
+  }, [isToday, isBeforeWindow, isWithinWindow, minutesElapsed, windowStartSlot, windowEndSlot, rowHeightPx, labelColumnWidthPx]);
 
   if (!isToday || isBeforeWindow) return null;
 
   const overlayHeight = isWithinWindow ? lineTop : fullWindowHeight;
+  const contentLeftStyle = { left: `${labelColumnWidthPx}px` };
+  const badgeLeftPx = (labelColumnWidthPx - CURRENT_TIME_BADGE_WIDTH_PX) / 2;
 
   return (
     <>
       <div ref={anchorRef} className="absolute top-0 left-0 h-0 w-0" aria-hidden />
       {overlayHeight !== null && (
-        <div data-past-time-overlay className={PAST_TIME_OVERLAY_CLASS} style={{ height: `${overlayHeight}px` }} />
+        <div data-past-time-overlay className={PAST_TIME_OVERLAY_CLASS} style={{ ...contentLeftStyle, height: `${overlayHeight}px` }} />
       )}
       {isWithinWindow && (
         <div
           ref={lineRef}
           data-current-time-line
           className={twMerge(CURRENT_TIME_LINE_CLASS, className)}
-          style={lineTop !== null ? { top: `${lineTop}px` } : undefined}
+          style={lineTop !== null ? { ...contentLeftStyle, top: `${lineTop}px` } : contentLeftStyle}
         />
       )}
       {isWithinWindow && lineTop !== null && (
-        <div data-current-time-badge className={CURRENT_TIME_BADGE_CLASS} style={{ top: `${lineTop}px` }}>
+        <div data-current-time-badge className={CURRENT_TIME_BADGE_CLASS} style={{ left: `${badgeLeftPx}px`, top: `${lineTop}px` }}>
           <span className={CURRENT_TIME_BADGE_PILL_CLASS}>{formatHoursMinutes(now)}</span>
         </div>
       )}

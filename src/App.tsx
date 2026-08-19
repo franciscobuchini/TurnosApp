@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-
 import Background from './components/layout/Background';
 import Home from './pages/landing/Home';
 import Terms from './pages/landing/Terms';
+import NotFound from './pages/landing/NotFound';
 import Dashboard, { useAdminContext } from './pages/admin/Dashboard';
 import Personalizacion from './pages/admin/Personalizacion';
 import SettingsBusinessView from './components/views/SettingsBusinessView';
@@ -58,6 +59,7 @@ function SchedulePage() {
       toggleTeamFilter={ctx.toggleTeamFilter}
       onMemberDetails={(name) => ctx.navigate(`/admin/miembro/${encodeURIComponent(name)}`)}
       blocksVersion={ctx.blocksVersion}
+      onColumnCapacityChange={ctx.setColumnCapacity}
     />
   );
 }
@@ -180,6 +182,8 @@ function App() {
           <Route path="cliente/:name/editar" element={<ClientPage mode="edit" />} />
           <Route path="cliente/:name" element={<ClientPage mode="view" />} />
         </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
       </div>
       </UnsavedChangesProvider>

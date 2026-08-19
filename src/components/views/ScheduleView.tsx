@@ -53,6 +53,9 @@ interface ScheduleViewProps {
   /** Se dispara al hacer click en una tarjeta "Horario bloqueado" ya confirmada. */
   onBlockClick?: (block: ScheduleBlock) => void;
   blocksVersion?: number;
+  /** Cupo de columnas de miembro que entran en el ancho real del Schedule —
+      lo mide y reporta Schedule.tsx, ver useTeamFilters.ts. */
+  onColumnCapacityChange?: (count: number) => void;
   children?: ReactNode;
 }
 
@@ -84,6 +87,7 @@ export default function ScheduleView({
   onMemberDetails,
   onBlockClick,
   blocksVersion,
+  onColumnCapacityChange,
   children,
 }: ScheduleViewProps) {
   return (
@@ -119,6 +123,7 @@ export default function ScheduleView({
         onMemberDetails={onMemberDetails}
         onBlockClick={onBlockClick}
         blocksVersion={blocksVersion}
+        onColumnCapacityChange={onColumnCapacityChange}
       />
       {children}
     </MainContent>

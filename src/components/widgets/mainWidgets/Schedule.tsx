@@ -83,6 +83,11 @@ interface ScheduleProps {
   onBlockClick?: (block: ScheduleBlock) => void;
   /** Fuerza a recalcular los bloqueos leídos de la BBDD tras crear uno nuevo. */
   blocksVersion?: number;
+  /** Se dispara con cuántas columnas de miembro entran en el ancho real
+      medido (ver visibleColumnCount) — quien arma `members` (useTeamFilters,
+      vía Dashboard) lo usa para mantener "Equipo" en sincro con lo que
+      realmente se puede mostrar (ver el comentario de useTeamFilters.ts). */
+  onColumnCapacityChange?: (count: number) => void;
 }
 
 /* Solo se redondea abajo (rounded-b-3xl): las esquinas de arriba no se ven
@@ -113,8 +118,10 @@ const SCHEDULE_TABLE_CLASS = 'bg-(--color-surface-solid)';
 const SCHEDULE_TABLE_HEADER_CLASS = 'bg-(--color-surface-solid)';
 
 const SCHEDULE_LABEL_CELL_CLASS = 'relative w-16 text-center';
+const SCHEDULE_LABEL_CELL_COMPACT_CLASS = 'w-11 px-1';
 
 const SCHEDULE_LABEL_TEXT_CLASS = 'absolute inset-x-0 -top-[5%] -translate-y-1/2 font-thin text-muted-foreground leading-none';
+const SCHEDULE_LABEL_TEXT_COMPACT_CLASS = 'text-xs';
 
 const SCHEDULE_LABEL_HEADER_CLASS = 'sr-only';
 
@@ -169,6 +176,26 @@ const BUSINESS_HOURS_PADDING_SLOTS = 30 / SLOT_DURATION_MINUTES;
 
 /* Alto fijo del header de la tabla (TableHead es h-10). */
 const HEADER_HEIGHT_PX = 40;
+
+/* Ancho de la columna fija de horas — también sirve para calcular cuántas
+   columnas de miembro entran en el ancho real (ver visibleColumnCount). */
+const LABEL_COLUMN_WIDTH_PX = 64;
+const LABEL_COLUMN_COMPACT_WIDTH_PX = 44;
+const SCHEDULE_COMPACT_WIDTH_PX = 520;
+
+/* Ancho mínimo legible de una columna de miembro (avatar + nombre en el
+   header, AppointmentCard con hora/servicio adentro): por debajo de esto se
+   prefiere ocultar la columna entera antes que angostarla hasta ser
+   ilegible. Misma "lógica responsive" que DaySelectorButtons.tsx (ocultar
+   por falta de espacio en vez de encoger sin límite), pero acá el ancho se
+   mide de verdad (ResizeObserver, ver scrollWidthPx) en vez de breakpoints
+   @container fijos — a diferencia de los 7 días fijos de la semana, la
+   cantidad de columnas es variable (depende de cuántos miembros están
+   tildados en Equipo). Subido de 140 a 200: con 140 las columnas quedaban
+   demasiado angostas (turnos ilegibles) antes de que la app empezara a
+   ocultarlas — el recorte tiene que arrancar en una resolución más alta,
+   con más margen. */
+const MIN_MEMBER_COLUMN_WIDTH_PX = 200;
 
 /* Click target de modo bloqueo ("Bloquear hora del negocio" y "Bloquear
    horario de un miembro"): cada celda que participa pone su propio overlay
@@ -519,6 +546,7 @@ export default function Schedule({
   onMemberDetails,
   onBlockClick,
   blocksVersion,
+  onColumnCapacityChange,
 }: ScheduleProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -568,13 +596,26 @@ export default function Schedule({
      algo (aunque sea "fuera de horario"). Se remide en el mismo momento que
      headerHeightPx (cambia de zoom) y también ante un resize de ventana. */
   const [scrollHeightPx, setScrollHeightPx] = useState(0);
+  /* Ancho real del contenedor con scroll — determina cuántas columnas de
+     miembro entran (ver visibleColumnCount más abajo). */
+  const [scrollWidthPx, setScrollWidthPx] = useState(0);
+  /* ResizeObserver en vez de (o además de) un listener de window: el ancho/
+     alto disponible también cambia cuando se abre/cierra un panel de la
+     sidebar sin que la ventana en sí cambie de tamaño, y un listener de
+     'resize' no se entera de eso. */
   useLayoutEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
+
     const measure = () => {
-      if (scrollRef.current) setScrollHeightPx(scrollRef.current.clientHeight);
+      setScrollHeightPx(node.clientHeight);
+      setScrollWidthPx(node.clientWidth);
     };
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
   }, [rowHeightPx]);
 
   /* Ticker de un minuto: refresca "now" (turnos vivos/pasados, celdas ya
@@ -939,16 +980,27 @@ export default function Schedule({
     }
   };
 
+  const isCompactSchedule = scrollWidthPx > 0 && scrollWidthPx < SCHEDULE_COMPACT_WIDTH_PX;
+  const labelColumnWidthPx = isCompactSchedule ? LABEL_COLUMN_COMPACT_WIDTH_PX : LABEL_COLUMN_WIDTH_PX;
+  const labelCellClassName = twMerge(
+    SCHEDULE_LABEL_CELL_CLASS,
+    isCompactSchedule && SCHEDULE_LABEL_CELL_COMPACT_CLASS,
+  );
+  const labelTextClassName = twMerge(
+    SCHEDULE_LABEL_TEXT_CLASS,
+    isCompactSchedule && SCHEDULE_LABEL_TEXT_COMPACT_CLASS,
+  );
+
   /* Columna fija de etiquetas de hora */
   const labelColumn: TableColumn<string> = {
     key: 'label',
     header: <span className={SCHEDULE_LABEL_HEADER_CLASS}>Horas</span>,
-    width: '64px',
-    cellClassName: SCHEDULE_LABEL_CELL_CLASS,
+    width: `${labelColumnWidthPx}px`,
+    cellClassName: labelCellClassName,
     cell: (slot, index) => {
       const absoluteIndex = windowStartSlot + index;
       const labelContent =
-        index === 0 ? '' : absoluteIndex % 4 === 0 ? <span className={SCHEDULE_LABEL_TEXT_CLASS}>{slot}</span> : '';
+        index === 0 ? '' : absoluteIndex % 4 === 0 ? <span className={labelTextClassName}>{slot}</span> : '';
 
       if (!blockModeOpen) {
         return labelContent;
@@ -980,17 +1032,45 @@ export default function Schedule({
     },
   };
 
-  /* Una columna por cada miembro seleccionado. Si no hay ninguno, o si el
-     día está cerrado (no tiene sentido mostrar columnas de miembros para un
-     día sin horario), se usa una columna vacía sin bordes para mantener el
-     layout. */
+  /* Cuántas columnas de miembro entran en el ancho real medido (ver el
+     ResizeObserver de scrollWidthPx más arriba) — 0 todavía sin medir
+     significa "no recortar nada" (se muestran todos los que llegaron por
+     props), para no parpadear a 1 columna en el primer render antes de que
+     el layout se asiente. Misma "lógica responsive" que DaySelectorButtons
+     (ocultar por falta de espacio), pero con cantidad de columnas en vez de
+     cantidad de botones. */
+  const visibleColumnCount = scrollWidthPx > 0
+    ? Math.max(1, Math.floor((scrollWidthPx - labelColumnWidthPx) / MIN_MEMBER_COLUMN_WIDTH_PX))
+    : members.length;
+
+  /* Reporta el cupo hacia arriba (useTeamFilters, vía Dashboard) para que
+     "Equipo" sepa cuántos miembros puede tener tildados a la vez — y, si
+     alguien tilda uno de más, destilde otro solo para hacer lugar. */
+  useEffect(() => {
+    if (scrollWidthPx <= 0) return;
+    onColumnCapacityChange?.(visibleColumnCount);
+  }, [visibleColumnCount, scrollWidthPx, onColumnCapacityChange]);
+
+  /* Corte puramente visual — a propósito no toca `members`/el estado
+     "tildado" de Equipo (ver useTeamFilters.ts): si sólo entran los
+     primeros N, son los que se renderizan como columna, pero el resto
+     sigue "elegido" aunque no se vea ahora mismo. Así, si el ancho vuelve a
+     crecer (se agranda la ventana, se cierra un panel de la sidebar),
+     `visibleColumnCount` sube solo y las columnas que habían desaparecido
+     reaparecen sin que nadie tenga que volver a tildarlas en Equipo. */
+  const visibleMembers = scrollWidthPx > 0 ? members.slice(0, visibleColumnCount) : members;
+
+  /* Una columna por cada miembro seleccionado (y visible, ver visibleMembers
+     arriba). Si no hay ninguno, o si el día está cerrado (no tiene sentido
+     mostrar columnas de miembros para un día sin horario), se usa una
+     columna vacía sin bordes para mantener el layout. */
   const isEmpty = members.length === 0;
 
   const showBlankGrid = isEmpty || isFullyClosed || isDayFullyBlocked;
 
   const memberColumns: TableColumn<string>[] = showBlankGrid
     ? [{ key: 'empty', header: null, cell: () => null }]
-    : members.map((member) => {
+    : visibleMembers.map((member) => {
         const teamFilter = teamFilters?.find((filter) => filter.label === member);
         const memberHeader = (
           <span className={SCHEDULE_MEMBER_HEADER_CLASS}>
@@ -1307,6 +1387,7 @@ export default function Schedule({
               windowStartSlot={windowStartSlot}
               windowEndSlot={windowEndSlot}
               rowHeightPx={rowHeightPx}
+              labelColumnWidthPx={labelColumnWidthPx}
             />
           )}
         </div>
@@ -1333,4 +1414,3 @@ export default function Schedule({
     </Box>
   );
 }
-

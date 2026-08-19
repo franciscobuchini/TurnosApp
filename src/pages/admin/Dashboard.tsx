@@ -62,6 +62,9 @@ import NotificationsSidebar from '../../components/views/sidebarViews/Notificati
 import Sidebar from '../../components/layout/Sidebar';
 import Calendar from '../../components/widgets/sidebarWidgets/Calendar';
 import Toast from '../../components/ui/toast';
+import ConfirmDialog from '../../components/ui/confirm-dialog';
+import OnboardingWizard from '../../components/widgets/onboarding/OnboardingWizard';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 import { DATE_RANGE_DAYS, getFirstAvailableDate, parseServiceDurationMinutes } from '@/functions/bookingAvailability';
 
@@ -114,6 +117,10 @@ export interface AdminContext {
   teamFilters: FiltersOption[];
   selectedMembers: string[];
   toggleTeamFilter: (id: string, checked: boolean) => void;
+  /** Cupo de columnas de miembro que entran en el ancho real del Schedule
+      (lo mide y reporta Schedule.tsx) — ver el comentario de
+      useTeamFilters.ts para el criterio completo. */
+  setColumnCapacity: (count: number) => void;
   serviceFilters: DetailsPanelOption[];
   toggleServiceFilter: (id: string, checked: boolean) => void;
   /** Persiste service.active (a diferencia de toggleServiceFilter, que sólo
@@ -233,7 +240,7 @@ export interface AdminContext {
 function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { teamFilters, selectedMembers, toggleTeamFilter, removeTeamFilter } = useTeamFilters(getTeamFilters);
+  const { teamFilters, selectedMembers, toggleTeamFilter, removeTeamFilter, setColumnCapacity } = useTeamFilters(getTeamFilters);
   const [serviceFilters, setServiceFilters] = useState<DetailsPanelOption[]>(() =>
     getservices().map((service) => ({
       id: service.name.toLowerCase().replace(/\s+/g, '-'),
@@ -256,10 +263,22 @@ function Dashboard() {
     dbUpdateService(target.name, { ...target, active });
     setServiceFilters((current) => current.map((f) => (f.id === id ? { ...f, active } : f)));
   };
+  const { setDirty: setUnsavedDirty, confirmNavigation } = useUnsavedChanges();
+
   const [addShiftOpen, setAddShiftOpen] = useState(false);
   const [blockModeOpen, setBlockModeOpen] = useState(false);
+  /* Se pone en true ante cualquier click en modo Bloqueos/Desbloqueos
+     (celda, fila, header de miembro o día del Calendar) — registrado en
+     useUnsavedChanges para que salir a otro apartado (AppMenubar, que ya
+     pasa todo por confirmNavigation) pida guardar o descartar en vez de
+     perder el bloqueo en curso en silencio. */
+  const [blockModeHasChanges, setBlockModeHasChanges] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => getBookingRequests());
+  /* Wizard de bienvenida (OnboardingWizard): sólo se abre vía location.state
+     al llegar desde "Crear cuenta" en Home.tsx (ver el useEffect de
+     location.state más abajo). */
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   const openNotifications = () => {
     setEditingAppointment(null);
@@ -279,12 +298,19 @@ function Dashboard() {
 
 
 
+  /* "Crear turno" no navega a otra ruta (abre un panel dentro de la misma
+     /admin), pero igual puede tapar una vista con cambios sin guardar
+     (modo Bloqueos/Desbloqueos) — pasa por confirmNavigation por la misma
+     razón que toggleNotifications (ver más abajo) y los ítems de
+     AppMenubar. */
   const openAddShift = () => {
-    setNotificationsOpen(false);
-    setEditingAppointment(null);
-    setEditingBlock(null);
-    setBlockModeOpen(false);
-    setAddShiftOpen(true);
+    confirmNavigation(() => {
+      setNotificationsOpen(false);
+      setEditingAppointment(null);
+      setEditingBlock(null);
+      setBlockModeOpen(false);
+      setAddShiftOpen(true);
+    });
   };
   const closeAddShift = () => {
     setAddShiftOpen(false);
@@ -300,14 +326,26 @@ function Dashboard() {
 
   const [blockModeSnapshot, setBlockModeSnapshot] = useState<ScheduleBlock[] | null>(null);
 
+  /* Entrar a modo Bloqueos/Desbloqueos pide el PIN de administrador (mismo
+     criterio que "Editar web" en AppMenubar y "Desactivar" en AdminSidebar
+     — una acción sensible, cambia la disponibilidad de turnos del
+     negocio). Salir (guardar) no lo vuelve a pedir: ya se confirmó al
+     entrar. */
+  const [blockModePinOpen, setBlockModePinOpen] = useState(false);
+
+  const openBlockMode = () => {
+    setNotificationsOpen(false);
+    closeAddShift();
+    setEditingAppointment(null);
+    setEditingBlock(null);
+    setBlockModeSnapshot(getScheduleBlocks());
+    setBlockModeHasChanges(false);
+    setBlockModeOpen(true);
+  };
+
   const toggleBlockMode = () => {
     if (!blockModeOpen) {
-      setNotificationsOpen(false);
-      closeAddShift();
-      setEditingAppointment(null);
-      setEditingBlock(null);
-      setBlockModeSnapshot(getScheduleBlocks());
-      setBlockModeOpen(true);
+      setBlockModePinOpen(true);
     } else {
       saveBlockMode();
     }
@@ -316,6 +354,7 @@ function Dashboard() {
 
   const saveBlockMode = () => {
     setBlockModeSnapshot(null);
+    setBlockModeHasChanges(false);
     setBlockModeOpen(false);
     setBlocksVersion((v) => v + 1);
   };
@@ -326,12 +365,25 @@ function Dashboard() {
       setBlockModeSnapshot(null);
       setBlocksVersion((v) => v + 1);
     }
+    setBlockModeHasChanges(false);
     setBlockModeOpen(false);
   };
 
   const closeBlockMode = () => {
     cancelBlockMode();
   };
+
+  /* Registra el borrador del modo Bloqueos/Desbloqueos en la guarda global
+     de useUnsavedChanges: al navegar a otro apartado (AppMenubar, que ya
+     pasa todo por confirmNavigation) con clicks sin confirmar, pide
+     "Guardar y salir" o "Salir sin guardar". cancelBlockMode va como
+     onDiscard (no alcanza con el efecto de location.pathname de más abajo:
+     ese sólo corre mientras Dashboard sigue montado, y no lo sigue al
+     navegar a una ruta top-level como "/personalizacion", fuera de
+     <Dashboard>). */
+  useEffect(() => {
+    setUnsavedDirty(blockModeOpen && blockModeHasChanges, saveBlockMode, cancelBlockMode);
+  }, [blockModeOpen, blockModeHasChanges, setUnsavedDirty, saveBlockMode, cancelBlockMode]);
 
   const toggleBusinessDayBlock = (date: Date) => {
     const hoursByDay = getBusinessHoursByDay(getOpeningHours());
@@ -346,11 +398,14 @@ function Dashboard() {
     if (!result.success && result.message) {
       setShiftNoticeMessage(result.message);
     } else {
-      setBlocksVersion((v) => v + 1);
+      incrementBlocksVersion();
     }
   };
 
-  const incrementBlocksVersion = () => setBlocksVersion((v) => v + 1);
+  const incrementBlocksVersion = () => {
+    setBlocksVersion((v) => v + 1);
+    if (blockModeOpen) setBlockModeHasChanges(true);
+  };
 
   const [shiftService, setShiftService] = useState<string | null>(null);
   const [shiftNoticeMessage, setShiftNoticeMessage] = useState<string | null>(null);
@@ -714,6 +769,7 @@ function Dashboard() {
     setEditingBlock(null);
     setAddShiftOpen(false);
     setBlockModeOpen(false);
+    setBlockModeHasChanges(false);
     setNotificationsOpen(false);
     setShiftService(null);
     setShiftSlot(null);
@@ -726,13 +782,17 @@ function Dashboard() {
   }, [location.pathname]);
 
   useEffect(() => {
-    const state = location.state as { openAddShift?: boolean; openNotifications?: boolean } | null;
+    const state = location.state as { openAddShift?: boolean; openNotifications?: boolean; onboarding?: boolean } | null;
     if (state?.openAddShift) {
       setAddShiftOpen(true);
       navigate(location.pathname, { replace: true, state: null });
     }
     if (state?.openNotifications) {
       openNotifications();
+      navigate(location.pathname, { replace: true, state: null });
+    }
+    if (state?.onboarding) {
+      setOnboardingOpen(true);
       navigate(location.pathname, { replace: true, state: null });
     }
   }, [location.state, location.pathname, navigate]);
@@ -921,6 +981,7 @@ function Dashboard() {
   const context: AdminContext = {
     teamFilters,
     selectedMembers,
+    setColumnCapacity,
     toggleTeamFilter,
     serviceFilters,
     toggleServiceFilter,
@@ -1074,6 +1135,16 @@ function Dashboard() {
         <Outlet context={context} />
       </Layout>
       <Toast message={shiftNoticeMessage} onDismiss={() => setShiftNoticeMessage(null)} />
+      <OnboardingWizard open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
+      <ConfirmDialog
+        open={blockModePinOpen}
+        onOpenChange={setBlockModePinOpen}
+        title="¿Bloquear o desbloquear horarios?"
+        description="Vas a cambiar la disponibilidad de turnos del negocio."
+        confirmText="Continuar"
+        onConfirm={openBlockMode}
+        requirePin
+      />
     </>
   );
 }

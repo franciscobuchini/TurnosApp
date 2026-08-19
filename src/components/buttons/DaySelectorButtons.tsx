@@ -31,6 +31,13 @@ const WEEK_SELECTOR_DAY_LABEL_CLASS = 'text-l font-normal';
 
 const WEEK_SELECTOR_DAY_NUMBER_CLASS = 'text-5xl px-1';
 
+function daySelectorNoHoverClass(isSelected: boolean, isToday: boolean, isDayOff: boolean): string {
+  if (isSelected) return 'hover:bg-muted hover:text-foreground';
+  if (isToday) return 'hover:bg-transparent hover:text-foreground';
+  if (isDayOff) return 'hover:bg-transparent hover:text-muted-foreground/25';
+  return 'hover:bg-transparent hover:text-muted-foreground';
+}
+
 export default function DaySelectorButtons({
   weekDays,
   selectedDate,
@@ -77,6 +84,7 @@ export default function DaySelectorButtons({
               WEEK_SELECTOR_DAY_BUTTON_CLASS,
               visibilityClassName,
               weekSelectorStateClass(isSelected, isToday, isDayOff),
+              daySelectorNoHoverClass(isSelected, isToday, isDayOff),
             )}
           >
             <span className={WEEK_SELECTOR_DAY_COLUMN_CLASS}>

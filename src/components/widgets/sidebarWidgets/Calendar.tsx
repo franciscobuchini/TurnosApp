@@ -296,7 +296,7 @@ export default function Calendar({
   }));
 
   return (
-    <div className={twMerge(CALENDAR_CLASS, className)}>
+    <div data-calendar className={twMerge(CALENDAR_CLASS, className)}>
       {/* Cabecera de navegación */}
       <div>
         <ContentHeader

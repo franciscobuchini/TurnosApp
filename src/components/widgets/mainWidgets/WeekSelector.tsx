@@ -29,8 +29,8 @@ const WEEK_SELECTOR_DAYS_CLASS = '@container flex flex-1 justify-around gap-2 px
    viewDate; hacer click en un día del selector sólo mueve selectedDate —
    para que "cambiar de día o de semana" tenga el mismo feedback acá,
    aunque sea distinto (invertido) del que usa el contenido del Schedule. */
-const WEEK_SELECTOR_SLIDE_FROM_RIGHT_CLASS = 'animate-in fade-in-0 slide-in-from-right-8 duration-200';
-const WEEK_SELECTOR_SLIDE_FROM_LEFT_CLASS = 'animate-in fade-in-0 slide-in-from-left-8 duration-200';
+const WEEK_SELECTOR_SLIDE_FROM_RIGHT_CLASS = 'animate-in slide-in-from-right-8 duration-200';
+const WEEK_SELECTOR_SLIDE_FROM_LEFT_CLASS = 'animate-in slide-in-from-left-8 duration-200';
 
 /* getWeekDays: dado un día, devuelve 7 fechas centradas en él (3 antes, el día, 3 después) */
 const getWeekDays = (date: Date): Date[] => {
@@ -84,22 +84,29 @@ export default function WeekSelector({
   const isTodayBeforeWeek = normalizedToday < firstWeekDay;
   const isTodayAfterWeek = normalizedToday > lastWeekDay;
 
-  const prevWeek = () => {
+  const prevDay = () => {
     const next = new Date(viewDate);
-    next.setDate(viewDate.getDate() - 7);
+    next.setDate(viewDate.getDate() - 1);
+    onSelectDate(next);
     onViewDateChange(next);
   };
 
-  const nextWeek = () => {
+  const nextDay = () => {
     const next = new Date(viewDate);
-    next.setDate(viewDate.getDate() + 7);
+    next.setDate(viewDate.getDate() + 1);
+    onSelectDate(next);
     onViewDateChange(next);
+  };
+
+  const handleSelectDate = (date: Date) => {
+    onSelectDate(date);
+    onViewDateChange(date);
   };
 
   return (
     <div className={twMerge(WEEK_SELECTOR_CLASS, className)}>
       <PrevWeekButton
-        onClick={prevWeek}
+        onClick={prevDay}
         isSelected={isSelectedBeforeWeek}
         isToday={isTodayBeforeWeek}
       />
@@ -115,12 +122,12 @@ export default function WeekSelector({
         <DaySelectorButtons
           weekDays={weekDays}
           selectedDate={selectedDate}
-          onSelectDate={onSelectDate}
+          onSelectDate={handleSelectDate}
         />
       </div>
 
       <NextWeekButton
-        onClick={nextWeek}
+        onClick={nextDay}
         isSelected={isSelectedAfterWeek}
         isToday={isTodayAfterWeek}
       />

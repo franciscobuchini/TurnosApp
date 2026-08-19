@@ -18,16 +18,19 @@ interface SidebarProps {
   children?: ReactNode;
   className?: string;
   footer?: ReactNode;
+  expandOpenPanel?: boolean;
 }
 
 const SIDEBAR_CLASS = 'flex flex-col min-w-0 shrink-0 w-90 -my-3';
 
 const SIDEBAR_INNER_CLASS = 'flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [&:has([data-filter-panel][open])>[data-sidebar-title]]:hidden';
+const SIDEBAR_EXPAND_OPEN_PANEL_CLASS =
+  '[&:has([data-filter-panel][open])>[data-calendar]]:hidden [&:has([data-filter-panel][open])>[data-filter-panel]:not([open])]:hidden [&:has([data-filter-panel][open])>[data-filter-panel][open]]:flex [&:has([data-filter-panel][open])>[data-filter-panel][open]]:min-h-0 [&:has([data-filter-panel][open])>[data-filter-panel][open]]:flex-1 [&:has([data-filter-panel][open])>[data-filter-panel][open]]:shrink [&:has([data-filter-panel][open])>[data-filter-panel][open]]:flex-col';
 
-export default function Sidebar({ children, className, footer }: SidebarProps) {
+export default function Sidebar({ children, className, footer, expandOpenPanel = false }: SidebarProps) {
   return (
     <aside className={twMerge(SIDEBAR_CLASS, className)}>
-      <div className={SIDEBAR_INNER_CLASS}>
+      <div className={twMerge(SIDEBAR_INNER_CLASS, expandOpenPanel && SIDEBAR_EXPAND_OPEN_PANEL_CLASS)}>
         <FiltersGroupProvider value="sidebar">{children}</FiltersGroupProvider>
         {/* El footer vive dentro del scroll (no fijo): con contenido corto
             queda pegado abajo (mt-auto) y, si el contenido crece, viaja con

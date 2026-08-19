@@ -103,6 +103,7 @@ export default function ViewLayout({
           description="Esta acción no se puede deshacer."
           confirmText={deleteText}
           onConfirm={onDelete}
+          requirePin
         />
       )}
     </MainContent>

@@ -11,12 +11,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Copy, MapPin } from 'lucide-react';
+import { Check, Copy, LogOut, MapPin } from 'lucide-react';
 import ViewLayout from '../layout/ViewLayout';
 import Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 import PhotoUrlPicker from '@/components/ui/photo-url-picker';
 import AddButton from '../buttons/AddButton';
 import WeekSchedule from '../widgets/entityWidgets/WeekSchedule';
@@ -54,6 +55,7 @@ export default function SettingsBusinessView() {
   const business = getBusiness();
 
   const [copied, setCopied] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   const [draft, setDraft] = useState<BusinessDraft>({
     name: business.name ?? '',
@@ -250,10 +252,28 @@ export default function SettingsBusinessView() {
       onCancel={goBack}
       onConfirm={handleSave}
     >
-      <Button variant="link" to="/terminos" className="w-fit px-0 text-foreground">
-        Términos y condiciones
-      </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button variant="link" to="/terminos" className="w-fit px-0 text-foreground">
+          Términos y condiciones
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          text="Cerrar sesión"
+          icon={<LogOut size={16} />}
+          onClick={() => setLogoutConfirmOpen(true)}
+          className="text-destructive hover:text-destructive"
+        />
+      </div>
     </ViewLayout>
+    <ConfirmDialog
+      open={logoutConfirmOpen}
+      onOpenChange={setLogoutConfirmOpen}
+      title="¿Cerrar sesión?"
+      description="Vas a salir del panel de administración."
+      confirmText="Cerrar sesión"
+      onConfirm={() => navigate('/')}
+    />
     <LocationPickerDialog
       open={locationPickerOpen}
       onOpenChange={setLocationPickerOpen}

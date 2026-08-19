@@ -145,7 +145,7 @@ export default function AdminSidebar({
 
   return (
     <>
-      <Sidebar>
+      <Sidebar expandOpenPanel>
         <Calendar selectedDate={selectedDate} onSelectDate={onSelectDate} />
         {panels.map((panel) => (
           <DetailsPanel
@@ -175,6 +175,7 @@ export default function AdminSidebar({
             toggleServiceActive(pendingService.id, false);
             setPendingDeactivateId(null);
           }}
+          requirePin
         />
       )}
     </>

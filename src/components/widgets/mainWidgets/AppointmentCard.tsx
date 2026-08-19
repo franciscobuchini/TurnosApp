@@ -26,15 +26,30 @@ interface AppointmentCardProps {
 const CARD_CLASS =
   'absolute inset-x-1 z-10 rounded-3xl overflow-hidden cursor-pointer text-xs transition-opacity';
 
-const CARD_INNER_CLASS = 'flex flex-col h-full p-2.5 gap-4';
+/* Dos columnas: izquierda flex-1 con todo el contenido (servicio/cliente/
+   notas), derecha angosta con duración + horario. items-stretch para que la
+   columna derecha tenga la altura completa de la card y pueda anclar su
+   contenido abajo (ver CARD_RIGHT_COLUMN_CLASS) igual que antes hacía el
+   bottom-4.5 absoluto. */
+const CARD_INNER_CLASS = 'flex h-full items-stretch gap-2 p-2.5';
 
-const CARD_HEADER_ROW_CLASS = 'flex min-w-0 items-center gap-2';
+const CARD_LEFT_COLUMN_CLASS = 'flex min-w-0 flex-1';
+
+/* items-start (no items-center): con notas, el bloque de texto puede tener
+   3 líneas (servicio/cliente/notas) — el avatar queda anclado arriba,
+   contra la primera línea, en vez de centrarse contra un bloque que crece. */
+const CARD_HEADER_ROW_CLASS = 'flex min-w-0 items-start gap-2';
 
 const CARD_SERVICE_AVATAR_CLASS = 'size-8 shrink-0 text-sm font-bold';
 
-const CARD_TEXT_COLUMN_CLASS = 'flex min-w-0 flex-1 flex-col';
+/* Notas adentro de esta columna (no como hermano suelto del header row):
+   así queda alineada con servicio/cliente, no con el avatar — antes
+   arrancaba más a la izquierda que el resto del texto. gap-0.5 en vez del
+   gap-4 que separaba el header entero de las notas: son líneas del mismo
+   bloque de texto, no dos secciones distintas de la card. */
+const CARD_TEXT_COLUMN_CLASS = 'flex min-w-0 flex-1 flex-col gap-0.5';
 
-const CARD_SERVICE_CLASS = 'font-semibold truncate';
+const CARD_SERVICE_CLASS = 'font-semibold truncate leading-tight';
 
 const CARD_CLIENT_ROW_CLASS = 'flex min-w-0 items-center gap-1';
 
@@ -42,11 +57,19 @@ const CARD_CLIENT_ICON_CLASS = 'size-3 shrink-0';
 
 const CARD_CLIENT_CLASS = 'truncate';
 
-const CARD_NOTES_CLASS = 'truncate';
+const CARD_NOTES_CLASS = 'truncate text-[11px] leading-tight';
 
-/* La hora va anclada al borde inferior de la tarjeta (referencia siempre
-     bottom, aunque la tarjeta sea chica): absoluta respecto de la card. */
-const CARD_TIME_CLASS = 'absolute bottom-4.5 right-4.5 max-w-[calc(100%-1rem)] truncate text-right text-xs pointer-events-none';
+/* Columna derecha: shrink-0 (ancho mínimo posible, el que pida el texto) +
+   whitespace-nowrap (nunca hace salto de línea) + justify-end para que
+   duración y horario queden anclados abajo, alineados entre sí — mismo
+   anclaje al fondo de la card que antes lograba el bottom-4.5 absoluto,
+   ahora vía flex en vez de position absolute. pointer-events-none: no es un
+   control propio, el click sigue siendo el de toda la card. */
+const CARD_RIGHT_COLUMN_CLASS = 'flex shrink-0 flex-col items-end justify-end gap-0.5 whitespace-nowrap pointer-events-none';
+
+const CARD_DURATION_CLASS = 'text-[10px] leading-none';
+
+const CARD_TIME_CLASS = 'text-xs leading-none';
 
 /* Colores de texto por estado: en una tarjeta normal el fondo es el color
    del servicio (pastel), así que el texto va en negro; en una finalizada
@@ -66,6 +89,17 @@ const CARD_PAST_COLOR_CLASS = 'border border-border bg-background/50';
 function isPastAppointment(appointment: Appointment): boolean {
   const end = new Date(`${appointment.date}T${appointment.endTime}`);
   return end.getTime() < Date.now();
+}
+
+/* Duración real del turno (fin - inicio en minutos), no la del service: un
+   turno ya creado no debe cambiar de duración mostrada si alguien edita
+   después la duración del servicio — mismo formato "<n> min" que ya usa el
+   resto de la app (ver FormAddService.tsx). */
+function formatAppointmentDuration(appointment: Appointment): string {
+  const [startHour, startMinute] = appointment.startTime.split(':').map(Number);
+  const [endHour, endMinute] = appointment.endTime.split(':').map(Number);
+  const minutes = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+  return `${minutes} min`;
 }
 
 export default function AppointmentCard({
@@ -94,29 +128,36 @@ export default function AppointmentCard({
       onClick={onClick}
     >
       <div className={CARD_INNER_CLASS}>
-        <div className={CARD_HEADER_ROW_CLASS}>
-          <Image
-            src={servicePhoto}
-            name={appointment.service}
-            className={twMerge(CARD_SERVICE_AVATAR_CLASS, textPrimaryClass)}
-          />
-          <div className={CARD_TEXT_COLUMN_CLASS}>
-            <span className={twMerge(CARD_SERVICE_CLASS, textPrimaryClass)}>{appointment.service}</span>
-            {showClient && (
-              <div className={CARD_CLIENT_ROW_CLASS}>
-                <User className={twMerge(CARD_CLIENT_ICON_CLASS, textSecondaryClass)} />
-                <span className={twMerge(CARD_CLIENT_CLASS, textSecondaryClass)}>{appointment.client}</span>
-              </div>
-            )}
+        <div className={CARD_LEFT_COLUMN_CLASS}>
+          <div className={CARD_HEADER_ROW_CLASS}>
+            <Image
+              src={servicePhoto}
+              name={appointment.service}
+              className={twMerge(CARD_SERVICE_AVATAR_CLASS, textPrimaryClass)}
+            />
+            <div className={CARD_TEXT_COLUMN_CLASS}>
+              <span className={twMerge(CARD_SERVICE_CLASS, textPrimaryClass)}>{appointment.service}</span>
+              {showClient && (
+                <div className={CARD_CLIENT_ROW_CLASS}>
+                  <User className={twMerge(CARD_CLIENT_ICON_CLASS, textSecondaryClass)} />
+                  <span className={twMerge(CARD_CLIENT_CLASS, textSecondaryClass)}>{appointment.client}</span>
+                </div>
+              )}
+              {showNotes && (
+                <span className={twMerge(CARD_NOTES_CLASS, textSecondaryClass)}>{appointment.notes}</span>
+              )}
+            </div>
           </div>
         </div>
-        {showNotes && (
-          <span className={twMerge(CARD_NOTES_CLASS, textSecondaryClass)}>{appointment.notes}</span>
-        )}
+        <div className={CARD_RIGHT_COLUMN_CLASS}>
+          <span className={twMerge(CARD_DURATION_CLASS, textSecondaryClass)}>
+            {formatAppointmentDuration(appointment)}
+          </span>
+          <span className={twMerge(CARD_TIME_CLASS, textSecondaryClass)}>
+            {appointment.startTime} – {appointment.endTime}
+          </span>
+        </div>
       </div>
-      <span className={twMerge(CARD_TIME_CLASS, textSecondaryClass)}>
-        {appointment.startTime} – {appointment.endTime}
-      </span>
     </div>
   );
 }

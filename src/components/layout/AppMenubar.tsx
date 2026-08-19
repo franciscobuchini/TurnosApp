@@ -5,29 +5,11 @@
   useLocation), así que cualquier página que lo monte vía
   <Layout menubar={<AppMenubar />}> lo obtiene funcionando sin pasarle props.
 
-  Arriba, la imagen del negocio: al clickearla abre un Dropdown con
-  "Ajustes" (Ajustes > Negocio), "Ver sitio web" (el sitio público, en una
-  pestaña nueva — no se pierde la sesión de admin) y "Cerrar sesión", que
-  pide confirmación antes de salir (ConfirmDialog). Esa confirmación no
-  puede vivir dentro del item del Dropdown: el Popover se cierra (y
-  desmonta su contenido) ante cualquier click adentro, así que el estado
-  pendingLogout y el ConfirmDialog viven acá, en AppMenubar, que no está
-  dentro de ningún Popover (mismo patrón que la confirmación de desactivar
-  un servicio en AdminSidebar). La app todavía no tiene login real (sin
-  backend de auth), así que "Cerrar sesión" por ahora sólo saca del admin a
-  la landing — el día que haya sesión de verdad, es el único lugar que hay
-  que tocar. Los accesos del medio quedan centrados verticalmente entre ese
-  grupo y el de ajustes. El de tema no navega: alterna claro/oscuro directo
-  (useTheme). El logo de la app es decorativo (no navega) y va abajo de
-  todo.
-
-  Las filas del dropdown del negocio parten de DROPDOWN_ITEM_CLASS, la
-  misma base que usan las de DropdownRowActions (Equipo/Servicios/Clientes
-  en la sidebar) — antes cada una tenía su propia clase declarada aparte y
-  no quedaban iguales. Acá se pisa el justify-between de la base a
-  justify-start: DropdownRowActions separa "label ... ícono indicador" a los
-  extremos, mientras que acá el contenido es ícono+label agrupados, como
-  cualquier ítem de menú.
+  Los accesos principales van de arriba hacia abajo: Inicio, notificaciones,
+  editar web, métricas y marketing. Métricas/Marketing todavía son entradas
+  visuales de roadmap, por eso quedan deshabilitadas. Ajustes y Ver mi sitio
+  web viven como accesos rápidos en el grupo inferior; Cerrar sesión se mueve
+  a la vista de Ajustes.
 
   El botón de "Crear turno" que vivía acá se movió a ScheduleControls
   (esquina inferior izquierda del Schedule) — addShiftOpen/onCloseAddShift
@@ -43,33 +25,24 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { twMerge } from 'tailwind-merge';
 import {
   Bell,
   Calendar,
   ChartColumn,
-  ExternalLink,
   Globe,
-  LogOut,
   Megaphone,
   Moon,
+  Palette,
   Settings,
   Sun,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dropdown, DROPDOWN_ITEM_CLASS } from '@/components/ui/dropdown';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import Logo from '@/components/ui/logo';
-import Image from '@/components/ui/image';
-import { getBookingRequests, getBusiness, DATA_CHANGE_EVENT } from '@/database/data';
+import { getBookingRequests, DATA_CHANGE_EVENT } from '@/database/data';
 import type { BookingRequest } from '@/database/types';
 import { useTheme } from '@/hooks/useTheme';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-
-/* DROPDOWN_ITEM_CLASS trae justify-between (pensado para "label ... ícono
-   indicador" como en DropdownRowActions) — acá el contenido es ícono+label
-   agrupados, como cualquier ítem de menú, así que se pisa a justify-start. */
-const BUSINESS_MENU_ITEM_CLASS = twMerge(DROPDOWN_ITEM_CLASS, 'justify-start gap-3');
 
 const MENUBAR_CLASS =
   'flex h-full w-16 shrink-0 flex-col items-center gap-3 rounded-4xl bg-card py-4 border border-border';
@@ -82,13 +55,14 @@ interface MenubarItem {
   to: string;
   label: string;
   icon: ReactNode;
+  disabled?: boolean;
 }
 
 const MAIN_ITEMS: MenubarItem[] = [
   { to: '/admin', label: 'Inicio', icon: <Calendar className={ICON_CLASS} /> },
-  { to: '/personalizacion', label: 'Editar web', icon: <Globe className={ICON_CLASS} /> },
-  { to: '/admin/metricas', label: 'Métricas', icon: <ChartColumn className={ICON_CLASS} /> },
-  { to: '/admin/marketing', label: 'Marketing', icon: <Megaphone className={ICON_CLASS} /> },
+  { to: '/personalizacion', label: 'Editar web', icon: <Palette className={ICON_CLASS} /> },
+  { to: '/admin/metricas', label: 'Métricas', icon: <ChartColumn className={ICON_CLASS} />, disabled: true },
+  { to: '/admin/marketing', label: 'Marketing', icon: <Megaphone className={ICON_CLASS} />, disabled: true },
 ];
 
 interface AppMenubarProps {
@@ -110,12 +84,14 @@ export default function AppMenubar({
 }: AppMenubarProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const business = getBusiness();
   const { theme, toggleTheme } = useTheme();
   const { confirmNavigation } = useUnsavedChanges();
 
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => getBookingRequests());
-  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+  /* "Editar web" pide el PIN de administrador antes de entrar a
+     Personalización (edita lo que ven los clientes en el sitio público) —
+     mismo ConfirmDialog con requirePin que ya usa "Eliminar" en ViewLayout. */
+  const [editWebConfirmOpen, setEditWebConfirmOpen] = useState(false);
 
   useEffect(() => {
     const handleDataChange = () => {
@@ -152,63 +128,37 @@ export default function AppMenubar({
     });
   };
 
+  /* El botón de notificaciones no navega a otra ruta (abre un panel dentro
+     de la misma /admin), pero igual puede tapar una vista con cambios sin
+     guardar (ej. modo Bloqueos/Desbloqueos) — pasa por confirmNavigation
+     por la misma razón que handleNavClick. */
+  const handleNotificationsClick = () => {
+    confirmNavigation(() => {
+      if (onToggleNotifications) {
+        onToggleNotifications();
+      } else {
+        /* Desde páginas que no controlan notificationsOpen
+           (ej. Personalización), navegar a /admin con state
+           para que Dashboard abra las notificaciones. */
+        navigate('/admin', { state: { openNotifications: true } });
+      }
+    });
+  };
+
   return (
     <nav className={MENUBAR_CLASS} aria-label="Accesos directos">
-      <Dropdown
-        content={<Image src={business.image} name={business.name} className="size-10 shrink-0" />}
-        className="h-auto w-auto rounded-full p-0 hover:bg-transparent"
-        items={[
-          <Button
-            key="ajustes"
-            variant="ghost"
-            text="Ajustes"
-            icon={<Settings size={16} />}
-            onClick={() => handleNavClick('/admin/ajustes')}
-            className={BUSINESS_MENU_ITEM_CLASS}
-          />,
-          <Button
-            key="ver-sitio"
-            variant="ghost"
-            text="Ver sitio web"
-            icon={<ExternalLink size={16} />}
-            onClick={() => window.open('/site', '_blank', 'noopener,noreferrer')}
-            className={BUSINESS_MENU_ITEM_CLASS}
-          />,
-          <Button
-            key="cerrar-sesion"
-            variant="ghost"
-            text="Cerrar sesión"
-            icon={<LogOut size={16} />}
-            onClick={() => setLogoutConfirmOpen(true)}
-            className={BUSINESS_MENU_ITEM_CLASS}
-          />,
-        ]}
-      />
-
-      <ConfirmDialog
-        open={logoutConfirmOpen}
-        onOpenChange={setLogoutConfirmOpen}
-        title="¿Cerrar sesión?"
-        description="Vas a salir del panel de administración."
-        confirmText="Cerrar sesión"
-        onConfirm={() => handleNavClick('/')}
-      />
-
-      <div className="flex-1" />
-
       <div className={GROUP_CLASS}>
+        <Button
+          onClick={() => handleNavClick('/admin')}
+          variant={isActive('/admin') ? 'default' : 'ghost'}
+          size="icon-lg"
+          icon={<Calendar className={ICON_CLASS} />}
+          aria-label="Inicio"
+          title="Inicio"
+        />
         <div className="relative">
           <Button
-            onClick={() => {
-              if (onToggleNotifications) {
-                onToggleNotifications();
-              } else {
-                /* Desde páginas que no controlan notificationsOpen
-                   (ej. Personalización), navegar a /admin con state
-                   para que Dashboard abra las notificaciones. */
-                navigate('/admin', { state: { openNotifications: true } });
-              }
-            }}
+            onClick={handleNotificationsClick}
             variant={notificationsOpen ? 'default' : 'ghost'}
             size="icon-lg"
             icon={<Bell className={ICON_CLASS} />}
@@ -221,22 +171,56 @@ export default function AppMenubar({
             </span>
           )}
         </div>
-        {MAIN_ITEMS.map(({ to, label, icon }) => (
+        {MAIN_ITEMS.slice(1).map(({ to, label, icon, disabled }) => (
           <Button
             key={to}
-            onClick={() => handleNavClick(to)}
+            onClick={() => {
+              if (disabled) return;
+              if (to === '/personalizacion') {
+                setEditWebConfirmOpen(true);
+                return;
+              }
+              handleNavClick(to);
+            }}
             variant={isActive(to) ? 'default' : 'ghost'}
             size="icon-lg"
             icon={icon}
             aria-label={label}
             title={label}
+            disabled={disabled}
           />
         ))}
       </div>
 
+      <ConfirmDialog
+        open={editWebConfirmOpen}
+        onOpenChange={setEditWebConfirmOpen}
+        title="¿Editar web?"
+        description="Vas a entrar a Personalización, donde se edita lo que ven tus clientes en el sitio público."
+        confirmText="Continuar"
+        onConfirm={() => handleNavClick('/personalizacion')}
+        requirePin
+      />
+
       <div className="flex-1" />
 
       <div className={GROUP_CLASS}>
+        <Button
+          onClick={() => handleNavClick('/admin/ajustes')}
+          variant={isActive('/admin/ajustes') ? 'default' : 'ghost'}
+          size="icon-lg"
+          icon={<Settings className={ICON_CLASS} />}
+          aria-label="Ajustes"
+          title="Ajustes"
+        />
+        <Button
+          onClick={() => window.open('/site', '_blank', 'noopener,noreferrer')}
+          variant="ghost"
+          size="icon-lg"
+          icon={<Globe className={ICON_CLASS} />}
+          aria-label="Ver mi sitio web"
+          title="Ver mi sitio web"
+        />
         <Button
           variant="ghost"
           size="icon-lg"

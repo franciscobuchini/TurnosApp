@@ -52,10 +52,12 @@ export default function SiteHours({ schedule }: SiteHoursProps) {
         {scheduleRows.map((row) => (
           <div
             key={row.label}
-            className="flex items-center justify-between gap-4 px-5 py-3 text-sm first:rounded-t-(--site-radius) last:rounded-b-(--site-radius)"
+            className={`flex items-center justify-between gap-4 px-5 py-3 text-sm first:rounded-t-(--site-radius) last:rounded-b-(--site-radius) ${
+              row.includesToday ? 'bg-(--site-primary) text-(--site-primary-foreground)' : ''
+            }`}
           >
             <span className={row.includesToday ? 'font-medium' : undefined}>{row.label}</span>
-            <span className={row.includesToday ? 'font-medium text-(--site-text)' : 'text-(--site-text-muted)'}>
+            <span className={row.includesToday ? 'font-medium text-(--site-primary-foreground)' : 'text-(--site-text-muted)'}>
               {row.hours}
             </span>
           </div>
