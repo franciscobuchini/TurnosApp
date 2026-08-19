@@ -285,7 +285,12 @@ interface ColumnBlockedCard {
 
 /** Calcula todas las tarjetas de bloqueo para una columna de miembro:
     incluye tanto los bloqueos explícitos (ScheduleBlock) como los tramos fuera
-    de horario / no disponibles (horario laboral del negocio, del miembro o servicio no aplicable). */
+    de horario / no disponibles (horario laboral del negocio, del miembro o servicio no aplicable).
+    `computeAvailability` tiene que ser la variante "estructural" (ignorePast,
+    ver computeStructuralAvailabilityFor en Schedule) — si no, un tramo ya
+    pasado nunca entra acá (computeAvailability devolvería 'past', no
+    'blocked') y su card jamás se dibuja, aunque el slot siga siendo, de
+    fondo, un horario no laboral o un bloqueo explícito. */
 function computeColumnBlockedCards(
   member: string,
   windowStartSlot: number,
@@ -804,6 +809,30 @@ export default function Schedule({
       memberUnblockedRanges: memberUnblockedRangesByMember[member],
     });
 
+  /* Variante "estructural" (ignorePast) de computeAvailabilityFor: sólo para
+     construir las regiones de columnBlockedCards (bloqueo explícito u
+     horario no laboral) — así esas cards se calculan igual aunque el slot
+     ya haya pasado o sea de un día anterior, en vez de que "past" tape el
+     motivo real por el que la celda no está disponible. No se usa para
+     decidir clicks/toggles: eso sigue yendo por computeAvailabilityFor
+     (con "past" activo), un slot pasado no se puede reservar ni bloquear
+     de nuevo. */
+  const computeStructuralAvailabilityFor = (member: string, row: number): CellAvailability =>
+    getCellAvailability({
+      selectedDate,
+      now,
+      slotMinutes: row * SLOT_DURATION_MINUTES,
+      businessRanges,
+      memberRanges: memberRangesByDay[member]?.[selectedDate.getDay()],
+      member,
+      blockedMembers,
+      businessBlockedRanges,
+      memberBlockedRanges: memberBlockedRangesByMember[member],
+      businessUnblockedRanges,
+      memberUnblockedRanges: memberUnblockedRangesByMember[member],
+      ignorePast: true,
+    });
+
   const isRowBlockable = (row: number): boolean =>
     computeAvailabilityFor('', row) === 'available';
 
@@ -999,8 +1028,14 @@ export default function Schedule({
     cellClassName: labelCellClassName,
     cell: (slot, index) => {
       const absoluteIndex = windowStartSlot + index;
+      /* showBlankGrid (definido más abajo, en el mismo scope — la closure
+         lee su valor recién cuando Table invoca este cell, ya con el
+         componente terminado de renderizar) apaga también las etiquetas de
+         hora: si no, quedaban visibles a la izquierda del mensaje "Día
+         libre"/"No hay miembros..." centrado, compitiendo con ese centrado
+         en vez de dejar la grilla realmente en blanco. */
       const labelContent =
-        index === 0 ? '' : absoluteIndex % 4 === 0 ? <span className={labelTextClassName}>{slot}</span> : '';
+        showBlankGrid || index === 0 ? '' : absoluteIndex % 4 === 0 ? <span className={labelTextClassName}>{slot}</span> : '';
 
       if (!blockModeOpen) {
         return labelContent;
@@ -1089,7 +1124,7 @@ export default function Schedule({
           businessBlockedRanges,
           memberBlockedRangesByMember[member],
           scheduleBlocksThatDay,
-          (row) => computeAvailabilityFor(member, row),
+          (row) => computeStructuralAvailabilityFor(member, row),
           appointmentMap,
         );
 
@@ -1134,22 +1169,28 @@ export default function Schedule({
 
             const availability = computeAvailability(absoluteRow);
 
-            if (availability === 'blocked') {
-              if (isRowCoveredByBlockedCard(absoluteRow, columnBlockedCards)) {
-                return null;
-              }
+            /* columnBlockedCards ya se construyó ignorando "past" (ver
+               computeStructuralAvailabilityFor): un bloqueo explícito u
+               horario no laboral sigue mostrando su card aunque el slot ya
+               haya pasado o sea de un día anterior (CurrentTimeLine encima)
+               — es el motivo real por el que esa celda no está disponible,
+               no algo que deba taparse sólo porque avanzó el reloj. Por eso
+               este chequeo corre antes de mirar `availability`. */
+            if (isRowCoveredByBlockedCard(absoluteRow, columnBlockedCards)) {
+              return null;
+            }
 
-              const blockedCard = columnBlockedCards.find((card) => card.startSlot === absoluteRow);
-              if (!blockedCard) return null;
-
+            const blockedCardAtRow = columnBlockedCards.find((card) => card.startSlot === absoluteRow);
+            if (blockedCardAtRow) {
               return (
                 <BlockedSlotCard
-                  spanSlots={blockedCard.endSlot - blockedCard.startSlot}
+                  spanSlots={blockedCardAtRow.endSlot - blockedCardAtRow.startSlot}
                   rowHeightPx={rowHeightPx}
-                  onClick={blockedCard.block && onBlockClick ? () => onBlockClick(blockedCard.block!) : undefined}
+                  onClick={blockedCardAtRow.block && onBlockClick ? () => onBlockClick(blockedCardAtRow.block!) : undefined}
                 />
               );
             }
+
             if (availability === 'past') return null;
 
             if (previewServiceInfo) {

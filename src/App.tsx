@@ -11,6 +11,7 @@ import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Site from './pages/clients/Site';
 import { getBlockedMemberNames } from './functions/scheduleCellAvailability';
 import { UnsavedChangesProvider } from './hooks/useUnsavedChanges';
+import { useLayoutTier } from './hooks/useLayoutTier';
 
 import ScheduleView from './components/views/ScheduleView';
 import AddEntityView, { ADD_ENTITY_VIEW_TITLE } from './components/views/EntityView';
@@ -152,6 +153,9 @@ function ClientPage({ mode }: { mode: CrudMode }) {
 }
 
 function App() {
+  // Activa el data-layout-tier de <html> para toda la app — ver useLayoutTier.ts.
+  useLayoutTier();
+
   return (
     <BrowserRouter>
       <UnsavedChangesProvider>

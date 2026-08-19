@@ -908,6 +908,7 @@ function Dashboard() {
         id: client.name.toLowerCase().replace(/\s+/g, '-'),
         label: client.name,
         checked: true,
+        phone: client.phone,
       });
 
       return accumulator;
@@ -963,6 +964,14 @@ function Dashboard() {
     addClient({ ...client, appointmentsCount: 0, totalSpent: 0 });
     setClients(getClients());
     confirmShiftClient(client.name);
+  };
+
+  /* Mismo alta rápida que confirmShiftWithNewClient, sin el paso de
+     confirmar turno: la usa el buscador del panel Clientes de AdminSidebar,
+     que no tiene ningún turno en curso. */
+  const addClientInline = (client: { name: string; phone: string; notes?: string }) => {
+    addClient({ ...client, appointmentsCount: 0, totalSpent: 0 });
+    setClients(getClients());
   };
 
   const updateClient = (previousName: string, updated: Client) => {
@@ -1053,8 +1062,17 @@ function Dashboard() {
     deleteClient,
   };
 
+  /* Las vistas de "Detalles de..."/"Perfil de..."/"Acerca de..." y "Crear un
+     nuevo..." (miembro/servicio/cliente) ya son, ellas mismas, una columna
+     centrada de ViewLayout — mostrar la sidebar de Equipo/Servicios/
+     Clientes al lado es redundante (esa misma lista es, de hecho, por
+     dónde se llega a la fila que abrió esta vista) y le resta ancho al
+     formulario. */
   const isSidebarlessPage =
     location.pathname.startsWith('/admin/ajustes') ||
+    location.pathname.startsWith('/admin/miembro') ||
+    location.pathname.startsWith('/admin/servicio') ||
+    location.pathname.startsWith('/admin/cliente') ||
     ['/admin/metricas', '/admin/marketing'].includes(location.pathname);
 
   return (
@@ -1128,6 +1146,7 @@ function Dashboard() {
               serviceFilters={serviceFilters}
               toggleServiceActive={toggleServiceActive}
               clientFilters={clientFilters}
+              onAddClient={addClientInline}
             />
           )
         }

@@ -108,16 +108,25 @@ interface AddShiftSidebarProps {
   onClearPendingBlocks: () => void;
 }
 
-const CLIENT_CARD_CLASS = 'flex w-full flex-col gap-1 rounded-4xl border border-border bg-card p-4';
+/* "Seleccionar cliente" es un DetailsPanel (igual que "Crear un nuevo
+   turno" y el resto de los paneles de la app: mismo chevron a la derecha,
+   mismo <details> con altura fijada a mano por DetailsPanel). Este div
+   sólo agrupa buscador/lista/alta-de-cliente con gap-2 — el body del
+   panel (FILTER_PANEL_BODY_CLASS) no tiene gap propio porque lo comparte
+   con Equipo/Servicios/Clientes, que no lo necesitan. flex-1 min-h-0 para
+   que reparta el alto extra (ver expandOpenPanel en el Sidebar de acá
+   abajo) hacia la lista, que es la que hace scroll. */
+const CLIENT_SEARCH_BODY_CLASS = 'flex flex-col gap-2 flex-1 min-h-0';
 
-/* Mismo card que CLIENT_CARD_CLASS (más aire entre título/explicación,
-   lista, e input — ver CONFIRM_BLOCK_SECTION_CLASS), pero con los mismos
-   colores que los horarios no hábiles del Schedule (bg-background/50, ver
-   SCHEDULE_OFF_HOURS_OVERLAY_CLASS/BlockedSlotCard) en vez de bg-card: es
-   la sidebar de "bloquear", tiene sentido que se sienta del mismo color
-   que lo que va a quedar bloqueado, en los dos temas por igual (son
-   tokens, no un hex fijo) — translúcido (/50), no sólido, para que
-   coincida de verdad con esa niebla y no sólo con su tono. */
+/* Mismo card que usaba antes "Seleccionar cliente" (más aire entre
+   título/explicación, lista, e input — ver CONFIRM_BLOCK_SECTION_CLASS),
+   pero con los mismos colores que los horarios no hábiles del Schedule
+   (bg-background/50, ver SCHEDULE_OFF_HOURS_OVERLAY_CLASS/BlockedSlotCard)
+   en vez de bg-card: es la sidebar de "bloquear", tiene sentido que se
+   sienta del mismo color que lo que va a quedar bloqueado, en los dos
+   temas por igual (son tokens, no un hex fijo) — translúcido (/50), no
+   sólido, para que coincida de verdad con esa niebla y no sólo con su
+   tono. */
 const CONFIRM_BLOCK_CARD_CLASS = 'flex w-full flex-col gap-7 rounded-4xl border border-border bg-background/50 p-4';
 
 const CONFIRM_BLOCK_HEADER_CLASS = 'flex flex-col gap-3';
@@ -131,7 +140,7 @@ const CONFIRM_BLOCK_LIST_CLASS = 'flex flex-col gap-4 px-1';
 
 const CLIENT_HEADER_CLASS = 'px-0 pb-1';
 
-const CLIENT_LIST_CLASS = 'flex flex-col gap-0.5 py-1';
+const CLIENT_LIST_CLASS = 'flex flex-col flex-1 min-h-0 overflow-y-auto gap-0.5 py-1';
 
 const CLIENT_ROW_CLASS =
   'h-12 w-full shrink-0 justify-start gap-4 rounded-3xl text-left text-muted-foreground hover:text-foreground';
@@ -207,6 +216,7 @@ export default function AddShiftSidebar({
 
     return (
       <Sidebar
+        expandOpenPanel
         footer={
           <div className="flex flex-col gap-2">
             {selectedClient && (
@@ -220,76 +230,85 @@ export default function AddShiftSidebar({
           </div>
         }
       >
-        <div className={CLIENT_CARD_CLASS}>
-          <ContentHeader title="Seleccionar cliente" className={CLIENT_HEADER_CLASS} />
+        <DetailsPanel
+          title="Seleccionar cliente"
+          open
+          onToggle={(e) => {
+            if (!e.currentTarget.open) {
+              onBack();
+            }
+          }}
+        >
+          <div className={CLIENT_SEARCH_BODY_CLASS}>
+            <Input
+              name="client-search"
+              placeholder="Escribí el nombre..."
+              value={clientQuery}
+              onChange={(event) => handleQueryChange(event.target.value)}
+              autoFocus
+              className="shrink-0"
+            />
 
-          <Input
-            name="client-search"
-            placeholder="Escribí el nombre..."
-            value={clientQuery}
-            onChange={(event) => handleQueryChange(event.target.value)}
-            autoFocus
-          />
+            {filteredClients.length > 0 && (
+              <div className={CLIENT_LIST_CLASS}>
+                {filteredClients.map((option) => (
+                  <Button
+                    key={option.id}
+                    type="button"
+                    variant="ghost"
+                    className={twMerge(
+                      CLIENT_ROW_CLASS,
+                      option.label === selectedClient && CLIENT_ROW_SELECTED_CLASS,
+                    )}
+                    onClick={() => {
+                      setClientQuery(option.label);
+                      setSelectedClient(option.label);
+                    }}
+                  >
+                    <Image name={option.label} className={CLIENT_ROW_AVATAR_CLASS} />
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            )}
 
-          {filteredClients.length > 0 && (
-            <div className={CLIENT_LIST_CLASS}>
-              {filteredClients.map((option) => (
-                <Button
-                  key={option.id}
-                  type="button"
-                  variant="ghost"
-                  className={twMerge(
-                    CLIENT_ROW_CLASS,
-                    option.label === selectedClient && CLIENT_ROW_SELECTED_CLASS,
-                  )}
-                  onClick={() => {
-                    setClientQuery(option.label);
-                    setSelectedClient(option.label);
-                  }}
-                >
-                  <Image name={option.label} className={CLIENT_ROW_AVATAR_CLASS} />
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          )}
-
-          {!selectedClient && clientQuery.trim() && (
-            <div
-              className={twMerge(
-                NEW_CLIENT_SECTION_CLASS,
-                filteredClients.length > 0 && NEW_CLIENT_SECTION_SEPARATOR_CLASS,
-              )}
-            >
-              <span className={NEW_CLIENT_HINT_CLASS}>
-                ¿No está en la lista? Completá estos datos para agregarlo como cliente nuevo.
-              </span>
-              <WhatsAppInput value={newClientWhatsapp} onChange={setNewClientWhatsapp} />
-              <Input
-                name="new-client-notes"
-                textarea
-                rows={2}
-                optional
-                label="Notas"
-                placeholder="Agregar notas..."
-                value={newClientNotes}
-                onChange={(event) => setNewClientNotes(event.target.value)}
-              />
-              <ConfirmButton
-                text="Agregar cliente y confirmar"
-                disabled={!isNewClientValid}
-                onClick={() =>
-                  onAddClientAndConfirm({
-                    name: clientQuery.trim(),
-                    phone: newClientWhatsapp,
-                    notes: newClientNotes.trim() || undefined,
-                  })
-                }
-                className="w-full"
-              />
-            </div>
-          )}
-        </div>
+            {!selectedClient && clientQuery.trim() && (
+              <div
+                className={twMerge(
+                  NEW_CLIENT_SECTION_CLASS,
+                  filteredClients.length > 0 && NEW_CLIENT_SECTION_SEPARATOR_CLASS,
+                )}
+              >
+                <span className={NEW_CLIENT_HINT_CLASS}>
+                  ¿No está en la lista? Completá estos datos para agregarlo como cliente nuevo.
+                </span>
+                <WhatsAppInput value={newClientWhatsapp} onChange={setNewClientWhatsapp} />
+                <Input
+                  name="new-client-notes"
+                  textarea
+                  rows={2}
+                  optional
+                  label="Notas"
+                  placeholder="Agregar notas..."
+                  value={newClientNotes}
+                  onChange={(event) => setNewClientNotes(event.target.value)}
+                />
+                <ConfirmButton
+                  text="Agregar cliente y confirmar"
+                  disabled={!isNewClientValid}
+                  onClick={() =>
+                    onAddClientAndConfirm({
+                      name: clientQuery.trim(),
+                      phone: newClientWhatsapp,
+                      notes: newClientNotes.trim() || undefined,
+                    })
+                  }
+                  className="w-full"
+                />
+              </div>
+            )}
+          </div>
+        </DetailsPanel>
       </Sidebar>
     );
   }
@@ -385,6 +404,12 @@ export default function AddShiftSidebar({
 
   return (
     <Sidebar
+      // expandOpenPanel sólo entra en juego si hay un [data-filter-panel][open]
+      // entre los hijos directos (ver SIDEBAR_EXPAND_OPEN_PANEL_CLASS) — en el
+      // modo "Bloquear día del negocio" (isBusinessDayMode) no hay ningún
+      // DetailsPanel acá (es Calendar + el card de confirmación), así que no
+      // le cambia nada; sólo estira "Crear un nuevo turno" al 100% del alto.
+      expandOpenPanel
       footer={
         isBusinessDayMode ? (
           <div className="flex flex-col gap-2">
@@ -451,7 +476,6 @@ export default function AddShiftSidebar({
         <>
           <DetailsPanel
             title="Crear un nuevo turno"
-            hideChevron
             options={serviceFilters}
             selectedId={selectedOptionId}
             onOptionClick={(option) => onSelectService(option.label)}

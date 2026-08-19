@@ -68,6 +68,11 @@ export type FiltersOption = {
   id: string;
   label: string;
   checked?: boolean;
+  /** Sólo la usan los filtros de Clientes (ver clientFilters en
+      Dashboard.tsx): se muestra en la fila del panel Clientes para
+      diferenciar clientes con nombres parecidos sin mostrar el teléfono
+      entero. */
+  phone?: string;
 };
 
 export type Appointment = {

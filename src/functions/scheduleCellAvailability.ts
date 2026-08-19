@@ -53,6 +53,14 @@ export interface CellAvailabilityInput {
   /** Tramos desbloqueados a mano para ESTE miembro puntual ese día
       (ScheduleBlock con type === 'unblock' y `member`). */
   memberUnblockedRanges?: TimeRange[];
+  /** Si true, no trata el slot como "past" aunque ya haya pasado — para
+      calcular la disponibilidad ESTRUCTURAL (bloqueo explícito, fuera de
+      horario laboral) sin que el paso del tiempo la tape. Sirve para
+      dibujar bloqueos/horario-no-laboral en celdas ya pasadas (ver
+      computeColumnBlockedCards en Schedule.tsx) — nunca para decidir si un
+      click puede reservar/tocar ese slot, eso sigue yendo por el chequeo
+      normal (con "past" activo). */
+  ignorePast?: boolean;
 }
 
 function timeToMinutes(time: string): number {
@@ -100,12 +108,13 @@ export function getCellAvailability({
   memberBlockedRanges,
   businessUnblockedRanges,
   memberUnblockedRanges,
+  ignorePast = false,
 }: CellAvailabilityInput): CellAvailability {
   if (blockedMembers?.includes(member)) {
     return 'blocked';
   }
 
-  if (isPastSlot(selectedDate, slotMinutes, now)) {
+  if (!ignorePast && isPastSlot(selectedDate, slotMinutes, now)) {
     return 'past';
   }
 

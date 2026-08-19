@@ -3,7 +3,7 @@
   Panel colapsable reutilizable con details/summary.
 */
 
-import { useRef, type DetailsHTMLAttributes, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, type DetailsHTMLAttributes, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Dropdown } from '@/components/ui/dropdown';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,10 @@ export interface DetailsPanelOption {
       de `checked`, que es nada más el filtro de "mostrar en mi calendario" —
       `active` es si el servicio se puede reservar desde el sitio público. */
   active?: boolean;
+  /** Sólo la usa el panel Clientes (ver clientFilters en Dashboard.tsx):
+      se muestran los últimos 2 dígitos en la fila, para diferenciar
+      clientes con nombres parecidos sin mostrar el teléfono entero. */
+  phone?: string;
 }
 
 interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
@@ -46,16 +50,96 @@ interface DetailsPanelProps extends DetailsHTMLAttributes<HTMLDetailsElement> {
   children?: ReactNode;
 }
 
+/* Ojo: <details> con display:flex (o grid) NO reparte el alto a sus hijos
+   con flex-grow/1fr — es un bug/particularidad real del elemento (probado
+   a mano: un <details> y un <div> con el mismo CSS flex-col + hijo flex:1
+   dan resultados distintos, el <div> reparte bien y el <details> no, sin
+   importar si el hijo es <summary> real o un div cualquiera). Por eso acá
+   NO se usa flex-col en el propio <details> — la altura del body se fija
+   a mano en px vía usePanelBodyHeight de más abajo, que sí funciona
+   siempre (ver ese hook para el detalle). */
 const FILTER_PANEL_CLASS = 'group w-full cursor-pointer overflow-hidden shrink-0 rounded-4xl text-foreground p-2 bg-card border border-border';
 
-const FILTER_PANEL_BODY_CLASS = 'flex flex-col flex-1 min-h-0 overflow-y-auto pt-1 ';
+const FILTER_PANEL_SUMMARY_CLASS = 'shrink-0';
+
+const FILTER_PANEL_BODY_CLASS = 'flex flex-col min-h-0 pt-1';
+
+/* Sólo la lista de options hace scroll — el botón "Agregar un nuevo..."
+   (action/actionLabel) vive afuera de este contenedor, así queda anclado
+   abajo como footer del panel en vez de desplazarse con la lista cuando
+   hay muchas filas (ver expandOpenPanel en Sidebar.tsx: el panel abierto
+   ocupa flex-1 del alto disponible, y ahí es donde esto se nota). */
+const FILTER_PANEL_LIST_CLASS = 'flex flex-col flex-1 min-h-0 overflow-y-auto';
 
 const DETAILS_PANEL_CONTENT_CLASS = 'flex items-center align-center gap-3 h-12 w-full text-left';
 
 const DETAILS_PANEL_AVATAR_CLASS = 'h-8 w-8 shrink-0';
 const DETAILS_PANEL_IMAGE_CLASS = 'h-full w-full';
 
-const DETAILS_PANEL_LABEL_CLASS = '';
+const DETAILS_PANEL_LABEL_CLASS = 'flex-1 truncate';
+
+const DETAILS_PANEL_PHONE_CLASS = 'shrink-0 text-xs text-muted-foreground';
+
+interface DetailsPanelOptionRowProps {
+  option: DetailsPanelOption;
+  renderDropdownItems?: (option: DetailsPanelOption) => ReactNode[];
+  onOptionClick?: (option: DetailsPanelOption) => void;
+  selectedId?: string;
+}
+
+/* Fila de opción (avatar + label, con menú Dropdown o click simple según
+   se pase renderDropdownItems) — la usa el listado por defecto de acá
+   abajo, y también paneles que arman su propio body (children) pero
+   quieren la misma fila, ej. el buscador de Clientes en AdminSidebar. */
+export function DetailsPanelOptionRow({ option, renderDropdownItems, onOptionClick, selectedId }: DetailsPanelOptionRowProps) {
+  const content = (
+    <div
+      data-details-panel-content
+      className={twMerge(
+        DETAILS_PANEL_CONTENT_CLASS,
+        (option.checked === false || option.active === false) && 'opacity-40',
+      )}
+    >
+      <span className={DETAILS_PANEL_AVATAR_CLASS}>
+        <Image
+          name={option.label}
+          className={twMerge(
+            DETAILS_PANEL_IMAGE_CLASS,
+            option.colorClassName && 'text-black',
+            option.colorClassName,
+          )}
+        />
+      </span>
+      <span className={DETAILS_PANEL_LABEL_CLASS}>{option.label}</span>
+      {option.phone?.trim() && (
+        <span className={DETAILS_PANEL_PHONE_CLASS}>•• {option.phone.trim().slice(-2)}</span>
+      )}
+    </div>
+  );
+
+  return renderDropdownItems ? (
+    <Dropdown
+      items={renderDropdownItems(option)}
+      onClick={() => onOptionClick?.(option)}
+      content={content}
+      className={DETAILS_PANEL_TRIGGER_CLASS}
+      openClassName={DETAILS_PANEL_TRIGGER_OPEN_CLASS}
+    />
+  ) : (
+    <Button
+      type="button"
+      variant="ghost"
+      className={twMerge(
+        DETAILS_PANEL_TRIGGER_CLASS,
+        'text-left',
+        option.id === selectedId && DETAILS_PANEL_TRIGGER_OPEN_CLASS,
+      )}
+      onClick={() => onOptionClick?.(option)}
+    >
+      {content}
+    </Button>
+  );
+}
 
 /* animate-in solo dispara al montarse (no en cada apertura del acordeón,
    ya que las filas existentes no se desmontan al cerrar/abrir un <details>
@@ -95,6 +179,13 @@ function useDetailsToggleAnimation(detailsRef: React.RefObject<HTMLDetailsElemen
     animationRef.current = null;
     isClosingRef.current = false;
     isExpandingRef.current = false;
+
+    // Recién acá el <details> quedó libre para medir su alto real (flex-1
+    // desde afuera, si aplica) sin el height animado de por medio — ver
+    // syncPanelBodyHeight. Mientras la animación corre, el <details> sigue
+    // el height animado (no el flex-grow final), así que sincronizar antes
+    // de este punto deja al body con un alto intermedio, congelado.
+    window.requestAnimationFrame(() => syncPanelBodyHeight(details));
   };
 
   const shrink = (details: HTMLDetailsElement) => {
@@ -156,6 +247,61 @@ function useDetailsToggleAnimation(detailsRef: React.RefObject<HTMLDetailsElemen
   };
 }
 
+/* <details> no reparte alto a sus hijos con CSS (ver comentario de
+   FILTER_PANEL_CLASS), así que cuando el propio <details> recibe más
+   altura de la que necesita su contenido natural (acordeón abierto dentro
+   de un contexto h-full, ej. el panel expandido de Sidebar.tsx vía
+   SIDEBAR_EXPAND_OPEN_PANEL_CLASS), el body se fija a mano al espacio que
+   sobra — así el botón "Agregar un nuevo...", al ser el último hijo de un
+   body flex-col, queda empujado hasta el fondo real en vez de pegado
+   justo debajo de la última fila.
+
+   El recálculo NO puede depender sólo de ResizeObserver: mientras el
+   <details> tiene flex-1 (flex-basis:0%) su altura animada a mano por
+   useDetailsToggleAnimation queda ignorada por el algoritmo de flexbox
+   (gana el flex-grow, no el height inline), así que el tamaño real
+   "salta" a su valor final apenas se abre — y en el entorno de test de
+   este proyecto ResizeObserver no llegó a reportar ese salto de forma
+   confiable. Por eso el toggle de <details> (ver onToggle más abajo)
+   llama a syncPanelBodyHeight a mano en el mismo rAF donde ya espera a
+   que el layout asiente (el que dispara "resize-filter-panel"). El
+   ResizeObserver + el listener de resize de acá quedan como red de
+   contención para el resto de los casos (resize de ventana con el panel
+   ya abierto, cambios de layout ajenos al propio toggle). */
+function syncPanelBodyHeight(details: HTMLDetailsElement) {
+  const summary = details.querySelector<HTMLElement>(':scope > summary');
+  const body = details.querySelector<HTMLElement>(':scope > [data-filter-panel-body]');
+  if (!summary || !body) return;
+
+  // clientHeight incluye el padding vertical del propio <details> (p-2):
+  // hay que restarlo antes de restar el summary, si no el body queda con
+  // paddingTop + paddingBottom de más (el botón termina desbordando el
+  // fondo real del panel en vez de quedar justo a ras).
+  const computed = window.getComputedStyle(details);
+  const verticalPadding = parseFloat(computed.paddingTop) + parseFloat(computed.paddingBottom);
+  const contentHeight = details.clientHeight - verticalPadding;
+
+  body.style.height = `${contentHeight - summary.offsetHeight}px`;
+}
+
+function usePanelBodyHeight(detailsRef: React.RefObject<HTMLDetailsElement | null>) {
+  useLayoutEffect(() => {
+    const details = detailsRef.current;
+    if (!details) return;
+
+    const sync = () => syncPanelBodyHeight(details);
+    sync();
+
+    const observer = new ResizeObserver(sync);
+    observer.observe(details);
+    window.addEventListener('resize', sync);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', sync);
+    };
+  }, [detailsRef]);
+}
+
 export default function DetailsPanel({
   title,
   options = [],
@@ -177,6 +323,7 @@ export default function DetailsPanel({
   const groupName = useFiltersGroup();
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const onSummaryClick = useDetailsToggleAnimation(detailsRef);
+  usePanelBodyHeight(detailsRef);
 
   return (
     <details
@@ -191,6 +338,7 @@ export default function DetailsPanel({
         const details = e.currentTarget;
 
         window.requestAnimationFrame(() => {
+          syncPanelBodyHeight(details);
           details.dispatchEvent(new Event('resize-filter-panel'));
         });
 
@@ -212,63 +360,24 @@ export default function DetailsPanel({
       }}
       className={twMerge(FILTER_PANEL_CLASS, className)}
     >
-      <summary hidden={hideHeader} onClick={onSummaryClick}>
+      <summary hidden={hideHeader} onClick={onSummaryClick} className={FILTER_PANEL_SUMMARY_CLASS}>
         <ContentHeader title={title} action={hideChevron ? undefined : <SummaryButton />} />
       </summary>
 
       <div data-filter-panel-body className={FILTER_PANEL_BODY_CLASS}>
         {children ?? (
           <>
-            {options.map((option) => {
-              const content = (
-                <div
-                  data-details-panel-content
-                  className={twMerge(
-                    DETAILS_PANEL_CONTENT_CLASS,
-                    (option.checked === false || option.active === false) && 'opacity-40',
-                  )}
-                >
-                  <span className={DETAILS_PANEL_AVATAR_CLASS}>
-                    <Image
-                      name={option.label}
-                      className={twMerge(
-                        DETAILS_PANEL_IMAGE_CLASS,
-                        option.colorClassName && 'text-black',
-                        option.colorClassName,
-                      )}
-                    />
-                  </span>
-                  <span className={DETAILS_PANEL_LABEL_CLASS}>{option.label}</span>
-                </div>
-              );
-
-              /* Sin ítems de dropdown, la fila es un botón simple (selección):
-                 el mismo Button ghost que usa el Dropdown para idéntico estilo. */
-              return renderDropdownItems ? (
-                <Dropdown
+            <div className={FILTER_PANEL_LIST_CLASS}>
+              {options.map((option) => (
+                <DetailsPanelOptionRow
                   key={option.id}
-                  items={renderDropdownItems(option)}
-                  onClick={() => onOptionClick?.(option)}
-                  content={content}
-                  className={DETAILS_PANEL_TRIGGER_CLASS}
-                  openClassName={DETAILS_PANEL_TRIGGER_OPEN_CLASS}
+                  option={option}
+                  renderDropdownItems={renderDropdownItems}
+                  onOptionClick={onOptionClick}
+                  selectedId={selectedId}
                 />
-              ) : (
-                <Button
-                  key={option.id}
-                  type="button"
-                  variant="ghost"
-                  className={twMerge(
-                    DETAILS_PANEL_TRIGGER_CLASS,
-                    'text-left',
-                    option.id === selectedId && DETAILS_PANEL_TRIGGER_OPEN_CLASS,
-                  )}
-                  onClick={() => onOptionClick?.(option)}
-                >
-                  {content}
-                </Button>
-              );
-            })}
+              ))}
+            </div>
 
             {action ?? (actionLabel ? <AddButton text={actionLabel} onClick={onActionClick} /> : null)}
           </>
