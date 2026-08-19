@@ -1,5 +1,8 @@
+notificaciones dentro de los días del weekselector? en version normal
+
 9- responsive.
-- botón flotante, cuando se abra se ve el sidebar y abajo de todo los botones de appnavbar (hice mal esto!! rehacer)
+- alinear current time line en mobile
+- al hacer click en el día que está en @src/components/widgets/mainWidgets/WeekSelector.tsx en mobile quiero que abra el @src/components/widgets/sidebarWidgets/Calendar.tsx exactamente igual a cuando abro el menú pero la única diferencia es que solo muestra el calendar y el mismo header con logo de la app y botón de cerrar
 
 
 11-logica de horarios tiene que ser extremadamente lógico, como si fuera un sudoku, tiene que tener sentido para todos y tiene que guardarse en base de datos y mostrarse en front de una manera muy clara.
@@ -17,6 +20,7 @@ normalizar componentes:
 - functions
 - colores. hacer una alta cantidad de colores, aplicarlos a todos y eliminar los no utilizados.
 - cómo mostrar las clases de cáda componente
+- imagen con placeholder
 
 13- notoficaciones:
 solicitud de turno al negocio

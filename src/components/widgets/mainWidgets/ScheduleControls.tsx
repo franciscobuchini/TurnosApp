@@ -25,6 +25,9 @@ interface ScheduleControlsProps {
   onToggleBlockMode?: () => void;
   onSaveBlockMode?: () => void;
   onCancelBlockMode?: () => void;
+  /** En mobile el zoom queda fijo (ver MOBILE_DEFAULT_ROW_HEIGHT_PX en
+      Schedule.tsx) — sin control para cambiarlo. */
+  hideZoom?: boolean;
   className?: string;
 }
 
@@ -47,6 +50,7 @@ export default function ScheduleControls({
   onToggleBlockMode,
   onSaveBlockMode,
   onCancelBlockMode,
+  hideZoom = false,
   className,
 }: ScheduleControlsProps) {
   return (
@@ -99,28 +103,32 @@ export default function ScheduleControls({
           )}
         </>
       )}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-lg"
-        className={CONTROL_BUTTON_CLASS}
-        icon={<ZoomOut className={ICON_CLASS} />}
-        aria-label="Alejar (filas más chicas)"
-        title="Alejar"
-        disabled={!canZoomOut(rowHeightPx)}
-        onClick={() => onRowHeightChange(zoomOut)}
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-lg"
-        className={CONTROL_BUTTON_CLASS}
-        icon={<ZoomIn className={ICON_CLASS} />}
-        aria-label="Acercar (filas más grandes)"
-        title="Acercar"
-        disabled={!canZoomIn(rowHeightPx)}
-        onClick={() => onRowHeightChange(zoomIn)}
-      />
+      {!hideZoom && (
+        <>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-lg"
+            className={CONTROL_BUTTON_CLASS}
+            icon={<ZoomOut className={ICON_CLASS} />}
+            aria-label="Alejar (filas más chicas)"
+            title="Alejar"
+            disabled={!canZoomOut(rowHeightPx)}
+            onClick={() => onRowHeightChange(zoomOut)}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-lg"
+            className={CONTROL_BUTTON_CLASS}
+            icon={<ZoomIn className={ICON_CLASS} />}
+            aria-label="Acercar (filas más grandes)"
+            title="Acercar"
+            disabled={!canZoomIn(rowHeightPx)}
+            onClick={() => onRowHeightChange(zoomIn)}
+          />
+        </>
+      )}
     </div>
   );
 }

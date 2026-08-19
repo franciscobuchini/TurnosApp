@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
+import { useLayoutTier } from '@/hooks/useLayoutTier';
 import { NextWeekButton, PrevWeekButton } from '../../buttons/WeekNavigationButtons';
 import DaySelectorButtons from '../../buttons/DaySelectorButtons';
 
@@ -17,7 +18,14 @@ interface WeekSelectorProps {
   nextButtonClassName?: string;
 }
 
-const WEEK_SELECTOR_CLASS = 'flex w-full items-center justify-between overflow-hidden bg-card rounded-3xl p-2';
+/* En mobile el padding baja de p-2 a p-1 (los botones internos, que son
+   los que de verdad marcan el alto, también se reducen a la mitad —
+   ver WEEK_SELECTOR_NAV_BUTTON_MOBILE_CLASS/WEEK_SELECTOR_DAY_BUTTON_MOBILE_CLASS
+   en WeekNavigationButtons.tsx/DaySelectorButtons.tsx) para que el alto
+   total del selector quede, en conjunto, a la mitad del de pc. */
+const WEEK_SELECTOR_CLASS = 'flex w-full items-center justify-between overflow-hidden bg-card rounded-3xl';
+const WEEK_SELECTOR_PC_CLASS = 'p-2';
+const WEEK_SELECTOR_MOBILE_CLASS = 'p-1';
 
 const WEEK_SELECTOR_DAYS_CLASS = '@container flex flex-1 justify-around gap-2 px-2';
 
@@ -50,6 +58,8 @@ export default function WeekSelector({
   onViewDateChange,
   className,
 }: WeekSelectorProps) {
+  const tier = useLayoutTier();
+
   /* Misma técnica que Schedule.tsx (ver previousSelectedDate ahí): se
      compara contra el valor anterior DURANTE el render (no en un efecto)
      para que la clase de animación ya esté lista en el primer commit con
@@ -104,7 +114,7 @@ export default function WeekSelector({
   };
 
   return (
-    <div className={twMerge(WEEK_SELECTOR_CLASS, className)}>
+    <div className={twMerge(WEEK_SELECTOR_CLASS, tier === 'mobile' ? WEEK_SELECTOR_MOBILE_CLASS : WEEK_SELECTOR_PC_CLASS, className)}>
       <PrevWeekButton
         onClick={prevDay}
         isSelected={isSelectedBeforeWeek}

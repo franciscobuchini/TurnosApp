@@ -13,6 +13,12 @@ export const ROW_HEIGHT_LEVELS_PX: number[] = [28, 36, 48, 64, 80];
 /** Alto de fila con el que arranca el Schedule (equivale al h-12 anterior). */
 export const DEFAULT_ROW_HEIGHT_PX = 48;
 
+/** Alto de fila con el que arranca el Schedule en mobile (ver
+    useLayoutTier): el 2do nivel contando desde el más chico (más zoom
+    out) — ahí queda fijo, no hay control de zoom en mobile (ver
+    ScheduleControls). */
+export const MOBILE_DEFAULT_ROW_HEIGHT_PX = ROW_HEIGHT_LEVELS_PX[1];
+
 function currentLevelIndex(rowHeightPx: number): number {
   const index = ROW_HEIGHT_LEVELS_PX.indexOf(rowHeightPx);
   return index === -1 ? ROW_HEIGHT_LEVELS_PX.indexOf(DEFAULT_ROW_HEIGHT_PX) : index;

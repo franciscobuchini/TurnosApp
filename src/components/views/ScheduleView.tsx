@@ -2,11 +2,30 @@ import type { ReactNode } from 'react';
 import type { Appointment, ScheduleBlock } from '../../database/types';
 import type { FiltersOption } from '../../database/types';
 import type { ShiftSlot } from '../../pages/admin/Dashboard';
+import { getTeamMembers } from '../../database/data';
+import { useLayoutTier } from '@/hooks/useLayoutTier';
+import Image from '../ui/image';
+import MobileMenuButton from '../buttons/MobileMenuButton';
 import MainContent from '../layout/MainContent';
 import WeekSelector from '../widgets/mainWidgets/WeekSelector';
 import Schedule from '../widgets/mainWidgets/Schedule';
 
-const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col gap-3 p-3';
+const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col sm:gap-3 sm:p-3 gap-2 px-0 pt-3 pb-0';
+
+/* Mobile (ver useLayoutTier): WeekSelector ya no va solo — "comparte
+   espacio" con el botón que abre el menú mobile (a la izquierda) y con
+   el avatar del empleado que se está mostrando en el Schedule (a la
+   derecha, reemplaza al header de la tabla que antes lo mostraba arriba
+   de la columna — ver showHeader en Schedule.tsx). selectedMembers[0] es
+   el mismo miembro que termina en la única columna visible: Schedule.tsx
+   recorta a `members.slice(0, visibleColumnCount)` sin reordenar, y en
+   mobile ese cupo ya da 1 sola columna. px-2: SCHEDULE_VIEW_CLASS es
+   px-0 en mobile (le da todo el ancho a la grilla del Schedule), pero
+   esta fila sí necesita separación del borde — si no, el botón del menú
+   y el avatar quedan pegados a los bordes de la pantalla. */
+const SCHEDULE_MOBILE_TOP_ROW_CLASS = 'flex items-center gap-2 px-2';
+
+const SCHEDULE_MOBILE_AVATAR_CLASS = 'size-12 shrink-0 text-sm';
 
 interface ScheduleViewProps {
   selectedMembers: string[];
@@ -56,6 +75,9 @@ interface ScheduleViewProps {
   /** Cupo de columnas de miembro que entran en el ancho real del Schedule —
       lo mide y reporta Schedule.tsx, ver useTeamFilters.ts. */
   onColumnCapacityChange?: (count: number) => void;
+  /** Abre el menú mobile (ver openMobileMenu en Dashboard.tsx) — sólo se
+      usa en mobile, desde el botón embebido en la fila de WeekSelector. */
+  onOpenMobileMenu?: () => void;
   children?: ReactNode;
 }
 
@@ -88,16 +110,36 @@ export default function ScheduleView({
   onBlockClick,
   blocksVersion,
   onColumnCapacityChange,
+  onOpenMobileMenu,
   children,
 }: ScheduleViewProps) {
+  const tier = useLayoutTier();
+  const visibleMemberPhoto = getTeamMembers().find((m) => m.name === selectedMembers[0])?.photo;
+
   return (
     <MainContent className={SCHEDULE_VIEW_CLASS}>
-      <WeekSelector
-        viewDate={viewDate}
-        selectedDate={selectedDate}
-        onSelectDate={onSelectDate}
-        onViewDateChange={onViewDateChange}
-      />
+      {tier === 'mobile' ? (
+        <div className={SCHEDULE_MOBILE_TOP_ROW_CLASS}>
+          <MobileMenuButton onClick={() => onOpenMobileMenu?.()} />
+          <WeekSelector
+            viewDate={viewDate}
+            selectedDate={selectedDate}
+            onSelectDate={onSelectDate}
+            onViewDateChange={onViewDateChange}
+            className="flex-1"
+          />
+          {selectedMembers[0] && (
+            <Image name={selectedMembers[0]} src={visibleMemberPhoto} className={SCHEDULE_MOBILE_AVATAR_CLASS} />
+          )}
+        </div>
+      ) : (
+        <WeekSelector
+          viewDate={viewDate}
+          selectedDate={selectedDate}
+          onSelectDate={onSelectDate}
+          onViewDateChange={onViewDateChange}
+        />
+      )}
       <Schedule
         selectedDate={selectedDate}
         members={selectedMembers}

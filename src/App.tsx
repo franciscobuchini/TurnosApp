@@ -61,6 +61,7 @@ function SchedulePage() {
       onMemberDetails={(name) => ctx.navigate(`/admin/miembro/${encodeURIComponent(name)}`)}
       blocksVersion={ctx.blocksVersion}
       onColumnCapacityChange={ctx.setColumnCapacity}
+      onOpenMobileMenu={ctx.openMobileMenu}
     />
   );
 }

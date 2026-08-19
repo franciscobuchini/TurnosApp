@@ -23,7 +23,7 @@
   sea el acceso que se use para salir.
 */
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
 import {
@@ -32,7 +32,6 @@ import {
   ChartColumn,
   Globe,
   Megaphone,
-  Menu,
   Moon,
   Palette,
   Settings,
@@ -42,6 +41,7 @@ import {
 import { Button } from '@/components/ui/button';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
 import Logo from '@/components/ui/logo';
+import MobileMenuButton from '@/components/buttons/MobileMenuButton';
 import { getBookingRequests, DATA_CHANGE_EVENT } from '@/database/data';
 import type { BookingRequest } from '@/database/types';
 import { useLayoutTier } from '@/hooks/useLayoutTier';
@@ -59,12 +59,22 @@ const ICON_CLASS = 'size-5';
    lugar queda sólo este botón flotante, arriba de todo lo demás (z-50),
    que abre el mismo menú a pantalla completa (MOBILE_OVERLAY_CLASS) —
    ver el return de más abajo, que bifurca por tier ANTES de llegar al
-   <nav> de siempre (que sigue exactamente igual para "pc"). */
-const MOBILE_TRIGGER_CLASS = 'fixed top-4 left-4 z-50 rounded-full border border-border bg-card shadow-lg';
+   <nav> de siempre (que sigue exactamente igual para "pc"). El color
+   (lima, texto oscuro, hover que atenúa la misma tonalidad) sale de
+   variant="default" del Button — acá sólo se pisa tamaño/posición: más
+   grande que icon-lg (size-10) para que el ícono (ICON_CLASS, sin
+   cambios) quede con más aire alrededor. */
+const MOBILE_TRIGGER_CLASS = 'fixed top-4 right-4 z-50 size-12 rounded-full shadow-lg';
 
 const MOBILE_OVERLAY_CLASS = 'fixed inset-0 z-50 flex flex-col gap-1 overflow-y-auto bg-background p-4';
 
 const MOBILE_OVERLAY_HEADER_CLASS = 'mb-2 flex shrink-0 items-center justify-between px-2';
+
+/* min-h-dvh: la sidebar embebida "ocupa toda la pantalla" al abrir el
+   menú (scrollear el overlay recién ahí muestra el menú de navegación
+   de más abajo) — flex flex-col para que <Sidebar> (que en mobile pasa
+   a ser flex-1, ver Sidebar.tsx) tenga de qué altura tomar ese 100%. */
+const MOBILE_SIDEBAR_SECTION_CLASS = 'flex min-h-dvh flex-col';
 
 const MOBILE_ITEM_CLASS =
   'h-14 w-full shrink-0 justify-start gap-4 rounded-3xl px-4 text-base text-muted-foreground hover:text-foreground';
@@ -94,6 +104,23 @@ interface AppMenubarProps {
   /* Estado del sidebar de notificaciones */
   notificationsOpen?: boolean;
   onToggleNotifications?: () => void;
+  /* La misma sidebar que la página le pasa a <Layout sidebar>  (ver
+     Dashboard.tsx) — sólo se usa en mobile: Layout.tsx deja de
+     renderizarla en su fila (no entra al lado de Schedule en una
+     pantalla angosta) y en su lugar aparece acá arriba, dentro del menú
+     a pantalla completa (ver MOBILE_OVERLAY_CLASS). En pc no se usa
+     (Layout ya la muestra donde siempre). Quien no pase nada acá
+     simplemente no suma esa sección al menú mobile. */
+  sidebar?: ReactNode;
+  /* Estado del menú mobile, controlado desde afuera — sólo Dashboard.tsx
+     lo pasa (ver mobileMenuOpen ahí): en la página del Schedule, el botón
+     que lo abre ya no vive acá, vive embebido en la fila de WeekSelector
+     (ScheduleView), así que los dos necesitan estar de acuerdo en el
+     mismo estado. Quien monta <AppMenubar /> sin pasar nada (ej.
+     Personalizacion.tsx) sigue funcionando solo, con estado propio (ver
+     el patrón controlado/no controlado más abajo). */
+  mobileMenuOpen?: boolean;
+  setMobileMenuOpen?: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function AppMenubar({
@@ -101,6 +128,9 @@ export default function AppMenubar({
   onCloseAddShift,
   notificationsOpen = false,
   onToggleNotifications,
+  sidebar,
+  mobileMenuOpen: controlledMobileMenuOpen,
+  setMobileMenuOpen: setControlledMobileMenuOpen,
 }: AppMenubarProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -114,8 +144,26 @@ export default function AppMenubar({
      mismo ConfirmDialog con requirePin que ya usa "Eliminar" en ViewLayout. */
   const [editWebConfirmOpen, setEditWebConfirmOpen] = useState(false);
   /* Sólo aplica en mobile (ver MOBILE_TRIGGER_CLASS/MOBILE_OVERLAY_CLASS
-     más abajo) — en pc no se usa. */
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+     más abajo) — en pc no se usa. Controlado/no controlado: si el padre
+     pasa mobileMenuOpen/setMobileMenuOpen (Dashboard.tsx) se usa eso; si
+     no (Personalizacion.tsx), este estado interno hace de respaldo para
+     que el botón flotante siga funcionando solo. */
+  const [internalMobileMenuOpen, setInternalMobileMenuOpen] = useState(false);
+  const mobileMenuOpen = controlledMobileMenuOpen ?? internalMobileMenuOpen;
+  const setMobileMenuOpen = setControlledMobileMenuOpen ?? setInternalMobileMenuOpen;
+
+  /* Cualquier navegación (un ítem de acá abajo, o "Ver detalles"/"Agregar
+     un nuevo..." tocado DENTRO de la sidebar embebida) cierra el menú —
+     si no, quedaría tapando la página nueva. Los controles que no
+     navegan (tildar un filtro, abrir un acordeón) no disparan esto, así
+     que se puede seguir interactuando con la sidebar sin que se cierre
+     sola. En modo controlado (Dashboard.tsx) esto ya lo hace el mismo
+     efecto de location.pathname que resetea el resto del estado — este
+     de acá sólo hace falta para el modo no controlado. */
+  useEffect(() => {
+    if (setControlledMobileMenuOpen) return;
+    setInternalMobileMenuOpen(false);
+  }, [pathname, setControlledMobileMenuOpen]);
 
   useEffect(() => {
     const handleDataChange = () => {
@@ -175,17 +223,18 @@ export default function AppMenubar({
       handleNavClick(to);
     };
 
+    /* /admin (Schedule): el botón que abre esto ya no flota acá — vive
+       embebido en la fila de WeekSelector (ScheduleView), compartiendo
+       espacio con él y con el avatar del empleado que se está mostrando.
+       En cualquier otra página (sin ese lugar donde "compartir espacio"),
+       sigue flotando acá como siempre. */
+    const isSchedulePage = pathname === '/admin';
+
     return (
       <>
-        <Button
-          onClick={() => setMobileMenuOpen(true)}
-          variant="ghost"
-          size="icon-lg"
-          icon={<Menu className={ICON_CLASS} />}
-          aria-label="Abrir menú"
-          title="Abrir menú"
-          className={MOBILE_TRIGGER_CLASS}
-        />
+        {!isSchedulePage && (
+          <MobileMenuButton onClick={() => setMobileMenuOpen(true)} className={MOBILE_TRIGGER_CLASS} />
+        )}
 
         {mobileMenuOpen && (
           <div className={MOBILE_OVERLAY_CLASS}>
@@ -200,6 +249,13 @@ export default function AppMenubar({
                 title="Cerrar menú"
               />
             </div>
+
+            {sidebar && (
+              <>
+                <div className={MOBILE_SIDEBAR_SECTION_CLASS}>{sidebar}</div>
+                <div className="my-2 border-t border-border" />
+              </>
+            )}
 
             <Button
               onClick={() => handleMobileNavClick('/admin')}

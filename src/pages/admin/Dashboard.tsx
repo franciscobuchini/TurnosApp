@@ -235,6 +235,10 @@ export interface AdminContext {
   createClient: (client: Client) => void;
   updateClient: (previousName: string, updated: Client) => void;
   deleteClient: (name: string) => void;
+  /** Abre el menú mobile (ver mobileMenuOpen en Dashboard.tsx) — lo usa el
+      botón embebido en la fila de WeekSelector (ScheduleView), que
+      "comparte espacio" con él en vez del botón flotante de AppMenubar. */
+  openMobileMenu: () => void;
 }
 
 function Dashboard() {
@@ -274,6 +278,15 @@ function Dashboard() {
      perder el bloqueo en curso en silencio. */
   const [blockModeHasChanges, setBlockModeHasChanges] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  /* En mobile (ver useLayoutTier) el botón que abre esto ya no vive sólo en
+     AppMenubar: en la página del Schedule (ScheduleView), pasa a estar
+     dentro de la fila de WeekSelector, para "compartir espacio" con él y
+     con el avatar del empleado que se está mostrando — ver el comentario
+     de MobileMenuButton en AppMenubar.tsx. Por eso el estado vive acá
+     (Dashboard), no adentro de AppMenubar: los dos necesitan poder
+     abrirlo/cerrarlo. */
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const openMobileMenu = () => setMobileMenuOpen(true);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => getBookingRequests());
   /* Wizard de bienvenida (OnboardingWizard): sólo se abre vía location.state
      al llegar desde "Crear cuenta" en Home.tsx (ver el useEffect de
@@ -771,6 +784,7 @@ function Dashboard() {
     setBlockModeOpen(false);
     setBlockModeHasChanges(false);
     setNotificationsOpen(false);
+    setMobileMenuOpen(false);
     setShiftService(null);
     setShiftSlot(null);
     setBlockType(null);
@@ -1060,6 +1074,7 @@ function Dashboard() {
     createClient,
     updateClient,
     deleteClient,
+    openMobileMenu,
   };
 
   /* Las vistas de "Detalles de..."/"Perfil de..."/"Acerca de..." y "Crear un
@@ -1075,6 +1090,73 @@ function Dashboard() {
     location.pathname.startsWith('/admin/cliente') ||
     ['/admin/metricas', '/admin/marketing'].includes(location.pathname);
 
+  /* Se le pasa esto mismo tanto a <Layout sidebar> (pc: al lado de
+     Schedule) como a <AppMenubar sidebar> (mobile: dentro de su propio
+     menú a pantalla completa — ver los comentarios de Layout.tsx y
+     AppMenubar.tsx) — un solo lugar decide qué sidebar corresponde
+     mostrar según el estado, cada uno decide nada más DÓNDE mostrarla. */
+  const sidebarContent = addShiftOpen ? (
+    <AddShiftSidebar
+      serviceFilters={serviceFilters}
+      clientFilters={clientFilters}
+      onClose={closeAddShift}
+      selectedService={shiftService}
+      onSelectService={selectShiftService}
+      shiftSlot={shiftSlot}
+      onBack={cancelShiftSlot}
+      onConfirmClient={confirmShiftClient}
+      onAddClientAndConfirm={confirmShiftWithNewClient}
+      blockType={blockType}
+      onSelectBlockType={selectBlockType}
+      pendingBlockRows={pendingBlockRows}
+      pendingBlockRanges={pendingBlockRanges}
+      pendingMemberDays={pendingMemberDays}
+      pendingBlockDays={pendingBlockDays}
+      onToggleBlockDay={toggleBlockDay}
+      onExitBlockDayMode={exitBlockDayMode}
+      pendingMemberHourRanges={pendingMemberHourRanges}
+      blockReason={blockReason}
+      onBlockReasonChange={setBlockReason}
+      onConfirmBlock={confirmBlock}
+      onClearPendingBlocks={clearPendingBlocks}
+    />
+  ) : editingAppointment ? (
+    <EditAppointmentSidebar
+      appointment={editingAppointment}
+      onClose={closeEditAppointment}
+      onSave={saveAppointment}
+      onCancelAppointment={cancelAppointment}
+    />
+  ) : editingBlock ? (
+    <EditBlockSidebar block={editingBlock} onClose={closeEditBlock} onCancelBlock={cancelBlock} />
+  ) : notificationsOpen ? (
+    <NotificationsSidebar
+      requests={bookingRequests}
+      onConfirm={handleConfirmBookingRequest}
+      onReject={handleRejectBookingRequest}
+    />
+  ) : isSidebarlessPage ? null : blockModeOpen ? (
+    <Sidebar>
+      <Calendar
+        selectedDate={selectedDate}
+        onSelectDate={selectDate}
+        blockModeOpen
+        onToggleBusinessDayBlock={toggleBusinessDayBlock}
+      />
+    </Sidebar>
+  ) : (
+    <AdminSidebar
+      selectedDate={selectedDate}
+      onSelectDate={selectDate}
+      teamFilters={teamFilters}
+      toggleTeamFilter={toggleTeamFilter}
+      serviceFilters={serviceFilters}
+      toggleServiceActive={toggleServiceActive}
+      clientFilters={clientFilters}
+      onAddClient={addClientInline}
+    />
+  );
+
   return (
     <>
       <Layout
@@ -1084,72 +1166,12 @@ function Dashboard() {
             onCloseAddShift={closeAddShift}
             notificationsOpen={notificationsOpen}
             onToggleNotifications={toggleNotifications}
+            sidebar={sidebarContent}
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
           />
         }
-        sidebar={
-          addShiftOpen ? (
-            <AddShiftSidebar
-              serviceFilters={serviceFilters}
-              clientFilters={clientFilters}
-              onClose={closeAddShift}
-              selectedService={shiftService}
-              onSelectService={selectShiftService}
-              shiftSlot={shiftSlot}
-              onBack={cancelShiftSlot}
-              onConfirmClient={confirmShiftClient}
-              onAddClientAndConfirm={confirmShiftWithNewClient}
-              blockType={blockType}
-              onSelectBlockType={selectBlockType}
-              pendingBlockRows={pendingBlockRows}
-              pendingBlockRanges={pendingBlockRanges}
-              pendingMemberDays={pendingMemberDays}
-              pendingBlockDays={pendingBlockDays}
-              onToggleBlockDay={toggleBlockDay}
-              onExitBlockDayMode={exitBlockDayMode}
-              pendingMemberHourRanges={pendingMemberHourRanges}
-              blockReason={blockReason}
-              onBlockReasonChange={setBlockReason}
-              onConfirmBlock={confirmBlock}
-              onClearPendingBlocks={clearPendingBlocks}
-            />
-          ) : editingAppointment ? (
-            <EditAppointmentSidebar
-              appointment={editingAppointment}
-              onClose={closeEditAppointment}
-              onSave={saveAppointment}
-              onCancelAppointment={cancelAppointment}
-            />
-          ) : editingBlock ? (
-            <EditBlockSidebar block={editingBlock} onClose={closeEditBlock} onCancelBlock={cancelBlock} />
-          ) : notificationsOpen ? (
-            <NotificationsSidebar
-              requests={bookingRequests}
-              onConfirm={handleConfirmBookingRequest}
-              onReject={handleRejectBookingRequest}
-            />
-          ) : isSidebarlessPage ? null : blockModeOpen ? (
-
-            <Sidebar>
-              <Calendar
-                selectedDate={selectedDate}
-                onSelectDate={selectDate}
-                blockModeOpen
-                onToggleBusinessDayBlock={toggleBusinessDayBlock}
-              />
-            </Sidebar>
-          ) : (
-            <AdminSidebar
-              selectedDate={selectedDate}
-              onSelectDate={selectDate}
-              teamFilters={teamFilters}
-              toggleTeamFilter={toggleTeamFilter}
-              serviceFilters={serviceFilters}
-              toggleServiceActive={toggleServiceActive}
-              clientFilters={clientFilters}
-              onAddClient={addClientInline}
-            />
-          )
-        }
+        sidebar={sidebarContent}
       >
         <Outlet context={context} />
       </Layout>

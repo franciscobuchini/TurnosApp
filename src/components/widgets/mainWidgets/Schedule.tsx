@@ -18,7 +18,8 @@ import type { Appointment, FiltersOption, ScheduleBlock } from '@/database/types
 import type { ShiftSlot } from '@/pages/admin/Dashboard';
 import { getBusinessHoursByDay, minutesToTime, rangesCoverFullDay, type TimeRange } from '@/hooks/useWeekSchedule';
 import { getCellAvailability, type CellAvailability } from '@/functions/scheduleCellAvailability';
-import { DEFAULT_ROW_HEIGHT_PX } from '@/functions/scheduleZoom';
+import { DEFAULT_ROW_HEIGHT_PX, MOBILE_DEFAULT_ROW_HEIGHT_PX } from '@/functions/scheduleZoom';
+import { useLayoutTier } from '@/hooks/useLayoutTier';
 import { SERVICE_COLOR_BY_ID } from '@/components/widgets/serviceWidgets/serviceColors';
 import { TeamFilterButton } from '@/components/widgets/sidebarWidgets/DropdownRowActions';
 import AppointmentCard from './AppointmentCard';
@@ -119,9 +120,14 @@ const SCHEDULE_TABLE_HEADER_CLASS = 'bg-(--color-surface-solid)';
 
 const SCHEDULE_LABEL_CELL_CLASS = 'relative w-16 text-center';
 const SCHEDULE_LABEL_CELL_COMPACT_CLASS = 'w-11 px-1';
+/* Mobile (ver useLayoutTier) pisa a isCompactSchedule — es un ancho fijo,
+   pensado para la pantalla del celular, no para "lo que sobra" del
+   ancho medido. */
+const SCHEDULE_LABEL_CELL_MOBILE_CLASS = 'w-12 px-1';
 
 const SCHEDULE_LABEL_TEXT_CLASS = 'absolute inset-x-0 -top-[5%] -translate-y-1/2 font-thin text-muted-foreground leading-none';
 const SCHEDULE_LABEL_TEXT_COMPACT_CLASS = 'text-xs';
+const SCHEDULE_LABEL_TEXT_MOBILE_CLASS = 'text-[10px]';
 
 const SCHEDULE_LABEL_HEADER_CLASS = 'sr-only';
 
@@ -181,6 +187,10 @@ const HEADER_HEIGHT_PX = 40;
    columnas de miembro entran en el ancho real (ver visibleColumnCount). */
 const LABEL_COLUMN_WIDTH_PX = 64;
 const LABEL_COLUMN_COMPACT_WIDTH_PX = 44;
+/* En mobile (ver useLayoutTier) va fijo acá, más chico todavía que el
+   compacto — no depende de isCompactSchedule (ancho medido), que sigue
+   existiendo para navegadores angostos en pc. */
+const LABEL_COLUMN_MOBILE_WIDTH_PX = 28;
 const SCHEDULE_COMPACT_WIDTH_PX = 520;
 
 /* Ancho mínimo legible de una columna de miembro (avatar + nombre en el
@@ -578,10 +588,17 @@ export default function Schedule({
     setPreviousSelectedDate(selectedDate);
   }
 
+  const tier = useLayoutTier();
+
   /* Único número del que depende el alto de las filas: cambiarlo reacomoda
      a la par la tabla, las AppointmentCard (altura según spanSlots) y el
-     reposicionamiento de CurrentTimeLine — ver src/functions/scheduleZoom.ts. */
-  const [rowHeightPx, setRowHeightPx] = useState(DEFAULT_ROW_HEIGHT_PX);
+     reposicionamiento de CurrentTimeLine — ver src/functions/scheduleZoom.ts.
+     En mobile arranca en MOBILE_DEFAULT_ROW_HEIGHT_PX y se queda ahí fijo
+     (ver ScheduleControls más abajo, que en mobile no muestra los botones
+     de zoom). */
+  const [rowHeightPx, setRowHeightPx] = useState(() =>
+    tier === 'mobile' ? MOBILE_DEFAULT_ROW_HEIGHT_PX : DEFAULT_ROW_HEIGHT_PX,
+  );
 
   /* Alto real del header de la tabla: la fila del header lleva el mismo
      alto inline que las filas del cuerpo (rowHeightPx), así que no es fijo
@@ -1010,14 +1027,21 @@ export default function Schedule({
   };
 
   const isCompactSchedule = scrollWidthPx > 0 && scrollWidthPx < SCHEDULE_COMPACT_WIDTH_PX;
-  const labelColumnWidthPx = isCompactSchedule ? LABEL_COLUMN_COMPACT_WIDTH_PX : LABEL_COLUMN_WIDTH_PX;
+  const isMobileSchedule = tier === 'mobile';
+  const labelColumnWidthPx = isMobileSchedule
+    ? LABEL_COLUMN_MOBILE_WIDTH_PX
+    : isCompactSchedule
+      ? LABEL_COLUMN_COMPACT_WIDTH_PX
+      : LABEL_COLUMN_WIDTH_PX;
   const labelCellClassName = twMerge(
     SCHEDULE_LABEL_CELL_CLASS,
     isCompactSchedule && SCHEDULE_LABEL_CELL_COMPACT_CLASS,
+    isMobileSchedule && SCHEDULE_LABEL_CELL_MOBILE_CLASS,
   );
   const labelTextClassName = twMerge(
     SCHEDULE_LABEL_TEXT_CLASS,
     isCompactSchedule && SCHEDULE_LABEL_TEXT_COMPACT_CLASS,
+    isMobileSchedule && SCHEDULE_LABEL_TEXT_MOBILE_CLASS,
   );
 
   /* Columna fija de etiquetas de hora */
@@ -1403,6 +1427,7 @@ export default function Schedule({
         onToggleBlockMode={onToggleBlockMode}
         onSaveBlockMode={onSaveBlockMode}
         onCancelBlockMode={onCancelBlockMode}
+        hideZoom={tier === 'mobile'}
       />
       <div data-schedule-scroll ref={scrollRef} className={SCHEDULE_SCROLL_CLASS}>
         <div
@@ -1413,13 +1438,17 @@ export default function Schedule({
             slideDirection === 'right' && SCHEDULE_SLIDE_FROM_RIGHT_CLASS,
           )}
         >
+          {/* En mobile el header (avatar + nombre del miembro) no se
+              muestra acá — con una sola columna visible (ver
+              visibleColumnCount), ScheduleView.tsx ya lo muestra arriba,
+              junto a WeekSelector. */}
           <Table
             columns={columns}
             rows={slots}
             rowHeightPx={rowHeightPx}
             className={SCHEDULE_TABLE_CLASS}
             headerClassName={SCHEDULE_TABLE_HEADER_CLASS}
-            showHeader
+            showHeader={tier !== 'mobile'}
             stickyHeader
           />
           {!showBlankGrid && (

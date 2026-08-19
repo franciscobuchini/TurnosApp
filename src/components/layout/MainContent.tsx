@@ -13,7 +13,7 @@ import { FiltersGroupProvider } from '@/hooks/useFiltersGroup';
    que su columna de contenido scrollee acá (con header/footer sticky). El
    scrollbar no se ve (regla global en Index.css). */
 const MAIN_CONTENT_CLASS =
-  'rounded-4xl h-full w-full flex flex-1 flex-col overflow-y-auto gap-3 bg-card border border-border';
+  'rounded-none sm:rounded-4xl h-full w-full flex flex-1 flex-col overflow-y-auto gap-3 bg-card sm:border border-border';
 
 interface MainContentProps {
   children?: ReactNode;

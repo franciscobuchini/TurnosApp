@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { getOpeningHours } from '@/database/data';
 import { getBusinessHoursByDay } from '@/hooks/useWeekSchedule';
 import { isBusinessDayAnyUnblocked, isBusinessDayFullyBlocked } from '@/functions/scheduleCellAvailability';
+import { useLayoutTier } from '@/hooks/useLayoutTier';
 import { getDayName, isSameDay } from '@/utils/dateName';
 import { weekSelectorStateClass } from './weekSelectorButtonState';
 
@@ -12,7 +13,13 @@ interface DaySelectorButtonsProps {
   onSelectDate: (date: Date) => void;
 }
 
-const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'h-24 flex-1 p-3 shrink-0 justify-center items-center bg-transparent rounded-3xl';
+const WEEK_SELECTOR_DAY_BUTTON_CLASS = 'flex-1 shrink-0 justify-center items-center bg-transparent rounded-3xl';
+/* h-24/p-3 en pc, mitad en mobile (h-12/p-1) — ver WeekSelector.tsx (el
+   padding del contenedor baja a la par) y WEEK_SELECTOR_DAY_LABEL/NUMBER_
+   *_MOBILE_CLASS de acá abajo (el texto también se achica, si no no entra
+   en la mitad del alto). */
+const WEEK_SELECTOR_DAY_BUTTON_PC_CLASS = 'h-24 p-3';
+const WEEK_SELECTOR_DAY_BUTTON_MOBILE_CLASS = 'h-12 p-1';
 
 const WEEK_SELECTOR_DAY_VISIBILITY_0_CLASS = '';
 const WEEK_SELECTOR_DAY_VISIBILITY_1_CLASS = 'hidden @min-[380px]:flex';
@@ -28,8 +35,10 @@ const WEEK_SELECTOR_DAY_VISIBILITY_CLASS: Record<number, string> = {
 const WEEK_SELECTOR_DAY_COLUMN_CLASS = 'flex flex-col items-center';
 
 const WEEK_SELECTOR_DAY_LABEL_CLASS = 'text-l font-normal';
+const WEEK_SELECTOR_DAY_LABEL_MOBILE_CLASS = 'text-[10px] font-normal';
 
 const WEEK_SELECTOR_DAY_NUMBER_CLASS = 'text-5xl px-1';
+const WEEK_SELECTOR_DAY_NUMBER_MOBILE_CLASS = 'text-xl px-1';
 
 function daySelectorNoHoverClass(isSelected: boolean, isToday: boolean, isDayOff: boolean): string {
   if (isSelected) return 'hover:bg-muted hover:text-foreground';
@@ -43,6 +52,7 @@ export default function DaySelectorButtons({
   selectedDate,
   onSelectDate,
 }: DaySelectorButtonsProps) {
+  const tier = useLayoutTier();
   const centerIdx = Math.floor(weekDays.length / 2);
   /* Horario del negocio por día de semana — para apagar los días sin
      ningún tramo de apertura ("día libre") o bloqueados enteros a mano
@@ -82,16 +92,17 @@ export default function DaySelectorButtons({
             onClick={handleDayClick}
             className={twMerge(
               WEEK_SELECTOR_DAY_BUTTON_CLASS,
+              tier === 'mobile' ? WEEK_SELECTOR_DAY_BUTTON_MOBILE_CLASS : WEEK_SELECTOR_DAY_BUTTON_PC_CLASS,
               visibilityClassName,
               weekSelectorStateClass(isSelected, isToday, isDayOff),
               daySelectorNoHoverClass(isSelected, isToday, isDayOff),
             )}
           >
             <span className={WEEK_SELECTOR_DAY_COLUMN_CLASS}>
-              <span className={WEEK_SELECTOR_DAY_LABEL_CLASS}>
+              <span className={tier === 'mobile' ? WEEK_SELECTOR_DAY_LABEL_MOBILE_CLASS : WEEK_SELECTOR_DAY_LABEL_CLASS}>
                 {getDayName(date)}
               </span>
-              <span className={WEEK_SELECTOR_DAY_NUMBER_CLASS}>
+              <span className={tier === 'mobile' ? WEEK_SELECTOR_DAY_NUMBER_MOBILE_CLASS : WEEK_SELECTOR_DAY_NUMBER_CLASS}>
                 {date.getDate()}
               </span>
             </span>
