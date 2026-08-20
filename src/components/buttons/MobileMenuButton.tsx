@@ -8,15 +8,16 @@
     espacio" con él y con el avatar del empleado — sólo en /admin.
   El estado de si el menú está abierto vive en Dashboard.tsx (ver
   mobileMenuOpen ahí) porque los dos lugares necesitan poder abrirlo.
+
+  El trigger es el logo (la nube) en vez de un ícono de hamburguesa: en
+  cualquier vista, tocar la nube abre el menú.
 */
 
-import { Menu } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import { Button } from '@/components/ui/button';
+import Logo from '@/components/ui/logo';
 
-const ICON_CLASS = 'size-5';
-
-const MOBILE_MENU_BUTTON_CLASS = 'size-12 shrink-0 rounded-full shadow-lg';
+const MOBILE_MENU_BUTTON_CLASS =
+  'flex size-12 shrink-0 items-center justify-center transition-transform active:scale-[0.97] cursor-pointer';
 
 interface MobileMenuButtonProps {
   onClick: () => void;
@@ -25,15 +26,14 @@ interface MobileMenuButtonProps {
 
 export default function MobileMenuButton({ onClick, className }: MobileMenuButtonProps) {
   return (
-    <Button
+    <button
       type="button"
       onClick={onClick}
-      variant="default"
-      size="icon-lg"
-      icon={<Menu className={ICON_CLASS} />}
       aria-label="Abrir menú"
       title="Abrir menú"
       className={twMerge(MOBILE_MENU_BUTTON_CLASS, className)}
-    />
+    >
+      <Logo className="h-full w-auto drop-shadow-md" />
+    </button>
   );
 }

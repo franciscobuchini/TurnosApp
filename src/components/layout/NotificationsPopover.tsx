@@ -88,7 +88,7 @@ export default function NotificationsPopover({
         align="start"
         sideOffset={14}
         className={cn(
-          'w-[380px] max-w-[92vw] overflow-hidden rounded-3xl border border-border bg-popover/95 p-0 shadow-2xl backdrop-blur-xl',
+          'w-[380px] max-w-[92vw] overflow-hidden rounded-3xl border-0 bg-transparent p-0 shadow-none backdrop-blur-none sm:border sm:border-border sm:bg-popover/95 sm:shadow-2xl sm:backdrop-blur-xl',
           className,
         )}
       >

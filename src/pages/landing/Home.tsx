@@ -19,13 +19,13 @@ import { Button } from '@/components/ui/button';
 
 type AuthMode = 'login' | 'signup';
 
-const HOME_CLASS = 'flex min-h-dvh w-dvw items-center justify-center p-6';
+const HOME_CLASS = 'flex h-dvh w-dvw items-center justify-center overflow-y-auto overflow-x-hidden p-4 sm:p-6';
 
-const HOME_CONTENT_CLASS = 'flex w-full max-w-sm flex-col items-center gap-8';
+const HOME_CONTENT_CLASS = 'flex w-full max-w-sm flex-col items-center gap-6 sm:gap-8';
 
-const HOME_LOGO_CLASS = 'h-32 w-auto';
+const HOME_LOGO_CLASS = 'h-20 w-auto sm:h-32';
 
-const HOME_CARD_CLASS = 'flex w-full flex-col gap-6 rounded-4xl border border-border bg-card p-8';
+const HOME_CARD_CLASS = 'flex w-full flex-col gap-5 rounded-4xl border border-border bg-card p-6 sm:gap-6 sm:p-8';
 
 const HOME_TITLE_CLASS = 'text-center text-xl font-semibold tracking-tight text-foreground';
 

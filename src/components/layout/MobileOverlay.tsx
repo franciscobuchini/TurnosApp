@@ -31,7 +31,7 @@ export default function MobileOverlay({ onClose, children }: MobileOverlayProps)
   return (
     <div className={MOBILE_OVERLAY_CLASS}>
       <div className={MOBILE_OVERLAY_HEADER_CLASS}>
-        <Logo className="h-9 w-auto shrink-0" />
+        <Logo className="h-12 w-auto shrink-0" />
         <Button
           onClick={onClose}
           variant="ghost"

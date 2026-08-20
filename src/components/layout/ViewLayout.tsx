@@ -42,16 +42,22 @@ interface ViewLayoutProps {
   deleteText?: string;
 }
 
+/* Padding lateral chico en mobile (si no, con el ancho de pantalla que hay
+   el form queda comprimido) — recién a partir de md (mismo corte que
+   useLayoutTier) vuelve al padding "de escritorio". */
 const VIEW_LAYOUT_CLASS =
-  'flex w-full flex-1 flex-col px-16 py-8';
+  'flex w-full flex-1 flex-col px-4 py-6 md:px-16 md:py-8';
 
 /* Una sola columna, centrada, con un ancho máximo cómodo de leer/completar
    en vez de estirarse borde a borde en pantallas grandes. */
 const VIEW_COLUMNS_CLASS =
-  'relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10';
+  'relative mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 md:gap-10';
 
+/* En mobile el footer NO queda pegado abajo (sticky): se muestra donde
+   termina naturalmente el scroll del contenido — sólo a partir de md
+   (mismo corte que useLayoutTier) vuelve a quedar fijo al fondo. */
 const VIEW_FOOTER_CLASS =
-  'sticky bottom-0 flex justify-end gap-2 p-3 z-10';
+  'flex justify-end gap-2 p-3 z-10 md:sticky md:bottom-0';
 
 export default function ViewLayout({
   title,
@@ -73,7 +79,11 @@ export default function ViewLayout({
 
   return (
     <MainContent>
-      <MainHeader title={title} className="pt-8" />
+      {/* pt-20 en mobile: deja aire para que el título no quede debajo del
+          logo flotante que abre el menú (MobileMenuButton, fixed top-4
+          left-4, sólo en mobile) — md: vuelve al padding parejo con el
+          resto de la columna. */}
+      <MainHeader title={title} className="px-4 pt-20 md:px-16 md:pt-8" />
 
       <div className={VIEW_LAYOUT_CLASS}>
         <div className={VIEW_COLUMNS_CLASS}>

@@ -14,6 +14,7 @@
 */
 
 import { useEffect, useState } from 'react';
+import { Upload, X } from 'lucide-react';
 import { Input } from './input';
 import { Button } from './button';
 import Image from './image';
@@ -61,10 +62,13 @@ export default function PhotoUrlPicker({ value, onChange, name, disabled = false
         <Button
           type="button"
           variant={isLoaded ? 'outline' : 'default'}
-          text={isLoaded ? 'Quitar' : 'Cargar'}
+          size="icon-lg"
+          icon={isLoaded ? <X size={18} /> : <Upload size={18} />}
+          aria-label={isLoaded ? 'Quitar' : 'Cargar'}
+          title={isLoaded ? 'Quitar' : 'Cargar'}
           onClick={handleAction}
           disabled={disabled || (!isLoaded && !draftUrl.trim())}
-          className="h-11 shrink-0"
+          className="h-11 w-11 shrink-0"
         />
       </div>
 

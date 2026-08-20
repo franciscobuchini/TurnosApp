@@ -29,8 +29,11 @@ interface NotificationsListProps {
 }
 
 /* Mismas constantes de estilo que EditAppointmentSidebar para que las cards
-   de solicitudes sean visualmente idénticas al resto de la app. */
-const CARD_CLASS = 'flex w-full flex-col rounded-4xl border border-border bg-card px-4 py-3';
+   de solicitudes sean visualmente idénticas al resto de la app — salvo en
+   mobile (por debajo de md, mismo corte que useLayoutTier), donde el
+   contenedor de la card queda invisible (sin fondo/borde), a pantalla
+   completa dentro del overlay de WeekSelector.tsx. */
+const CARD_CLASS = 'flex w-full flex-col rounded-4xl px-4 py-3 md:border md:border-border md:bg-card';
 
 const HEADER_CLASS = 'px-0 pt-0 pb-2';
 

@@ -11,10 +11,10 @@ interface MainHeaderProps {
   gradient?: boolean;
 }
 
-const MAIN_HEADER_CLASS = 'flex h-18 w-full items-center';
+const MAIN_HEADER_CLASS = 'flex h-14 w-full items-center md:h-18';
 const MAIN_HEADER_BLEED_CLASS = '';
 const MAIN_HEADER_TITLE_COLUMN_CLASS = 'flex min-w-0 flex-1 items-center justify-center';
-const MAIN_HEADER_TITLE_CLASS = 'text-3xl font-semibold tracking-tight leading-none text-foreground text-center';
+const MAIN_HEADER_TITLE_CLASS = 'truncate text-xl font-semibold tracking-tight leading-none text-foreground text-center md:text-3xl';
 const MAIN_HEADER_ACTION_CLASS = 'self-center shrink-0 bg-muted rounded-full';
 const MAIN_HEADER_LEADING_CLASS = 'flex shrink-0 items-center self-center';
 const MAIN_HEADER_ACTIONS_RIGHT_CLASS = 'gap-3 self-center shrink-0';

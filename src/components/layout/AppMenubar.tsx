@@ -73,12 +73,10 @@ const ICON_CLASS = 'size-5';
    lugar queda sólo este botón flotante, arriba de todo lo demás (z-50),
    que abre el mismo menú a pantalla completa (MOBILE_OVERLAY_CLASS) —
    ver el return de más abajo, que bifurca por tier ANTES de llegar al
-   <nav> de siempre (que sigue exactamente igual para "pc"). El color
-   (lima, texto oscuro, hover que atenúa la misma tonalidad) sale de
-   variant="default" del Button — acá sólo se pisa tamaño/posición: más
-   grande que icon-lg (size-10) para que el ícono (ICON_CLASS, sin
-   cambios) quede con más aire alrededor. */
-const MOBILE_TRIGGER_CLASS = 'fixed top-4 right-4 z-50 size-12 rounded-full shadow-lg';
+   <nav> de siempre (que sigue exactamente igual para "pc"). El botón en
+   sí es el logo (MobileMenuButton ya lo dibuja con su propia sombra),
+   así que acá sólo se pisa posición/tamaño. */
+const MOBILE_TRIGGER_CLASS = 'fixed top-4 left-4 z-50 size-12';
 
 /* min-h-dvh: la sidebar embebida "ocupa toda la pantalla" al abrir el
    menú (scrollear el overlay recién ahí muestra el menú de navegación

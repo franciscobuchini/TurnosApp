@@ -56,7 +56,7 @@ export default function WeekSchedule({
             <div
               key={dayRow.dayOfWeek}
               className={twMerge(
-                "flex items-center gap-4 w-full px-4 py-3 h-20 transition-colors"
+                "flex flex-col gap-3 w-full px-4 py-3 transition-colors md:h-20 md:flex-row md:items-center md:gap-4"
               )}
             >
               {/* Checkbox + Day Name */}
@@ -70,15 +70,16 @@ export default function WeekSchedule({
                 <span className="text-sm text-foreground min-w-16">{dayRow.label}</span>
               </div>
 
-              {/* Separator */}
-              <div className="h-5 w-px bg-border shrink-0" />
+              {/* Separator: sólo en horizontal (md+) — en mobile el salto
+                  de línea ya separa visualmente */}
+              <div className="hidden h-5 w-px bg-border shrink-0 md:block" />
 
               {/* Body: Ranges or No Trabaja */}
-              <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex w-full flex-1 min-w-0 items-start md:items-center">
                 {!day.works ? (
                   <span className="text-sm text-muted-foreground">No trabaja</span>
                 ) : (
-                  <div className="flex items-center gap-3 w-full">
+                  <div className="flex flex-col gap-2 w-full md:flex-row md:items-center md:gap-3">
                     {day.ranges.map((range, index) => {
                       const prevRange = index > 0 ? day.ranges[index - 1] : undefined;
                       const nextRange = index < day.ranges.length - 1 ? day.ranges[index + 1] : undefined;
