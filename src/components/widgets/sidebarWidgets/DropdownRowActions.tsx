@@ -12,7 +12,8 @@ import ServiceView from '@/components/views/ServiceView';
   Todo lo que puede aparecer dentro de una fila del Dropdown de DetailsPanel
   (los paneles de Equipo/Servicios/Clientes de la sidebar), en un solo lugar:
   el toggle de ocultar/desactivar, el botón de ver detalles, y las 3 filas
-  por entidad que arma AdminSidebar/AddShiftSidebar. Antes eran 6 archivos
+  por entidad que arma EntitySidebarPanel/AddShiftSidebar (pc) y AppMenubar
+  (overlays de mobile). Antes eran 6 archivos
   separados (DetailsButton, HideButton, ViewEntityDetailsButton,
   TeamFilterButton, ServiceFilterButton, ClientFilterButton) sin relación
   visible entre sí — DetailsButton no lo usaba nada más que esto, y

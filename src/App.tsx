@@ -62,6 +62,9 @@ function SchedulePage() {
       blocksVersion={ctx.blocksVersion}
       onColumnCapacityChange={ctx.setColumnCapacity}
       onOpenMobileMenu={ctx.openMobileMenu}
+      bookingRequests={ctx.bookingRequests}
+      onConfirmBookingRequest={ctx.onConfirmBookingRequest}
+      onRejectBookingRequest={ctx.onRejectBookingRequest}
     />
   );
 }

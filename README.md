@@ -1,9 +1,7 @@
-notificaciones dentro de los días del weekselector? en version normal
+notificaciones dentro de los días del weekselector?
 
 9- responsive.
 - alinear current time line en mobile
-- al hacer click en el día que está en @src/components/widgets/mainWidgets/WeekSelector.tsx en mobile quiero que abra el @src/components/widgets/sidebarWidgets/Calendar.tsx exactamente igual a cuando abro el menú pero la única diferencia es que solo muestra el calendar y el mismo header con logo de la app y botón de cerrar
-
 
 11-logica de horarios tiene que ser extremadamente lógico, como si fuera un sudoku, tiene que tener sentido para todos y tiene que guardarse en base de datos y mostrarse en front de una manera muy clara.
 12- compactar y rehacer código mas prolijo antes de empezar con todas las pruebas de testing y de base de datos porque podemos romper el codigo y rehacer bbdd y las peuebas van a ser distintas.
@@ -31,3 +29,7 @@ cancelación de turno al negocio
 
 14- crear el puente, eliminar la bbdd y conectar con supabase.
 15- landing page
+
+
+notificaciones quitarlo de appmenubar y agregarlo abajo de calendario siempre abierto y que compartan espacio.
+clientes, servicios, miembros enviarlos a appmenubar

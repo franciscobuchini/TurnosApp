@@ -16,7 +16,7 @@ import {
 } from 'react-router-dom';
 import { useAgendaDate } from '@/hooks/useAgendaDate';
 import Layout from '../../components/layout/Layout';
-import AppMenubar from '../../components/layout/AppMenubar';
+import AppMenubar, { type SidebarPanel } from '../../components/layout/AppMenubar';
 import {
   getClients,
   getTeamFilters,
@@ -55,10 +55,10 @@ import { isBusinessDayFullyBlocked, isBusinessDayAnyUnblocked } from '@/function
 import { toDateKey } from '@/utils/dateName';
 import type { DetailsPanelOption } from '../../components/widgets/sidebarWidgets/DetailsPanel';
 import AdminSidebar from '../../components/views/sidebarViews/AdminSidebar';
+import EntitySidebarPanel from '../../components/views/sidebarViews/EntitySidebarPanel';
 import AddShiftSidebar from '../../components/views/sidebarViews/AddShiftSidebar';
 import EditAppointmentSidebar from '../../components/views/sidebarViews/EditAppointmentSidebar';
 import EditBlockSidebar from '../../components/views/sidebarViews/EditBlockSidebar';
-import NotificationsSidebar from '../../components/views/sidebarViews/NotificationsSidebar';
 import Sidebar from '../../components/layout/Sidebar';
 import Calendar from '../../components/widgets/sidebarWidgets/Calendar';
 import Toast from '../../components/ui/toast';
@@ -239,6 +239,13 @@ export interface AdminContext {
       botón embebido en la fila de WeekSelector (ScheduleView), que
       "comparte espacio" con él en vez del botón flotante de AppMenubar. */
   openMobileMenu: () => void;
+  /** Solicitudes de turno pendientes (desde /site) — en mobile, ScheduleView
+      se las pasa a WeekSelector para mostrarlas debajo del Calendar del
+      overlay a pantalla completa (mismo contenido que ya usa AdminSidebar
+      en pc, ver NotificationsList). */
+  bookingRequests: BookingRequest[];
+  onConfirmBookingRequest: (request: BookingRequest) => void;
+  onRejectBookingRequest: (request: BookingRequest) => void;
 }
 
 function Dashboard() {
@@ -277,7 +284,21 @@ function Dashboard() {
      pasa todo por confirmNavigation) pida guardar o descartar en vez de
      perder el bloqueo en curso en silencio. */
   const [blockModeHasChanges, setBlockModeHasChanges] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  /* Sólo pc (ver sidebarPanel en AppMenubarProps): Equipo/Servicios/
+     Clientes, disparados desde AppMenubar, reemplazan la sidebar entera
+     por EntitySidebarPanel — mismo patrón que addShiftOpen/
+     editingAppointment/editingBlock, así que se suma a la misma lista de
+     resets que ellos (ver openAddShift/openBlockMode/openEditAppointment/
+     openEditBlock y el efecto de location.pathname más abajo). */
+  const [sidebarPanel, setSidebarPanel] = useState<SidebarPanel | null>(null);
+  const openSidebarPanel = (panel: SidebarPanel) => {
+    setEditingAppointment(null);
+    setEditingBlock(null);
+    setBlockModeOpen(false);
+    setAddShiftOpen(false);
+    setSidebarPanel(panel);
+  };
+  const closeSidebarPanel = () => setSidebarPanel(null);
   /* En mobile (ver useLayoutTier) el botón que abre esto ya no vive sólo en
      AppMenubar: en la página del Schedule (ScheduleView), pasa a estar
      dentro de la fila de WeekSelector, para "compartir espacio" con él y
@@ -287,41 +308,30 @@ function Dashboard() {
      abrirlo/cerrarlo. */
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const openMobileMenu = () => setMobileMenuOpen(true);
+  /* Solicitudes de turno pendientes (desde /site): en pc viven siempre
+     abiertas debajo del Calendar de la sidebar por defecto (ver
+     AdminSidebar.tsx); en mobile, debajo del Calendar del overlay de
+     WeekSelector (ver ese componente) — ya no hay un botón "Notificaciones"
+     propio en AppMenubar que las tape/destape, así que no hace falta un
+     booleano de "abierto/cerrado": onConfirmBookingRequest/
+     onRejectBookingRequest van directo por AdminContext a quien las
+     necesite mostrar. */
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => getBookingRequests());
   /* Wizard de bienvenida (OnboardingWizard): sólo se abre vía location.state
      al llegar desde "Crear cuenta" en Home.tsx (ver el useEffect de
      location.state más abajo). */
   const [onboardingOpen, setOnboardingOpen] = useState(false);
 
-  const openNotifications = () => {
-    setEditingAppointment(null);
-    setEditingBlock(null);
-    setBlockModeOpen(false);
-    setAddShiftOpen(false);
-    setNotificationsOpen(true);
-  };
-
-  const toggleNotifications = () => {
-    if (!notificationsOpen) {
-      openNotifications();
-    } else {
-      setNotificationsOpen(false);
-    }
-  };
-
-
-
   /* "Crear turno" no navega a otra ruta (abre un panel dentro de la misma
      /admin), pero igual puede tapar una vista con cambios sin guardar
      (modo Bloqueos/Desbloqueos) — pasa por confirmNavigation por la misma
-     razón que toggleNotifications (ver más abajo) y los ítems de
-     AppMenubar. */
+     razón que los ítems de AppMenubar. */
   const openAddShift = () => {
     confirmNavigation(() => {
-      setNotificationsOpen(false);
       setEditingAppointment(null);
       setEditingBlock(null);
       setBlockModeOpen(false);
+      setSidebarPanel(null);
       setAddShiftOpen(true);
     });
   };
@@ -347,10 +357,10 @@ function Dashboard() {
   const [blockModePinOpen, setBlockModePinOpen] = useState(false);
 
   const openBlockMode = () => {
-    setNotificationsOpen(false);
     closeAddShift();
     setEditingAppointment(null);
     setEditingBlock(null);
+    setSidebarPanel(null);
     setBlockModeSnapshot(getScheduleBlocks());
     setBlockModeHasChanges(false);
     setBlockModeOpen(true);
@@ -589,7 +599,7 @@ function Dashboard() {
   const pendingMemberHourRanges = useMemo(() => {
     const cellsByMemberDate = new Map<string, MemberHourBlock[]>();
     for (const cell of pendingMemberHourCells) {
-      const key = `${cell.member} ${cell.date}`;
+      const key = `${cell.member} ${cell.date}`;
       const cellsForKey = cellsByMemberDate.get(key) ?? [];
       cellsForKey.push(cell);
       cellsByMemberDate.set(key, cellsForKey);
@@ -783,7 +793,7 @@ function Dashboard() {
     setAddShiftOpen(false);
     setBlockModeOpen(false);
     setBlockModeHasChanges(false);
-    setNotificationsOpen(false);
+    setSidebarPanel(null);
     setMobileMenuOpen(false);
     setShiftService(null);
     setShiftSlot(null);
@@ -796,13 +806,17 @@ function Dashboard() {
   }, [location.pathname]);
 
   useEffect(() => {
-    const state = location.state as { openAddShift?: boolean; openNotifications?: boolean; onboarding?: boolean } | null;
+    const state = location.state as {
+      openAddShift?: boolean;
+      openSidebarPanel?: SidebarPanel;
+      onboarding?: boolean;
+    } | null;
     if (state?.openAddShift) {
       setAddShiftOpen(true);
       navigate(location.pathname, { replace: true, state: null });
     }
-    if (state?.openNotifications) {
-      openNotifications();
+    if (state?.openSidebarPanel) {
+      openSidebarPanel(state.openSidebarPanel);
       navigate(location.pathname, { replace: true, state: null });
     }
     if (state?.onboarding) {
@@ -812,8 +826,8 @@ function Dashboard() {
   }, [location.state, location.pathname, navigate]);
 
   const openEditAppointment = (appointment: Appointment) => {
-    setNotificationsOpen(false);
     setEditingBlock(null);
+    setSidebarPanel(null);
     setEditingAppointment(appointment);
   };
   const closeEditAppointment = () => setEditingAppointment(null);
@@ -832,8 +846,8 @@ function Dashboard() {
 
   const [editingBlock, setEditingBlock] = useState<ScheduleBlock | null>(null);
   const openEditBlock = (block: ScheduleBlock) => {
-    setNotificationsOpen(false);
     setEditingAppointment(null);
+    setSidebarPanel(null);
     setEditingBlock(block);
   };
   const closeEditBlock = () => setEditingBlock(null);
@@ -1075,6 +1089,9 @@ function Dashboard() {
     updateClient,
     deleteClient,
     openMobileMenu,
+    bookingRequests,
+    onConfirmBookingRequest: handleConfirmBookingRequest,
+    onRejectBookingRequest: handleRejectBookingRequest,
   };
 
   /* Las vistas de "Detalles de..."/"Perfil de..."/"Acerca de..." y "Crear un
@@ -1090,12 +1107,10 @@ function Dashboard() {
     location.pathname.startsWith('/admin/cliente') ||
     ['/admin/metricas', '/admin/marketing'].includes(location.pathname);
 
-  /* Se le pasa esto mismo tanto a <Layout sidebar> (pc: al lado de
-     Schedule) como a <AppMenubar sidebar> (mobile: dentro de su propio
-     menú a pantalla completa — ver los comentarios de Layout.tsx y
-     AppMenubar.tsx) — un solo lugar decide qué sidebar corresponde
-     mostrar según el estado, cada uno decide nada más DÓNDE mostrarla. */
-  const sidebarContent = addShiftOpen ? (
+  /* Ramas que se embeben en los dos lugares (Layout y AppMenubar, ver
+     sidebarContent/mobileMenuSidebarContent más abajo) — computadas una
+     sola vez para no duplicar el JSX. */
+  const addShiftSidebarContent = (
     <AddShiftSidebar
       serviceFilters={serviceFilters}
       clientFilters={clientFilters}
@@ -1120,21 +1135,50 @@ function Dashboard() {
       onConfirmBlock={confirmBlock}
       onClearPendingBlocks={clearPendingBlocks}
     />
-  ) : editingAppointment ? (
+  );
+  const editAppointmentSidebarContent = editingAppointment ? (
     <EditAppointmentSidebar
       appointment={editingAppointment}
       onClose={closeEditAppointment}
       onSave={saveAppointment}
       onCancelAppointment={cancelAppointment}
     />
-  ) : editingBlock ? (
+  ) : null;
+  const editBlockSidebarContent = editingBlock ? (
     <EditBlockSidebar block={editingBlock} onClose={closeEditBlock} onCancelBlock={cancelBlock} />
-  ) : notificationsOpen ? (
-    <NotificationsSidebar
-      requests={bookingRequests}
-      onConfirm={handleConfirmBookingRequest}
-      onReject={handleRejectBookingRequest}
+  ) : null;
+  /* Sólo pc: Equipo/Servicios/Clientes disparados desde AppMenubar (ver
+     sidebarPanel más arriba) — mismo mecanismo que el resto de las ramas de
+     acá abajo, reemplaza toda la sidebar. key={sidebarPanel} para que el
+     estado interno del panel (ej. el buscador de Clientes) arranque limpio
+     al pasar de un panel a otro sin volver al default primero. */
+  const entitySidebarPanelContent = sidebarPanel ? (
+    <EntitySidebarPanel
+      key={sidebarPanel}
+      panel={sidebarPanel}
+      onClose={closeSidebarPanel}
+      teamFilters={teamFilters}
+      toggleTeamFilter={toggleTeamFilter}
+      serviceFilters={serviceFilters}
+      toggleServiceActive={toggleServiceActive}
+      clientFilters={clientFilters}
+      onAddClient={addClientInline}
     />
+  ) : null;
+
+  /* Se le pasa esto mismo tanto a <Layout sidebar> (pc: al lado de
+     Schedule) como a <AppMenubar sidebar> (mobile: dentro de su propio
+     menú a pantalla completa — ver los comentarios de Layout.tsx y
+     AppMenubar.tsx) — un solo lugar decide qué sidebar corresponde
+     mostrar según el estado, cada uno decide nada más DÓNDE mostrarla. */
+  const sidebarContent = addShiftOpen ? (
+    addShiftSidebarContent
+  ) : editingAppointment ? (
+    editAppointmentSidebarContent
+  ) : editingBlock ? (
+    editBlockSidebarContent
+  ) : sidebarPanel ? (
+    entitySidebarPanelContent
   ) : isSidebarlessPage ? null : blockModeOpen ? (
     <Sidebar>
       <Calendar
@@ -1148,14 +1192,29 @@ function Dashboard() {
     <AdminSidebar
       selectedDate={selectedDate}
       onSelectDate={selectDate}
-      teamFilters={teamFilters}
-      toggleTeamFilter={toggleTeamFilter}
-      serviceFilters={serviceFilters}
-      toggleServiceActive={toggleServiceActive}
-      clientFilters={clientFilters}
-      onAddClient={addClientInline}
+      bookingRequests={bookingRequests}
+      onConfirmBookingRequest={handleConfirmBookingRequest}
+      onRejectBookingRequest={handleRejectBookingRequest}
     />
   );
+
+  /* Lo mismo que sidebarContent, pero SIN el Calendar de bloqueos, el
+     AdminSidebar por defecto (Calendar + Notificaciones) ni
+     entitySidebarPanelContent (sidebarPanel es un concepto sólo de pc: en
+     mobile, Equipo/Servicios/Clientes tienen sus propios overlays acá
+     abajo, sin pasar por Dashboard.tsx). Notificaciones tampoco: en mobile
+     vive embebida debajo del Calendar del overlay de WeekSelector (ver ese
+     componente), no acá — ya no hay un botón "Notificaciones" propio en
+     AppMenubar que dispare nada por acá. Agregar turno/editar turno/bloqueo
+     sí se siguen embebiendo — sin esto, mobile se quedaría sin forma de
+     llegar a esos pasos. */
+  const mobileMenuSidebarContent = addShiftOpen
+    ? addShiftSidebarContent
+    : editingAppointment
+      ? editAppointmentSidebarContent
+      : editingBlock
+        ? editBlockSidebarContent
+        : null;
 
   return (
     <>
@@ -1164,11 +1223,16 @@ function Dashboard() {
           <AppMenubar
             addShiftOpen={addShiftOpen}
             onCloseAddShift={closeAddShift}
-            notificationsOpen={notificationsOpen}
-            onToggleNotifications={toggleNotifications}
-            sidebar={sidebarContent}
+            sidebarPanel={sidebarPanel}
+            onCloseSidebarPanel={closeSidebarPanel}
+            sidebar={mobileMenuSidebarContent}
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen}
+            teamFilters={teamFilters}
+            toggleTeamFilter={toggleTeamFilter}
+            serviceFilters={serviceFilters}
+            toggleServiceActive={toggleServiceActive}
+            clientFilters={clientFilters}
           />
         }
         sidebar={sidebarContent}

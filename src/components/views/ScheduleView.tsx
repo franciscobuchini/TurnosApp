@@ -1,14 +1,17 @@
-import type { ReactNode } from 'react';
-import type { Appointment, ScheduleBlock } from '../../database/types';
+import { useState, type ReactNode } from 'react';
+import type { Appointment, BookingRequest, ScheduleBlock } from '../../database/types';
 import type { FiltersOption } from '../../database/types';
 import type { ShiftSlot } from '../../pages/admin/Dashboard';
 import { getTeamMembers } from '../../database/data';
 import { useLayoutTier } from '@/hooks/useLayoutTier';
+import ContentHeader from '../ui/content-header';
 import Image from '../ui/image';
 import MobileMenuButton from '../buttons/MobileMenuButton';
 import MainContent from '../layout/MainContent';
+import MobileOverlay from '../layout/MobileOverlay';
 import WeekSelector from '../widgets/mainWidgets/WeekSelector';
 import Schedule from '../widgets/mainWidgets/Schedule';
+import { DetailsPanelOptionRow } from '../widgets/sidebarWidgets/DetailsPanel';
 
 const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col sm:gap-3 sm:p-3 gap-2 px-0 pt-3 pb-0';
 
@@ -26,6 +29,14 @@ const SCHEDULE_VIEW_CLASS = 'flex h-full w-full flex-col sm:gap-3 sm:p-3 gap-2 p
 const SCHEDULE_MOBILE_TOP_ROW_CLASS = 'flex items-center gap-2 px-2';
 
 const SCHEDULE_MOBILE_AVATAR_CLASS = 'size-12 shrink-0 text-sm';
+
+/* Tocar el avatar abre un picker de equipo a pantalla completa (mismo
+   MobileOverlay que el menú y que el Calendar de WeekSelector) — elegir
+   un miembro ahí lo deja como el único tildado (en mobile sólo entra 1
+   columna, ver SCHEDULE_MOBILE_AVATAR_CLASS más arriba) y cierra el
+   overlay: como ya está en /admin, "llevar a Schedule" es simplemente
+   volver a ver la grilla, ahora con ese miembro. */
+const SCHEDULE_MOBILE_MEMBER_LIST_CLASS = 'flex flex-col gap-1';
 
 interface ScheduleViewProps {
   selectedMembers: string[];
@@ -78,6 +89,12 @@ interface ScheduleViewProps {
   /** Abre el menú mobile (ver openMobileMenu en Dashboard.tsx) — sólo se
       usa en mobile, desde el botón embebido en la fila de WeekSelector. */
   onOpenMobileMenu?: () => void;
+  /** Solicitudes de turno pendientes (desde /site): en mobile, WeekSelector
+      las muestra debajo del Calendar de su overlay a pantalla completa
+      (ver ese componente) — sólo aplica ahí, se ignoran en pc. */
+  bookingRequests?: BookingRequest[];
+  onConfirmBookingRequest?: (request: BookingRequest) => void;
+  onRejectBookingRequest?: (request: BookingRequest) => void;
   children?: ReactNode;
 }
 
@@ -111,10 +128,30 @@ export default function ScheduleView({
   blocksVersion,
   onColumnCapacityChange,
   onOpenMobileMenu,
+  bookingRequests,
+  onConfirmBookingRequest,
+  onRejectBookingRequest,
   children,
 }: ScheduleViewProps) {
   const tier = useLayoutTier();
   const visibleMemberPhoto = getTeamMembers().find((m) => m.name === selectedMembers[0])?.photo;
+
+  const [memberOverlayOpen, setMemberOverlayOpen] = useState(false);
+  const currentMemberId = teamFilters?.find((filter) => filter.label === selectedMembers[0])?.id;
+
+  /* En mobile "elegir un miembro" reemplaza la selección entera (no suma
+     al grupo tildado): tilda ÚNICAMENTE el elegido y destilda el resto,
+     así el nuevo miembro es siempre el que termina en la única columna
+     visible (selectedMembers[0] — ver Schedule.tsx). */
+  const selectOnlyMember = (chosenId: string) => {
+    teamFilters?.forEach((filter) => {
+      const shouldBeChecked = filter.id === chosenId;
+      if (Boolean(filter.checked) !== shouldBeChecked) {
+        toggleTeamFilter?.(filter.id, shouldBeChecked);
+      }
+    });
+    setMemberOverlayOpen(false);
+  };
 
   return (
     <MainContent className={SCHEDULE_VIEW_CLASS}>
@@ -127,9 +164,14 @@ export default function ScheduleView({
             onSelectDate={onSelectDate}
             onViewDateChange={onViewDateChange}
             className="flex-1"
+            bookingRequests={bookingRequests}
+            onConfirmBookingRequest={onConfirmBookingRequest}
+            onRejectBookingRequest={onRejectBookingRequest}
           />
           {selectedMembers[0] && (
-            <Image name={selectedMembers[0]} src={visibleMemberPhoto} className={SCHEDULE_MOBILE_AVATAR_CLASS} />
+            <button type="button" onClick={() => setMemberOverlayOpen(true)} aria-label="Elegir empleado">
+              <Image name={selectedMembers[0]} src={visibleMemberPhoto} className={SCHEDULE_MOBILE_AVATAR_CLASS} />
+            </button>
           )}
         </div>
       ) : (
@@ -167,6 +209,23 @@ export default function ScheduleView({
         blocksVersion={blocksVersion}
         onColumnCapacityChange={onColumnCapacityChange}
       />
+
+      {tier === 'mobile' && memberOverlayOpen && (
+        <MobileOverlay onClose={() => setMemberOverlayOpen(false)}>
+          <ContentHeader title="Equipo" />
+          <div className={SCHEDULE_MOBILE_MEMBER_LIST_CLASS}>
+            {teamFilters?.map((filter) => (
+              <DetailsPanelOptionRow
+                key={filter.id}
+                option={filter}
+                selectedId={currentMemberId}
+                onOptionClick={(option) => selectOnlyMember(option.id)}
+              />
+            ))}
+          </div>
+        </MobileOverlay>
+      )}
+
       {children}
     </MainContent>
   );

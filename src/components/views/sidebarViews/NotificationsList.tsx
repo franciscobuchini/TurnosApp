@@ -1,14 +1,18 @@
 /*
-  src/components/views/sidebarViews/NotificationsSidebar.tsx
-  Estado de sidebar para gestionar las solicitudes de turno pendientes.
-  Permite al administrador revisar los datos de cada solicitud, confirmarla
+  src/components/views/sidebarViews/NotificationsList.tsx
+  Solicitudes de turno pendientes (desde /site): lista de cards (o empty
+  state) para revisar los datos de cada solicitud, confirmarla
   (agregándola automáticamente a la agenda) o rechazarla.
   Sigue el mismo patrón visual que EditAppointmentSidebar: CARD_CLASS,
   ROW_CLASS, ContentHeader, CancelButton, ConfirmButton, DeleteButton.
+
+  Sin <Sidebar> propio (a diferencia de otros estados de sidebar, ej.
+  EditAppointmentSidebar): quien la usa ya está embebiéndola dentro de un
+  <Sidebar> ajeno, junto al Calendar — en pc, el de AdminSidebar.tsx; en
+  mobile, el del overlay a pantalla completa de WeekSelector.tsx.
 */
 
 import { Bell } from 'lucide-react';
-import Sidebar from '@/components/layout/Sidebar';
 import ContentHeader from '@/components/ui/content-header';
 
 import ConfirmButton from '@/components/buttons/ConfirmButton';
@@ -18,7 +22,7 @@ import type { BookingRequest } from '@/database/types';
 import { currencyFormatter } from '@/database/data';
 import { formatDateKeyToDisplay } from '@/utils/dateName';
 
-interface NotificationsSidebarProps {
+interface NotificationsListProps {
   requests: BookingRequest[];
   onConfirm: (request: BookingRequest) => void;
   onReject: (request: BookingRequest) => void;
@@ -54,18 +58,16 @@ function InfoRow({ label, value, avatarLabel }: { label: string; value: string; 
   );
 }
 
-export default function NotificationsSidebar({
+export function NotificationsList({
   requests,
   onConfirm,
   onReject,
-}: NotificationsSidebarProps) {
+}: NotificationsListProps) {
   const pendingRequests = requests.filter((r) => r.status === 'pending');
   const count = pendingRequests.length;
 
   return (
-    <Sidebar>
-
-
+    <>
 
       {/* Empty State */}
       {count === 0 ? (
@@ -74,7 +76,7 @@ export default function NotificationsSidebar({
             <div className="flex size-10 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground">
               <Bell className="size-5 opacity-60" />
             </div>
-            <p className="text-sm font-medium text-foreground">Todo al día</p>
+            <p className="text-sm font-medium text-foreground">Panel de notificaciones</p>
             <p className="text-xs text-muted-foreground max-w-[220px]">
               Las reservas de tus clientes desde la web van a aparecer acá.
             </p>
@@ -127,6 +129,6 @@ export default function NotificationsSidebar({
           })}
         </div>
       )}
-    </Sidebar>
+    </>
   );
 }

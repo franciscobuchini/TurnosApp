@@ -5,8 +5,12 @@
 import { useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { useLayoutTier } from '@/hooks/useLayoutTier';
+import MobileOverlay from '@/components/layout/MobileOverlay';
 import { NextWeekButton, PrevWeekButton } from '../../buttons/WeekNavigationButtons';
 import DaySelectorButtons from '../../buttons/DaySelectorButtons';
+import Calendar from '../sidebarWidgets/Calendar';
+import { NotificationsList } from '@/components/views/sidebarViews/NotificationsList';
+import type { BookingRequest } from '@/database/types';
 
 interface WeekSelectorProps {
   viewDate: Date;
@@ -16,6 +20,13 @@ interface WeekSelectorProps {
   className?: string;
   prevButtonClassName?: string;
   nextButtonClassName?: string;
+  /** Solicitudes de turno pendientes (desde /site): sólo se muestran en
+      mobile, debajo del Calendar del overlay a pantalla completa (mismo
+      contenido que ya usa AdminSidebar en pc) — quien no las pase (ningún
+      otro lugar monta WeekSelector hoy) simplemente no suma esa sección. */
+  bookingRequests?: BookingRequest[];
+  onConfirmBookingRequest?: (request: BookingRequest) => void;
+  onRejectBookingRequest?: (request: BookingRequest) => void;
 }
 
 /* En mobile el padding baja de p-2 a p-1 (los botones internos, que son
@@ -57,6 +68,9 @@ export default function WeekSelector({
   onSelectDate,
   onViewDateChange,
   className,
+  bookingRequests,
+  onConfirmBookingRequest,
+  onRejectBookingRequest,
 }: WeekSelectorProps) {
   const tier = useLayoutTier();
 
@@ -113,34 +127,74 @@ export default function WeekSelector({
     onViewDateChange(date);
   };
 
-  return (
-    <div className={twMerge(WEEK_SELECTOR_CLASS, tier === 'mobile' ? WEEK_SELECTOR_MOBILE_CLASS : WEEK_SELECTOR_PC_CLASS, className)}>
-      <PrevWeekButton
-        onClick={prevDay}
-        isSelected={isSelectedBeforeWeek}
-        isToday={isTodayBeforeWeek}
-      />
+  /* Mobile (ver useLayoutTier): tocar un día, además de seleccionarlo
+     como siempre (mismo handleSelectDate — no se pierde el auto-scroll a
+     "ahora" de DaySelectorButtons cuando ya está seleccionado y es hoy),
+     abre el Calendar mensual completo a pantalla completa — la tira de
+     7 días de acá alcanza para moverse dentro de la semana, pero para
+     saltar a cualquier fecha hace falta el mes entero. Mismo header
+     (logo + Cerrar) que el menú mobile de AppMenubar — ver MobileOverlay.
+     Debajo del Calendar va NotificationsList (mismo lugar que ocupa en pc,
+     ver AdminSidebar.tsx): ya no hay un botón "Notificaciones" propio en
+     AppMenubar en mobile, así que este es el único lugar donde se ven. */
+  const [calendarOverlayOpen, setCalendarOverlayOpen] = useState(false);
 
-      <div
-        key={`${viewDate.getTime()}_${selectedDate.getTime()}`}
-        className={twMerge(
-          WEEK_SELECTOR_DAYS_CLASS,
-          slideDirection === 'left' && WEEK_SELECTOR_SLIDE_FROM_LEFT_CLASS,
-          slideDirection === 'right' && WEEK_SELECTOR_SLIDE_FROM_RIGHT_CLASS,
-        )}
-      >
-        <DaySelectorButtons
-          weekDays={weekDays}
-          selectedDate={selectedDate}
-          onSelectDate={handleSelectDate}
+  const handleSelectDayButton = (date: Date) => {
+    handleSelectDate(date);
+    if (tier === 'mobile') {
+      setCalendarOverlayOpen(true);
+    }
+  };
+
+  return (
+    <>
+      <div className={twMerge(WEEK_SELECTOR_CLASS, tier === 'mobile' ? WEEK_SELECTOR_MOBILE_CLASS : WEEK_SELECTOR_PC_CLASS, className)}>
+        <PrevWeekButton
+          onClick={prevDay}
+          isSelected={isSelectedBeforeWeek}
+          isToday={isTodayBeforeWeek}
+        />
+
+        <div
+          key={`${viewDate.getTime()}_${selectedDate.getTime()}`}
+          className={twMerge(
+            WEEK_SELECTOR_DAYS_CLASS,
+            slideDirection === 'left' && WEEK_SELECTOR_SLIDE_FROM_LEFT_CLASS,
+            slideDirection === 'right' && WEEK_SELECTOR_SLIDE_FROM_RIGHT_CLASS,
+          )}
+        >
+          <DaySelectorButtons
+            weekDays={weekDays}
+            selectedDate={selectedDate}
+            onSelectDate={handleSelectDayButton}
+          />
+        </div>
+
+        <NextWeekButton
+          onClick={nextDay}
+          isSelected={isSelectedAfterWeek}
+          isToday={isTodayAfterWeek}
         />
       </div>
 
-      <NextWeekButton
-        onClick={nextDay}
-        isSelected={isSelectedAfterWeek}
-        isToday={isTodayAfterWeek}
-      />
-    </div>
+      {tier === 'mobile' && calendarOverlayOpen && (
+        <MobileOverlay onClose={() => setCalendarOverlayOpen(false)}>
+          <Calendar
+            selectedDate={selectedDate}
+            onSelectDate={(date) => {
+              handleSelectDate(date);
+              setCalendarOverlayOpen(false);
+            }}
+          />
+          {bookingRequests && (
+            <NotificationsList
+              requests={bookingRequests}
+              onConfirm={(request) => onConfirmBookingRequest?.(request)}
+              onReject={(request) => onRejectBookingRequest?.(request)}
+            />
+          )}
+        </MobileOverlay>
+      )}
+    </>
   );
 }
